@@ -80,3 +80,20 @@ export const generateProductContent = createServerFn({ method: "POST" })
       hashtags: Array.isArray(parsed.hashtags) ? parsed.hashtags : [],
     };
   });
+
+export const listProductsForContent = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ password: z.string() }).parse(d))
+  .handler(async ({ data }) => {
+    assertAdmin(data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("products")
+      .select("id, name, description, price, old_price")
+      .order("created_at", { ascending: false })
+      .limit(300);
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as Array<{
+      id: string; name: string; description: string | null;
+      price: number | null; old_price: number | null;
+    }>;
+  });
