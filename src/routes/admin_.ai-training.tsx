@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Plus, Pencil, Trash2, Loader2, Save, X, Sparkles } from "lucide-react";
+import { ArrowRight, Plus, Pencil, Trash2, Loader2, Save, X, Sparkles, Wand2, Copy, Check } from "lucide-react";
 import {
   listKnowledge, saveKnowledge, toggleKnowledge, deleteKnowledge,
   type KnowledgeItem,
 } from "@/lib/ai-knowledge.functions";
+import { generateProductContent } from "@/lib/ai-content.functions";
 
 const TOKEN_KEY = "mycar_admin_token";
 
@@ -262,7 +263,108 @@ function TrainingUI() {
             </ul>
           )}
         </section>
+
+        <ContentGenerator />
       </main>
     </div>
   );
 }
+
+type GenResult = {
+  title: string; description: string; features: string[];
+  marketing_post: string; hashtags: string[];
+};
+
+function ContentGenerator() {
+  const gen = useServerFn(generateProductContent);
+  const [brief, setBrief] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [out, setOut] = useState<GenResult | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function run(e: React.FormEvent) {
+    e.preventDefault();
+    if (!brief.trim()) return;
+    setBusy(true); setErr(null); setOut(null);
+    try {
+      const r = await gen({ data: { password: getToken(), brief: brief.trim(), kind: "both" } });
+      setOut(r as GenResult);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "خطأ");
+    } finally { setBusy(false); }
+  }
+
+  async function copy(k: string, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(k);
+      setTimeout(() => setCopied(null), 1500);
+    } catch { /* ignore */ }
+  }
+
+  return (
+    <section className="bg-white rounded-2xl border border-slate-200 p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Wand2 className="w-5 h-5 text-amber-600" />
+        <h2 className="font-bold text-lg">مولّد محتوى المنتجات والتسويق</h2>
+      </div>
+      <p className="text-sm text-slate-500 mb-3">
+        اكتب فكرة قصيرة عن المنتج أو الخدمة، وسيولّد المساعد عنوانًا، وصفًا احترافيًا، مزايا، ومنشورًا جاهزًا للنشر.
+      </p>
+
+      <form onSubmit={run} className="space-y-3">
+        <textarea
+          value={brief}
+          onChange={(e) => setBrief(e.target.value)}
+          placeholder="مثال: عازل حراري نانو سيراميك 70% للسيارات المرسيدس، يقاوم الحرارة ويحمي من الأشعة فوق البنفسجية"
+          rows={3}
+          maxLength={2000}
+          className="w-full border-2 border-slate-200 focus:border-amber-500 outline-none rounded-xl px-4 py-3 text-sm"
+        />
+        <button
+          type="submit"
+          disabled={busy || !brief.trim()}
+          className="flex items-center gap-2 bg-gradient-to-l from-amber-500 to-yellow-500 text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50 hover:shadow-md transition"
+        >
+          {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+          {busy ? "جارٍ التوليد..." : "توليد المحتوى"}
+        </button>
+      </form>
+
+      {err && <div className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{err}</div>}
+
+      {out && (
+        <div className="mt-5 space-y-4">
+          {(
+            [
+              { k: "title", label: "العنوان", value: out.title, multi: false },
+              { k: "description", label: "الوصف", value: out.description, multi: true },
+              { k: "features", label: "المزايا", value: (out.features || []).map((f, i) => `${i + 1}. ${f}`).join("\n"), multi: true },
+              { k: "marketing_post", label: "منشور تسويقي", value: out.marketing_post, multi: true },
+              { k: "hashtags", label: "الهاشتاقات", value: (out.hashtags || []).join(" "), multi: false },
+            ] as const
+          ).map((f) => f.value ? (
+            <div key={f.k} className="border border-slate-200 rounded-xl p-3 bg-slate-50">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-bold text-slate-600">{f.label}</span>
+                <button
+                  onClick={() => copy(f.k, f.value)}
+                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white border border-slate-200 hover:bg-slate-100"
+                >
+                  {copied === f.k ? <><Check className="w-3 h-3 text-green-600" /> تم النسخ</> : <><Copy className="w-3 h-3" /> نسخ</>}
+                </button>
+              </div>
+              {f.multi ? (
+                <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">{f.value}</p>
+              ) : (
+                <p className="text-sm text-slate-800 font-medium">{f.value}</p>
+              )}
+            </div>
+          ) : null)}
+        </div>
+      )}
+    </section>
+  );
+}
+
