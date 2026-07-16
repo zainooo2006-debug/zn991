@@ -7,7 +7,7 @@ import {
   listKnowledge, saveKnowledge, toggleKnowledge, deleteKnowledge,
   type KnowledgeItem,
 } from "@/lib/ai-knowledge.functions";
-import { generateProductContent } from "@/lib/ai-content.functions";
+import { generateProductContent, listProductsForContent } from "@/lib/ai-content.functions";
 
 const TOKEN_KEY = "mycar_admin_token";
 
@@ -277,11 +277,29 @@ type GenResult = {
 
 function ContentGenerator() {
   const gen = useServerFn(generateProductContent);
+  const listProds = useServerFn(listProductsForContent);
   const [brief, setBrief] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [out, setOut] = useState<GenResult | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const { data: products } = useQuery({
+    queryKey: ["ai_content_products"],
+    queryFn: () => listProds({ data: { password: getToken() } }),
+  });
+
+  function pickProduct(id: string) {
+    const p = (products ?? []).find((x) => x.id === id);
+    if (!p) return;
+    const parts = [
+      `المنتج: ${p.name}`,
+      p.description ? `الوصف الحالي: ${p.description}` : null,
+      p.price != null ? `السعر: ${p.price} ر.ي${p.old_price ? ` (بدلاً من ${p.old_price})` : ""}` : null,
+      "المطلوب: توليد منشور تسويقي جذاب ومزايا محدثة.",
+    ].filter(Boolean).join("\n");
+    setBrief(parts);
+  }
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
@@ -308,10 +326,28 @@ function ContentGenerator() {
       <div className="flex items-center gap-2 mb-4">
         <Wand2 className="w-5 h-5 text-amber-600" />
         <h2 className="font-bold text-lg">مولّد محتوى المنتجات والتسويق</h2>
+
       </div>
       <p className="text-sm text-slate-500 mb-3">
-        اكتب فكرة قصيرة عن المنتج أو الخدمة، وسيولّد المساعد عنوانًا، وصفًا احترافيًا، مزايا، ومنشورًا جاهزًا للنشر.
+        اختر منتجًا موجودًا من المتجر لتعبئة الوصف تلقائيًا، أو اكتب فكرة قصيرة يدويًا.
       </p>
+
+      {products && products.length > 0 && (
+        <div className="mb-3">
+          <label className="block text-xs font-bold text-slate-600 mb-1">اختر منتجًا من المتجر (اختياري):</label>
+          <select
+            onChange={(e) => e.target.value && pickProduct(e.target.value)}
+            className="w-full border-2 border-slate-200 focus:border-amber-500 outline-none rounded-xl px-3 py-2 text-sm bg-white"
+            defaultValue=""
+          >
+            <option value="">— بدون —</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}{p.price != null ? ` — ${p.price} ر.ي` : ""}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
 
       <form onSubmit={run} className="space-y-3">
         <textarea
