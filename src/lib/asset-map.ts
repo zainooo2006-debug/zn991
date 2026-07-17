@@ -29,10 +29,23 @@ const map: Record<string, string> = {
   "s-interior.jpg": sInterior,
 };
 
+// Rewrite Supabase public storage URLs (bucket: media) to same-origin proxy path
+// to avoid client-side DNS/network blocking of *.supabase.co in some regions.
+const SUPABASE_PUBLIC_MEDIA_RE =
+  /^https?:\/\/[^/]+\.supabase\.co\/storage\/v1\/object\/public\/media\/(.+)$/i;
+
+export function toProxyUrl(src: string): string {
+  const m = src.match(SUPABASE_PUBLIC_MEDIA_RE);
+  if (!m) return src;
+  // Preserve any query string on the last segment
+  return `/api/public/img/${m[1]}`;
+}
+
 export function resolveImage(src: string | undefined | null): string {
   if (!src) return shampoo;
-  const file = src.split("/").pop() ?? "";
-  return map[file] ?? src;
+  const file = src.split("/").pop()?.split("?")[0] ?? "";
+  if (map[file]) return map[file];
+  return toProxyUrl(src);
 }
 
 export { hero as heroImage };
