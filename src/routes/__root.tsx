@@ -99,14 +99,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 import { CartProvider } from "@/lib/cart";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <Outlet />
-      </CartProvider>
+      <ThemeProvider>
+        <CartProvider>
+          <Outlet />
+        </CartProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
