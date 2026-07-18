@@ -590,6 +590,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          active_theme_json: Json
+          created_at: string
+          default_theme_json: Json
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          active_theme_json?: Json
+          created_at?: string
+          default_theme_json?: Json
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          active_theme_json?: Json
+          created_at?: string
+          default_theme_json?: Json
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           branch_id: string | null
