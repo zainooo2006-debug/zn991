@@ -25,6 +25,7 @@ import {
 import {
   WarrantyOverview, WarrantiesTab, WarrantyCustomersTab, WarrantySimpleCrud, WarrantyUsersTab,
 } from "@/components/warranty-admin-panels";
+import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
 
 // Session token issued by the server-side `adminLogin` function. The actual
 // admin password is never stored in the client bundle or in browser storage.
@@ -37,7 +38,8 @@ export const Route = createFileRoute("/admin")({
 
 type Tab =
  | "orders" | "products" | "categories" | "services" | "packages" | "wallets" | "content" | "reviews" | "customer-reviews" | "centers" | "hero"
- | "w-overview" | "w-warranties" | "w-customers" | "w-brands" | "w-films" | "w-branches" | "w-users";
+ | "w-overview" | "w-warranties" | "w-customers" | "w-brands" | "w-films" | "w-branches" | "w-users"
+ | "theme";
 
 function AdminPage() {
   const login = useServerFn(adminLogin);
@@ -144,6 +146,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         { id: "w-users", label: "المستخدمون والصلاحيات" },
       ],
     },
+    {
+      title: "المظهر",
+      tabs: [
+        { id: "theme", label: "إدارة المظهر" },
+      ],
+    },
   ];
 
   return (
@@ -200,6 +208,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {tab === "w-films" && <WarrantySimpleCrud table="film_types" title="أنواع اللاصق" fields={[{ k: "name", l: "الاسم" }, { k: "warranty_months", l: "مدة الضمان (شهر)", type: "number" }, { k: "description", l: "الوصف" }]} />}
           {tab === "w-branches" && <WarrantySimpleCrud table="branches" title="الفروع" fields={[{ k: "name", l: "الاسم" }, { k: "address", l: "العنوان" }, { k: "phone", l: "الجوال" }]} />}
           {tab === "w-users" && <WarrantyUsersTab />}
+          {tab === "theme" && <ThemeManagerPanel />}
         </div>
       </div>
     </Shell>
