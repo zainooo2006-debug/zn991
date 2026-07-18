@@ -52,13 +52,13 @@ export const saveTheme = createServerFn({ method: "POST" })
     if (existing) {
       const { error } = await supabaseAdmin
         .from("site_settings")
-        .update({ active_theme_json: data.active_theme_json })
+        .update({ active_theme_json: data.active_theme_json as never })
         .eq("id", existing.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin
         .from("site_settings")
-        .insert({ active_theme_json: data.active_theme_json, default_theme_json: data.active_theme_json });
+        .insert({ active_theme_json: data.active_theme_json as never, default_theme_json: data.active_theme_json as never as never });
       if (error) throw new Error(error.message);
     }
     return { ok: true };
@@ -94,7 +94,7 @@ export const setDefaultTheme = createServerFn({ method: "POST" })
     if (!existing) throw new Error("لا يوجد سجل إعدادات");
     const { error } = await supabaseAdmin
       .from("site_settings")
-      .update({ default_theme_json: data.default_theme_json })
+      .update({ default_theme_json: data.default_theme_json as never })
       .eq("id", existing.id);
     if (error) throw new Error(error.message);
     return { ok: true };
