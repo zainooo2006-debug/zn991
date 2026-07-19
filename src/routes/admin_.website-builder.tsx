@@ -411,7 +411,7 @@ function CustomCodePanel() {
   const upsert = useServerFn(wbUpsert);
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["wb","website_settings"], queryFn: () => list({ data: { table: "website_settings" as any } }) });
-  const row = q.data?.[0];
+  const row: any = q.data?.[0];
   const [html, setHtml] = useState(""); const [css, setCss] = useState(""); const [js, setJs] = useState("");
   const [ok, setOk] = useState("");
   useEffect(() => { if (row) { setHtml(row.custom_html ?? ""); setCss(row.custom_css ?? ""); setJs(row.custom_js ?? ""); } }, [row?.id]);
