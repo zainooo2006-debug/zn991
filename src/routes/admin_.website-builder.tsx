@@ -335,7 +335,7 @@ function SettingsPanel() {
   const upsert = useServerFn(wbUpsert);
   const qc = useQueryClient();
   const q = useQuery({ queryKey: ["wb","website_settings"], queryFn: () => list({ data: { table: "website_settings" as any } }) });
-  const row = q.data?.[0];
+  const row: any = q.data?.[0];
   const [txt, setTxt] = useState<string>("");
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");
