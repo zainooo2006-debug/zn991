@@ -790,6 +790,249 @@ export type Database = {
         }
         Relationships: []
       }
+      website_backups: {
+        Row: {
+          created_at: string
+          id: string
+          label: string | null
+          snapshot_json: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          snapshot_json?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          label?: string | null
+          snapshot_json?: Json
+        }
+        Relationships: []
+      }
+      website_components: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          schema_json: Json
+          settings_json: Json
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          name: string
+          schema_json?: Json
+          settings_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          schema_json?: Json
+          settings_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_layouts: {
+        Row: {
+          created_at: string
+          id: string
+          layout_json: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          layout_json?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          layout_json?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_media: {
+        Row: {
+          created_at: string
+          file_url: string
+          folder: string | null
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          folder?: string | null
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          folder?: string | null
+          id?: string
+          metadata?: Json
+        }
+        Relationships: []
+      }
+      website_menus: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          menu_json: Json
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          menu_json?: Json
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          menu_json?: Json
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_pages: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          page_json: Json
+          seo_json: Json
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          page_json?: Json
+          seo_json?: Json
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          page_json?: Json
+          seo_json?: Json
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_settings: {
+        Row: {
+          custom_css: string | null
+          custom_html: string | null
+          custom_js: string | null
+          id: string
+          settings_json: Json
+          updated_at: string
+        }
+        Insert: {
+          custom_css?: string | null
+          custom_html?: string | null
+          custom_js?: string | null
+          id?: string
+          settings_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          custom_css?: string | null
+          custom_html?: string | null
+          custom_js?: string | null
+          id?: string
+          settings_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_templates: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          template_json: Json
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          template_json?: Json
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          template_json?: Json
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_themes: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          theme_json: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          theme_json?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          theme_json?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
