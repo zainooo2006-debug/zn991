@@ -36,6 +36,7 @@ import { Route as WarrantyActivateRouteImport } from './routes/warranty.activate
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 import { Route as CentersIdRouteImport } from './routes/centers.$id'
+import { Route as AdminWebsiteBuilderRouteImport } from './routes/admin_.website-builder'
 import { Route as AdminAiTrainingRouteImport } from './routes/admin_.ai-training'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
@@ -179,6 +180,11 @@ const CentersIdRoute = CentersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => CentersRoute,
 } as any)
+const AdminWebsiteBuilderRoute = AdminWebsiteBuilderRouteImport.update({
+  id: '/admin_/website-builder',
+  path: '/admin/website-builder',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAiTrainingRoute = AdminAiTrainingRouteImport.update({
   id: '/admin_/ai-training',
   path: '/admin/ai-training',
@@ -238,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/ai-training': typeof AdminAiTrainingRoute
+  '/admin/website-builder': typeof AdminWebsiteBuilderRoute
   '/centers/$id': typeof CentersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -272,6 +279,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/ai-training': typeof AdminAiTrainingRoute
+  '/admin/website-builder': typeof AdminWebsiteBuilderRoute
   '/centers/$id': typeof CentersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -309,6 +317,7 @@ export interface FileRoutesById {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin_/ai-training': typeof AdminAiTrainingRoute
+  '/admin_/website-builder': typeof AdminWebsiteBuilderRoute
   '/centers/$id': typeof CentersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -347,6 +356,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/ai-training'
+    | '/admin/website-builder'
     | '/centers/$id'
     | '/product/$id'
     | '/services/$slug'
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/ai-training'
+    | '/admin/website-builder'
     | '/centers/$id'
     | '/product/$id'
     | '/services/$slug'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin_/ai-training'
+    | '/admin_/website-builder'
     | '/centers/$id'
     | '/product/$id'
     | '/services/$slug'
@@ -454,6 +466,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAiTrainingRoute: typeof AdminAiTrainingRoute
+  AdminWebsiteBuilderRoute: typeof AdminWebsiteBuilderRoute
   ProductIdRoute: typeof ProductIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -651,6 +664,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CentersIdRouteImport
       parentRoute: typeof CentersRoute
     }
+    '/admin_/website-builder': {
+      id: '/admin_/website-builder'
+      path: '/admin/website-builder'
+      fullPath: '/admin/website-builder'
+      preLoaderRoute: typeof AdminWebsiteBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin_/ai-training': {
       id: '/admin_/ai-training'
       path: '/admin/ai-training'
@@ -775,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAiTrainingRoute: AdminAiTrainingRoute,
+  AdminWebsiteBuilderRoute: AdminWebsiteBuilderRoute,
   ProductIdRoute: ProductIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
