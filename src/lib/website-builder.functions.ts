@@ -154,7 +154,7 @@ export const wbImportAll = createServerFn({ method: "POST" })
     for (const [t, rows] of Object.entries(data.snapshot)) {
       if (!TABLES.includes(t as WBTable) || t === "website_backups") continue;
       if (!Array.isArray(rows) || rows.length === 0) { results[t] = 0; continue; }
-      const { error } = await supabaseAdmin.from(t).upsert(rows as never);
+      const { error } = await (supabaseAdmin as any).from(t).upsert(rows);
       if (error) throw new Error(`${t}: ${error.message}`);
       results[t] = rows.length;
     }
