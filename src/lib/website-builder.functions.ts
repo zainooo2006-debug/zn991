@@ -130,12 +130,13 @@ export const wbRestoreBackup = createServerFn({ method: "POST" })
 /** Export snapshot without saving — for JSON download */
 export const wbExportAll = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<{ exported_at: string; data: Record<string, any[]> }> => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const snapshot: Record<string, unknown> = {};
+    const admin: any = supabaseAdmin;
+    const snapshot: Record<string, any[]> = {};
     for (const t of TABLES.filter((x) => x !== "website_backups")) {
-      const { data: rows, error } = await supabaseAdmin.from(t).select("*");
+      const { data: rows, error } = await admin.from(t).select("*");
       if (error) throw new Error(error.message);
       snapshot[t] = rows ?? [];
     }
