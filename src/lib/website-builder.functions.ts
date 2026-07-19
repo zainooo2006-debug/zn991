@@ -112,14 +112,15 @@ export const wbRestoreBackup = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: b, error: e1 } = await supabaseAdmin.from("website_backups").select("snapshot_json").eq("id", data.id).maybeSingle();
+    const admin: any = supabaseAdmin;
+    const { data: b, error: e1 } = await admin.from("website_backups").select("snapshot_json").eq("id", data.id).maybeSingle();
     if (e1 || !b) throw new Error(e1?.message ?? "Backup not found");
-    const snap = (b as any).snapshot_json as Record<string, any[]>;
+    const snap = b.snapshot_json as Record<string, any[]>;
     for (const t of Object.keys(snap)) {
       if (!TABLES.includes(t as WBTable) || t === "website_backups") continue;
-      await supabaseAdmin.from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await admin.from(t).delete().neq("id", "00000000-0000-0000-0000-000000000000");
       if (Array.isArray(snap[t]) && snap[t].length > 0) {
-        const { error } = await supabaseAdmin.from(t).insert(snap[t] as never);
+        const { error } = await admin.from(t).insert(snap[t]);
         if (error) throw new Error(`${t}: ${error.message}`);
       }
     }
