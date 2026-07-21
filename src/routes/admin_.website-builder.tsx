@@ -246,9 +246,11 @@ function TablePanel({
   );
 }
 
-function RowEditor({ row, textFields, jsonFields, onSave, onCancel }: {
+function RowEditor({ row, textFields, jsonFields, onSave, onCancel, liveKind, onLiveChange }: {
   row: any; textFields: FieldDef[]; jsonFields: string[];
   onSave: (v: any) => Promise<void>; onCancel: () => void;
+  liveKind?: "theme";
+  onLiveChange?: (p: LivePayload) => void;
 }) {
   const [values, setValues] = useState<any>(() => {
     const v: any = { ...row };
@@ -257,6 +259,16 @@ function RowEditor({ row, textFields, jsonFields, onSave, onCancel }: {
   });
   const [err, setErr] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Live preview: push theme JSON to iframe on every valid change.
+  useEffect(() => {
+    if (!liveKind || !onLiveChange) return;
+    const f = jsonFields[0];
+    try {
+      const parsed = JSON.parse(values[f] || "{}");
+      onLiveChange({ kind: "theme", json: parsed });
+    } catch { /* invalid JSON — skip until user fixes it */ }
+  }, [values, liveKind, jsonFields, onLiveChange]);
 
   const submit = async () => {
     setErr(""); setSaving(true);
