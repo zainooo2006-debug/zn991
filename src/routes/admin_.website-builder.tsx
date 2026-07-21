@@ -173,8 +173,13 @@ function DashboardPanel({ onNavigate }: { onNavigate: (t: Tab) => void }) {
 /* ---------- Generic Table Panel with JSON editor ---------- */
 type FieldDef = { k: string; l: string };
 function TablePanel({
-  table, title, jsonFields, textFields,
-}: { table: any; title: string; jsonFields: string[]; textFields: FieldDef[] }) {
+  table, title, jsonFields, textFields, liveKind, onLiveChange, onEditPath,
+}: {
+  table: any; title: string; jsonFields: string[]; textFields: FieldDef[];
+  liveKind?: "theme";
+  onLiveChange?: (p: LivePayload) => void;
+  onEditPath?: (row: any) => void;
+}) {
   const list = useServerFn(wbList);
   const upsert = useServerFn(wbUpsert);
   const del = useServerFn(wbDelete);
@@ -188,6 +193,7 @@ function TablePanel({
     textFields.forEach((f) => (row[f.k] = ""));
     jsonFields.forEach((f) => (row[f] = {}));
     setEditing(row);
+    onLiveChange?.(null);
   };
 
   return (
@@ -202,10 +208,12 @@ function TablePanel({
 
       {editing ? (
         <RowEditor row={editing} textFields={textFields} jsonFields={jsonFields}
-          onCancel={() => setEditing(null)}
+          liveKind={liveKind} onLiveChange={onLiveChange}
+          onCancel={() => { setEditing(null); onLiveChange?.(null); }}
           onSave={async (values) => {
             await upsert({ data: { table, values } });
             setEditing(null);
+            onLiveChange?.({ kind: "reload" });
             qc.invalidateQueries({ queryKey: key });
           }} />
       ) : (
