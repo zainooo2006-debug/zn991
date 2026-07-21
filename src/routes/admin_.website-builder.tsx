@@ -227,7 +227,7 @@ function TablePanel({
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => setEditing(r)} className="btn-outline text-xs">تعديل</button>
+                <button onClick={() => { setEditing(r); onEditPath?.(r); }} className="btn-outline text-xs">تعديل</button>
                 <button onClick={async () => {
                   if (!confirm("حذف هذا العنصر؟")) return;
                   await del({ data: { table, id: r.id } });
