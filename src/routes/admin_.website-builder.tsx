@@ -72,15 +72,25 @@ function WebsiteBuilderPage() {
     );
   }
 
+  const [previewOpen, setPreviewOpen] = useState(true);
+  const [livePayload, setLivePayload] = useState<LivePayload>(null);
+  const [previewPath, setPreviewPath] = useState("/");
+
   return (
     <Shell>
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div>
             <h1 className="text-2xl md:text-3xl font-black">Website Builder</h1>
-            <p className="text-sm text-[var(--color-ink-soft)]">محرك بناء مواقع ديناميكي مدفوع بـ JSON</p>
+            <p className="text-sm text-[var(--color-ink-soft)]">محرك بناء مواقع ديناميكي مدفوع بـ JSON مع معاينة مباشرة</p>
           </div>
-          <Link to="/admin" className="btn-outline"><ArrowLeft className="w-4 h-4" /> لوحة التحكم</Link>
+          <div className="flex gap-2">
+            <button onClick={() => setPreviewOpen((v) => !v)} className="btn-outline">
+              {previewOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {previewOpen ? "إخفاء المعاينة" : "إظهار المعاينة"}
+            </button>
+            <Link to="/admin" className="btn-outline"><ArrowLeft className="w-4 h-4" /> لوحة التحكم</Link>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 border-b border-[var(--color-border)] pb-3 mb-6">
@@ -94,19 +104,29 @@ function WebsiteBuilderPage() {
           ))}
         </div>
 
-        {tab === "dashboard" && <DashboardPanel onNavigate={setTab} />}
-        {tab === "pages" && <TablePanel table="website_pages" title="Pages" jsonFields={["page_json","seo_json"]} textFields={[{k:"name",l:"Name"},{k:"slug",l:"Slug"},{k:"status",l:"Status (draft/published)"}]} />}
-        {tab === "components" && <TablePanel table="website_components" title="Components" jsonFields={["schema_json","settings_json"]} textFields={[{k:"name",l:"Name"},{k:"category",l:"Category"}]} />}
-        {tab === "layouts" && <TablePanel table="website_layouts" title="Layouts" jsonFields={["layout_json"]} textFields={[{k:"name",l:"Name"}]} />}
-        {tab === "templates" && <TablePanel table="website_templates" title="Templates" jsonFields={["template_json"]} textFields={[{k:"name",l:"Name"},{k:"type",l:"Type (section/page)"},{k:"category",l:"Category"}]} />}
-        {tab === "themes" && <TablePanel table="website_themes" title="Themes" jsonFields={["theme_json"]} textFields={[{k:"name",l:"Name"},{k:"is_active",l:"Active (true/false)"}]} />}
-        {tab === "media" && <MediaPanel />}
-        {tab === "menus" && <TablePanel table="website_menus" title="Menus" jsonFields={["menu_json"]} textFields={[{k:"name",l:"Name"},{k:"location",l:"Location (header/footer)"}]} />}
-        {tab === "settings" && <SettingsPanel />}
-        {tab === "seo" && <SEOPanel />}
-        {tab === "custom-code" && <CustomCodePanel />}
-        {tab === "import-export" && <ImportExportPanel />}
-        {tab === "backups" && <BackupsPanel />}
+        <div className={previewOpen ? "grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-4" : ""}>
+          <div className="min-w-0">
+            {tab === "dashboard" && <DashboardPanel onNavigate={setTab} />}
+            {tab === "pages" && <TablePanel table="website_pages" title="Pages" jsonFields={["page_json","seo_json"]} textFields={[{k:"name",l:"Name"},{k:"slug",l:"Slug"},{k:"status",l:"Status (draft/published)"}]} onEditPath={(r) => setPreviewPath("/" + (r.slug ?? ""))} />}
+            {tab === "components" && <TablePanel table="website_components" title="Components" jsonFields={["schema_json","settings_json"]} textFields={[{k:"name",l:"Name"},{k:"category",l:"Category"}]} />}
+            {tab === "layouts" && <TablePanel table="website_layouts" title="Layouts" jsonFields={["layout_json"]} textFields={[{k:"name",l:"Name"}]} />}
+            {tab === "templates" && <TablePanel table="website_templates" title="Templates" jsonFields={["template_json"]} textFields={[{k:"name",l:"Name"},{k:"type",l:"Type (section/page)"},{k:"category",l:"Category"}]} />}
+            {tab === "themes" && <TablePanel table="website_themes" title="Themes" jsonFields={["theme_json"]} textFields={[{k:"name",l:"Name"},{k:"is_active",l:"Active (true/false)"}]} liveKind="theme" onLiveChange={setLivePayload} />}
+            {tab === "media" && <MediaPanel />}
+            {tab === "menus" && <TablePanel table="website_menus" title="Menus" jsonFields={["menu_json"]} textFields={[{k:"name",l:"Name"},{k:"location",l:"Location (header/footer)"}]} />}
+            {tab === "settings" && <SettingsPanel />}
+            {tab === "seo" && <SEOPanel />}
+            {tab === "custom-code" && <CustomCodePanel />}
+            {tab === "import-export" && <ImportExportPanel />}
+            {tab === "backups" && <BackupsPanel />}
+          </div>
+
+          {previewOpen && (
+            <div className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)]">
+              <LivePreview path={previewPath} payload={livePayload} />
+            </div>
+          )}
+        </div>
       </div>
     </Shell>
   );
