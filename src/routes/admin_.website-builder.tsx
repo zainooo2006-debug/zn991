@@ -7,9 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   wbList, wbUpsert, wbDelete, wbCreateBackup, wbRestoreBackup, wbExportAll, wbImportAll,
 } from "@/lib/website-builder.functions";
+import { LivePreview, type LivePayload } from "@/components/admin/LivePreview";
 import {
   Plus, Trash2, Save, Download, Upload, ArrowLeft, Loader2, RefreshCw, FileText,
-  Layout, Boxes, Palette, Package, Image as ImageIcon, Menu as MenuIcon, Settings, Search, Code2, HistoryIcon,
+  Layout, Boxes, Palette, Package, Image as ImageIcon, Menu as MenuIcon, Settings, Search, Code2, HistoryIcon, Eye, EyeOff,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin_/website-builder")({
