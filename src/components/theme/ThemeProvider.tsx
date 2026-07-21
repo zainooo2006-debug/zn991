@@ -58,5 +58,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyTheme(active);
   }, [data]);
 
+  // Live-preview bridge for the Website Builder editor.
+  // Parent posts { source:'zain-preview', kind:'theme'|'reload', json? }.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onMsg = (e: MessageEvent) => {
+      const d = e.data as { source?: string; kind?: string; json?: unknown } | null;
+      if (!d || d.source !== "zain-preview") return;
+      if (d.kind === "theme") applyTheme(d.json as ThemeJson);
+      else if (d.kind === "reload") window.location.reload();
+    };
+    window.addEventListener("message", onMsg);
+    try { window.parent?.postMessage({ source: "zain-preview", kind: "ready" }, "*"); } catch {}
+    return () => window.removeEventListener("message", onMsg);
+  }, []);
+
   return <>{children}</>;
 }
