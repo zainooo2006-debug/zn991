@@ -56,6 +56,9 @@ function WebsiteBuilderPage() {
   }, []);
 
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [previewOpen, setPreviewOpen] = useState(true);
+  const [livePayload, setLivePayload] = useState<LivePayload>(null);
+  const [previewPath, setPreviewPath] = useState("/");
 
   if (authed === null) {
     return <Shell><div className="p-8 text-center"><Loader2 className="w-6 h-6 animate-spin inline" /></div></Shell>;
@@ -71,10 +74,6 @@ function WebsiteBuilderPage() {
       </Shell>
     );
   }
-
-  const [previewOpen, setPreviewOpen] = useState(true);
-  const [livePayload, setLivePayload] = useState<LivePayload>(null);
-  const [previewPath, setPreviewPath] = useState("/");
 
   return (
     <Shell>
