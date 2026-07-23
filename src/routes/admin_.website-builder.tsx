@@ -8,6 +8,7 @@ import {
   wbList, wbUpsert, wbDelete, wbCreateBackup, wbRestoreBackup, wbExportAll, wbImportAll,
 } from "@/lib/website-builder.functions";
 import { LivePreview, type LivePayload } from "@/components/admin/LivePreview";
+import { ThemeEditor } from "@/components/admin/ThemeEditor";
 import {
   Plus, Trash2, Save, Download, Upload, ArrowLeft, Loader2, RefreshCw, FileText,
   Layout, Boxes, Palette, Package, Image as ImageIcon, Menu as MenuIcon, Settings, Search, Code2, HistoryIcon, Eye, EyeOff,
@@ -110,7 +111,7 @@ function WebsiteBuilderPage() {
             {tab === "components" && <TablePanel table="website_components" title="Components" jsonFields={["schema_json","settings_json"]} textFields={[{k:"name",l:"Name"},{k:"category",l:"Category"}]} />}
             {tab === "layouts" && <TablePanel table="website_layouts" title="Layouts" jsonFields={["layout_json"]} textFields={[{k:"name",l:"Name"}]} />}
             {tab === "templates" && <TablePanel table="website_templates" title="Templates" jsonFields={["template_json"]} textFields={[{k:"name",l:"Name"},{k:"type",l:"Type (section/page)"},{k:"category",l:"Category"}]} />}
-            {tab === "themes" && <TablePanel table="website_themes" title="Themes" jsonFields={["theme_json"]} textFields={[{k:"name",l:"Name"},{k:"is_active",l:"Active (true/false)"}]} liveKind="theme" onLiveChange={setLivePayload} />}
+            {tab === "themes" && <ThemeEditor onLiveChange={setLivePayload} />}
             {tab === "media" && <MediaPanel />}
             {tab === "menus" && <TablePanel table="website_menus" title="Menus" jsonFields={["menu_json"]} textFields={[{k:"name",l:"Name"},{k:"location",l:"Location (header/footer)"}]} />}
             {tab === "settings" && <SettingsPanel />}
