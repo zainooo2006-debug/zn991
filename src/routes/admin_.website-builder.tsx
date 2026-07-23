@@ -8,6 +8,7 @@ import {
   wbList, wbUpsert, wbDelete, wbCreateBackup, wbRestoreBackup, wbExportAll, wbImportAll,
 } from "@/lib/website-builder.functions";
 import { LivePreview, type LivePayload } from "@/components/admin/LivePreview";
+import { ThemeEditor } from "@/components/admin/ThemeEditor";
 import {
   Plus, Trash2, Save, Download, Upload, ArrowLeft, Loader2, RefreshCw, FileText,
   Layout, Boxes, Palette, Package, Image as ImageIcon, Menu as MenuIcon, Settings, Search, Code2, HistoryIcon, Eye, EyeOff,
