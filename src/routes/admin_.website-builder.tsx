@@ -111,7 +111,7 @@ function WebsiteBuilderPage() {
             {tab === "components" && <TablePanel table="website_components" title="Components" jsonFields={["schema_json","settings_json"]} textFields={[{k:"name",l:"Name"},{k:"category",l:"Category"}]} />}
             {tab === "layouts" && <TablePanel table="website_layouts" title="Layouts" jsonFields={["layout_json"]} textFields={[{k:"name",l:"Name"}]} />}
             {tab === "templates" && <TablePanel table="website_templates" title="Templates" jsonFields={["template_json"]} textFields={[{k:"name",l:"Name"},{k:"type",l:"Type (section/page)"},{k:"category",l:"Category"}]} />}
-            {tab === "themes" && <TablePanel table="website_themes" title="Themes" jsonFields={["theme_json"]} textFields={[{k:"name",l:"Name"},{k:"is_active",l:"Active (true/false)"}]} liveKind="theme" onLiveChange={setLivePayload} />}
+            {tab === "themes" && <ThemeEditor onLiveChange={setLivePayload} />}
             {tab === "media" && <MediaPanel />}
             {tab === "menus" && <TablePanel table="website_menus" title="Menus" jsonFields={["menu_json"]} textFields={[{k:"name",l:"Name"},{k:"location",l:"Location (header/footer)"}]} />}
             {tab === "settings" && <SettingsPanel />}
