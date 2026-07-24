@@ -3,6 +3,7 @@ import { Phone, MessageCircle, MapPin, Clock, Instagram } from "lucide-react";
 
 import { SALES_PHONE, WHATSAPP_NUMBER, DEV_PHONE, whatsappLink } from "@/lib/whatsapp";
 import logoAsset from "@/assets/logo-tajalmoluk.png.asset.json";
+import { useSiteContentValue } from "@/lib/site-content";
 
 const wallets = [
   "جيب",
@@ -15,16 +16,17 @@ const wallets = [
 ];
 
 export function Footer() {
+  const c = useSiteContentValue("footer_content");
   return (
     <footer className="bg-white border-t border-[var(--color-hairline)] mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div>
           <img src={logoAsset.url} alt="زين" className="h-16 w-auto object-contain" />
           <p className="text-sm text-[var(--color-ink-soft)] mt-3 leading-relaxed">
-            زين للعناية وزينة السيارات — جودة ملكية وخدمة احترافية في صنعاء.
+            {c.description}
           </p>
           <p className="text-xs text-[var(--color-ink-soft)] mt-3">
-            المدير العام: <span className="font-semibold text-[var(--color-ink)]">صديق الزين</span>
+            المدير العام: <span className="font-semibold text-[var(--color-ink)]">{c.managerName}</span>
           </p>
         </div>
 
@@ -58,8 +60,8 @@ export function Footer() {
           <ul className="space-y-3 text-sm text-[var(--color-ink-soft)]">
             <li className="flex items-center gap-2"><Phone className="w-4 h-4 text-[var(--color-gold)]" /> <a href={`tel:${SALES_PHONE}`}>{SALES_PHONE}</a></li>
             <li className="flex items-center gap-2"><MessageCircle className="w-4 h-4 text-[var(--color-gold)]" /> <a href={whatsappLink("مرحباً")}>{WHATSAPP_NUMBER.replace("967","")}</a></li>
-            <li className="flex items-start gap-2"><MapPin className="w-4 h-4 text-[var(--color-gold)] mt-0.5" /> صنعاء - شارع 22 مايو - جوار فندق الأحلام - قبل جولة الثقافة</li>
-            <li className="flex items-start gap-2"><Clock className="w-4 h-4 text-[var(--color-gold)] mt-0.5" /> السبت - الخميس: 9 ص - 11 م | الجمعة إجازة</li>
+            <li className="flex items-start gap-2"><MapPin className="w-4 h-4 text-[var(--color-gold)] mt-0.5" /> {c.address}</li>
+            <li className="flex items-start gap-2"><Clock className="w-4 h-4 text-[var(--color-gold)] mt-0.5" /> {c.hours}</li>
           </ul>
         </div>
 
