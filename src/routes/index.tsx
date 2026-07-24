@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   Zap, Sparkles, Droplets, Wind, Sticker, Cog, Palette,
@@ -10,6 +11,7 @@ import { FeaturedSlider } from "@/components/home/FeaturedSlider";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { CustomerReviewsSection } from "@/components/home/CustomerReviewsSection";
 import { getCategories, getProducts, getPackages, getFeaturedProducts } from "@/lib/catalog.functions";
+import { useSiteContentValue, type HomeSectionId } from "@/lib/site-content";
 
 const iconMap: Record<string, LucideIcon> = {
   Zap, Sparkles, Droplets, Wind, Sticker, Cog, Palette,
@@ -47,13 +49,12 @@ function HomePage() {
   const { data: featured } = useSuspenseQuery(featuredQO);
   const bestSellers = products.filter((p) => p.is_bestseller).slice(0, 4);
 
-  return (
-    <Shell>
-      {/* HERO SLIDER */}
-      <HeroSlider />
+  const sectionsConfig = useSiteContentValue("home_sections");
+  const banner = useSiteContentValue("home_banner");
 
-      {/* QUICK ACCESS: المراكز + الضمانات */}
-      <section className="max-w-7xl mx-auto px-4 pt-6 md:pt-8">
+  const sectionMap: Record<HomeSectionId, ReactNode> = {
+    quick_access: (
+      <section key="quick_access" className="max-w-7xl mx-auto px-4 pt-6 md:pt-8">
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           <Link
             to="/centers"
@@ -73,9 +74,9 @@ function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* CATEGORY CIRCLES */}
-      <section className="max-w-7xl mx-auto px-4 py-8 md:py-10">
+    ),
+    categories: (
+      <section key="categories" className="max-w-7xl mx-auto px-4 py-8 md:py-10">
         <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-2">
           {categories.map((c) => {
             const Icon = iconMap[c.icon ?? "Sparkles"] ?? Sparkles;
@@ -95,14 +96,10 @@ function HomePage() {
           })}
         </div>
       </section>
-
-      {/* FEATURED PRODUCTS SLIDER */}
-      <FeaturedSlider products={featured} />
-
-
-
-      {/* HOT DEALS */}
-      <section className="max-w-7xl mx-auto px-4 py-8">
+    ),
+    featured: <FeaturedSlider key="featured" products={featured} />,
+    hot_deals: (
+      <section key="hot_deals" className="max-w-7xl mx-auto px-4 py-8">
         <SectionTitle title="🔥 العروض المميزة" subtitle="بكجات حصرية لفترة محدودة" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           {packages.map((p) => (
@@ -133,9 +130,9 @@ function HomePage() {
           ))}
         </div>
       </section>
-
-      {/* BEST SELLERS */}
-      <section className="max-w-7xl mx-auto px-4 py-8">
+    ),
+    best_sellers: (
+      <section key="best_sellers" className="max-w-7xl mx-auto px-4 py-8">
         <SectionTitle title="الأكثر مبيعاً" subtitle="منتجات يثق بها عملاؤنا" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-6">
           {bestSellers.map((p) => (
@@ -146,9 +143,9 @@ function HomePage() {
           <Link to="/shop" className="btn-outline">عرض جميع المنتجات</Link>
         </div>
       </section>
-
-      {/* TRUST */}
-      <section className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+    ),
+    trust: (
+      <section key="trust" className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           { Icon: ShieldCheck, title: "ضمان الجودة", text: "منتجات أصلية بأعلى المعايير" },
           { Icon: Truck, title: "خدمة منزلية VIP", text: "فريقنا يصلك أينما كنت في صنعاء" },
@@ -163,9 +160,41 @@ function HomePage() {
           </div>
         ))}
       </section>
+    ),
+    reviews: <CustomerReviewsSection key="reviews" />,
+  };
 
-      {/* CUSTOMER REVIEWS */}
-      <CustomerReviewsSection />
+  const orderedIds = sectionsConfig.order.length ? sectionsConfig.order : (["quick_access","categories","featured","hot_deals","best_sellers","trust","reviews"] as HomeSectionId[]);
+  const hiddenSet = new Set(sectionsConfig.hidden);
+
+  return (
+    <Shell>
+      {/* HERO SLIDER — always first, not reorderable/hideable (it's the page identity) */}
+      <HeroSlider />
+
+      {/* SEASONAL BANNER — shown only when enabled from the dashboard */}
+      {banner.enabled && (
+        <div style={{ backgroundColor: banner.bgColor, color: banner.textColor }} className="w-full">
+          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-right">
+            <div>
+              <h3 className="font-black text-lg">{banner.title}</h3>
+              {banner.subtitle && <p className="text-sm opacity-90">{banner.subtitle}</p>}
+            </div>
+            {banner.buttonText && (
+              <Link
+                to={banner.buttonLink || "/"}
+                className="shrink-0 rounded-full px-5 py-2 font-bold bg-black/10 hover:bg-black/20 transition"
+              >
+                {banner.buttonText}
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
+      {orderedIds
+        .filter((id) => !hiddenSet.has(id) && sectionMap[id])
+        .map((id) => sectionMap[id])}
     </Shell>
   );
 }
@@ -180,4 +209,4 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle?: string })
       <div className="h-1 w-16 bg-[var(--color-gold)] rounded-full hidden md:block" />
     </div>
   );
-}
+          }
