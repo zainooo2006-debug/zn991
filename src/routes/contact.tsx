@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Shell } from "@/components/layout/Shell";
 import { Phone, MessageCircle, MapPin, Clock } from "lucide-react";
 import { SALES_PHONE, WHATSAPP_NUMBER, whatsappLink } from "@/lib/whatsapp";
+import { useSiteContentValue } from "@/lib/site-content";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const c = useSiteContentValue("contact_page");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
@@ -33,7 +35,7 @@ function ContactPage() {
     <Shell>
       <div className="max-w-5xl mx-auto px-4 py-10">
         <h1 className="text-3xl md:text-4xl font-black">اتصل بنا</h1>
-        <p className="text-[var(--color-ink-soft)] mt-2">نحن هنا لخدمتك — تواصل معنا بالطريقة التي تناسبك.</p>
+        <p className="text-[var(--color-ink-soft)] mt-2">{c.subtitle}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="space-y-4">
@@ -44,10 +46,12 @@ function ContactPage() {
               <a href={whatsappLink("مرحباً")} className="hover:text-[var(--color-gold)]">{WHATSAPP_NUMBER.replace("967","")}</a>
             </InfoRow>
             <InfoRow Icon={MapPin} title="العنوان">
-              صنعاء - شارع 22 مايو - جوار فندق الأحلام - قبل جولة الثقافة
+              {c.address}
             </InfoRow>
             <InfoRow Icon={Clock} title="أوقات العمل">
-              السبت - الخميس: 9 صباحاً - 11 مساءً<br />الجمعة: إجازة
+              {c.hours.split("\n").map((line, i) => (
+                <span key={i}>{i > 0 && <br />}{line}</span>
+              ))}
             </InfoRow>
           </div>
 
