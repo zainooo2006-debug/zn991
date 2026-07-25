@@ -17,11 +17,12 @@ const wallets = [
 
 export function Footer() {
   const c = useSiteContentValue("footer_content");
+  const branding = useSiteContentValue("branding");
   return (
     <footer className="bg-white border-t border-[var(--color-hairline)] mt-16">
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div>
-          <img src={logoAsset.url} alt="زين" className="h-16 w-auto object-contain" />
+          <img src={branding.logoUrl || logoAsset.url} alt="زين" className="h-16 w-auto object-contain" />
           <p className="text-sm text-[var(--color-ink-soft)] mt-3 leading-relaxed">
             {c.description}
           </p>
