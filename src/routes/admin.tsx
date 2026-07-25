@@ -26,7 +26,7 @@ import {
   WarrantyOverview, WarrantiesTab, WarrantyCustomersTab, WarrantySimpleCrud, WarrantyUsersTab,
 } from "@/components/warranty-admin-panels";
 import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
-import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId } from "@/lib/site-content";
+import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent } from "@/lib/site-content";
 // Session token issued by the server-side `adminLogin` function. The actual
 // admin password is never stored in the client bundle or in browser storage.
 const TOKEN_KEY = "mycar_admin_token";
@@ -38,6 +38,8 @@ export const Route = createFileRoute("/admin")({
 
 type Tab =
  | "orders" | "products" | "categories" | "services" | "packages" | "wallets" | "content" | "site-pages" | "home-builder" | "reviews" | "customer-reviews" | "centers" | "hero"
+ | "w-overview" | "w-warranties" | "w-customers" | "w-brands" | "w-films" | "w-branches" | "w-users"
+ | "theme";
 
 function AdminPage() {
   const login = useServerFn(adminLogin);
