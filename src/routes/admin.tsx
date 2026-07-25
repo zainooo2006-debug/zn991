@@ -886,6 +886,7 @@ function SitePagesPanel() {
   const [about, setAbout] = useState<AboutContent | null>(null);
   const [footer, setFooter] = useState<FooterContent | null>(null);
   const [contact, setContact] = useState<ContactContent | null>(null);
+  const [branding, setBranding] = useState<BrandingContent | null>(null);
   const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
@@ -893,6 +894,7 @@ function SitePagesPanel() {
       setAbout(getValue("about_page"));
       setFooter(getValue("footer_content"));
       setContact(getValue("contact_page"));
+      setBranding(getValue("branding"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
@@ -905,7 +907,7 @@ function SitePagesPanel() {
     setTimeout(() => setSavedMsg(""), 2000);
   };
 
-  if (isLoading || !about || !footer || !contact) {
+  if (isLoading || !about || !footer || !contact || !branding) {
     return <div className="text-sm text-[var(--color-ink-soft)]">جارِ التحميل...</div>;
   }
 
@@ -915,6 +917,25 @@ function SitePagesPanel() {
         عدّل نصوص صفحات الموقع مباشرة — أي تعديل يظهر في الموقع فورًا بدون نشر جديد. إذا ما عدّلت شي، تبقى النصوص كما هي حاليًا.
       </p>
       {savedMsg && <div className="text-sm font-bold text-green-600">{savedMsg}</div>}
+
+      <div className="card-clean p-4 space-y-3">
+        <h3 className="font-bold text-lg">شعار الموقع</h3>
+        <p className="text-xs text-[var(--color-ink-soft)]">يظهر هذا الشعار في أعلى كل صفحات الموقع بدلاً من الشعار الافتراضي.</p>
+        <div className="flex items-center gap-4">
+          {branding.logoUrl && (
+            <img src={branding.logoUrl} alt="" className="h-14 w-auto object-contain bg-[var(--color-surface)] rounded-lg p-1" />
+          )}
+          <ImageUploader onUploaded={(u) => setBranding({ ...branding, logoUrl: u })} />
+        </div>
+        <input
+          value={branding.logoUrl}
+          onChange={(e) => setBranding({ ...branding, logoUrl: e.target.value })}
+          placeholder="أو ألصق رابط الشعار"
+          dir="ltr"
+          className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm"
+        />
+        <button className="btn-gold" onClick={() => saveKey("branding", branding)}>حفظ الشعار</button>
+      </div>
 
       <div className="card-clean p-4 space-y-3">
         <h3 className="font-bold text-lg">صفحة "من نحن"</h3>
