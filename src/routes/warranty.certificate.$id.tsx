@@ -1,3 +1,9 @@
+
+
+
+
+
+
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,6 +15,7 @@ import { verifyWarranty } from "@/lib/warranty-public.functions";
 import { formatDateAr, statusLabel, statusColor, computeStatus, type WarrantyStatus, verifyUrl } from "@/lib/warranty-utils";
 import { Download, Printer, ArrowRight, Loader2, MessageCircle } from "lucide-react";
 import logoAsset from "@/assets/logo-tajalmoluk.png.asset.json";
+import { useSiteContentValue } from "@/lib/site-content";
 import { whatsappLink } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/warranty/certificate/$id")({
@@ -32,6 +39,7 @@ function CertificatePage() {
   const { user, loading } = useWarrantyAuth();
   const navigate = useNavigate();
   const verify = useServerFn(verifyWarranty);
+  const branding = useSiteContentValue("branding");
   const [data, setData] = useState<Data | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -127,7 +135,7 @@ function CertificatePage() {
       <div ref={certRef} className="max-w-3xl mx-auto bg-white text-slate-900 rounded-2xl overflow-hidden shadow-2xl border-4 border-amber-500 print:shadow-none print:border-2">
         <div className="bg-gradient-to-l from-amber-500 to-yellow-500 text-white p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoAsset.url} alt="زين" className="h-16 w-auto bg-white rounded-lg p-1" />
+            <img src={branding.logoUrl || logoAsset.url} alt="زين" className="h-16 w-auto bg-white rounded-lg p-1" />
             <div>
               <h1 className="text-2xl font-black">زين</h1>
               <p className="text-sm opacity-90">شهادة ضمان رسمية</p>
@@ -161,7 +169,7 @@ function CertificatePage() {
         </div>
 
         <div className="bg-slate-50 p-4 text-center text-xs text-slate-600 border-t border-slate-200">
-          هذه الشهادة صادرة عن مؤسسة زين للعناية وزينة السيارات - صنعاء، اليمن. لأي استفسار: 782222919
+          هذه الشهادة صادرة عن مؤسسة زين اصل الحماية للعناية وزينة السيارات - صنعاء، اليمن. لأي استفسار: 780687704
         </div>
       </div>
     </div>
@@ -175,4 +183,4 @@ function CertRow({ label, value, highlight }: { label: string; value: string; hi
       <span className="font-semibold">{value}</span>
     </div>
   );
-}
+          }
