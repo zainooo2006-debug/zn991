@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { WarrantyAuthProvider, useWarrantyAuth } from "@/lib/warranty-auth";
 import logoAsset from "@/assets/logo-tajalmoluk.png.asset.json";
+import { useSiteContentValue } from "@/lib/site-content";
 import { LogOut, ShieldCheck, LayoutDashboard, PlusCircle, Search, Home, Car } from "lucide-react";
 
 export const Route = createFileRoute("/warranty")({
@@ -26,12 +27,13 @@ function WarrantyLayout() {
 function WHeader() {
   const { user, isAdmin, isStaff, signOut } = useWarrantyAuth();
   const navigate = useNavigate();
+  const branding = useSiteContentValue("branding");
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/95 backdrop-blur border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <Link to="/warranty" className="flex items-center gap-2 shrink-0">
-          <img src={logoAsset.url} alt="زين" className="h-10 w-auto" />
+          <img src={branding.logoUrl || logoAsset.url} alt="زين" className="h-10 w-auto" />
           <div className="hidden sm:block">
             <div className="font-bold text-sm leading-tight">زين</div>
             <div className="text-[11px] text-amber-600 dark:text-amber-400">نظام إدارة الضمانات</div>
