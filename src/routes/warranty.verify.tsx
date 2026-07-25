@@ -6,6 +6,7 @@ import { verifyWarranty } from "@/lib/warranty-public.functions";
 import { statusLabel, statusColor, formatDateAr, computeStatus, verifyUrl, type WarrantyStatus } from "@/lib/warranty-utils";
 import { Search, ShieldCheck, ShieldX, Loader2, Printer } from "lucide-react";
 import logoAsset from "@/assets/logo-tajalmoluk.png.asset.json";
+import { useSiteContentValue } from "@/lib/site-content";
 
 export const Route = createFileRoute("/warranty/verify")({
   component: VerifyPage,
@@ -33,6 +34,7 @@ function VerifyPage() {
   const initial = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("n") ?? "" : "";
   const [num, setNum] = useState(initial);
   const verify = useServerFn(verifyWarranty);
+  const branding = useSiteContentValue("branding");
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +100,7 @@ function VerifyPage() {
           <div className="max-w-3xl mx-auto bg-white text-slate-900 rounded-2xl overflow-hidden shadow-2xl border-4 border-amber-500 print:shadow-none print:border-2">
             <div className="bg-gradient-to-l from-amber-500 to-yellow-500 text-white p-6 flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
-                <img src={logoAsset.url} alt="زين" className="h-16 w-auto bg-white rounded-lg p-1" />
+                <img src={branding.logoUrl || logoAsset.url} alt="زين" className="h-16 w-auto bg-white rounded-lg p-1" />
                 <div>
                   <h1 className="text-2xl font-black">زين</h1>
                   <p className="text-sm opacity-90">شهادة ضمان رسمية</p>
