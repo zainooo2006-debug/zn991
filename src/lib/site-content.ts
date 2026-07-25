@@ -143,4 +143,5 @@ export function useSiteContentValue<K extends ContentKey>(key: K): (typeof CONTE
     return fallback;
   }
   // Shallow-merge so a partially-filled admin edit doesn't blank out other fields.
-  return { ...fallback,
+  return { ...fallback, ...(row.value as Record<string, string>) } as (typeof CONTENT_DEFAULTS)[K];
+}
