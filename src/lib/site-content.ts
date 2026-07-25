@@ -31,6 +31,10 @@ export type FooterContent = {
   hours: string;
 };
 
+export type BrandingContent = {
+  logoUrl: string;
+};
+
 export type ContactContent = {
   subtitle: string;
   address: string;
@@ -96,6 +100,10 @@ export const CONTENT_DEFAULTS = {
     hours: "السبت - الخميس: 9 ص - 11 م | الجمعة إجازة",
   } as FooterContent,
 
+  branding: {
+    logoUrl: "/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
+  } as BrandingContent,
+
   contact_page: {
     subtitle: "نحن هنا لخدمتك — تواصل معنا بالطريقة التي تناسبك.",
     address: "صنعاء - شارع الخمسين  - جوار  اس بي سي مول ",
@@ -135,5 +143,4 @@ export function useSiteContentValue<K extends ContentKey>(key: K): (typeof CONTE
     return fallback;
   }
   // Shallow-merge so a partially-filled admin edit doesn't blank out other fields.
-  return { ...fallback, ...(row.value as Record<string, string>) } as (typeof CONTENT_DEFAULTS)[K];
-}
+  return { ...fallback,
