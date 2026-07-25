@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Shell } from "@/components/layout/Shell";
-import { Lock, LogOut, Plus, Pencil, Trash2, X, Upload, Loader2, Sparkles } from "lucide-react";
+import { Lock, LogOut, Plus, Pencil, Trash2, X, Upload, Loader2, Sparkles, Eye, EyeOff } from "lucide-react";
 import {
   getProducts, getCategories, getServiceCategories, getPackages, getWallets, getSiteContent,
 } from "@/lib/catalog.functions";
@@ -26,7 +26,7 @@ import {
   WarrantyOverview, WarrantiesTab, WarrantyCustomersTab, WarrantySimpleCrud, WarrantyUsersTab,
 } from "@/components/warranty-admin-panels";
 import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
-
+import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId } from "@/lib/site-content";
 // Session token issued by the server-side `adminLogin` function. The actual
 // admin password is never stored in the client bundle or in browser storage.
 const TOKEN_KEY = "mycar_admin_token";
@@ -37,9 +37,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 type Tab =
- | "orders" | "products" | "categories" | "services" | "packages" | "wallets" | "content" | "reviews" | "customer-reviews" | "centers" | "hero"
- | "w-overview" | "w-warranties" | "w-customers" | "w-brands" | "w-films" | "w-branches" | "w-users"
- | "theme";
+ | "orders" | "products" | "categories" | "services" | "packages" | "wallets" | "content" | "site-pages" | "home-builder" | "reviews" | "customer-reviews" | "centers" | "hero"
 
 function AdminPage() {
   const login = useServerFn(adminLogin);
@@ -131,7 +129,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         { id: "customer-reviews", label: "آراء العملاء" },
         { id: "centers", label: "مراكز التركيب" },
         { id: "hero", label: "إدارة السلايدر" },
-        { id: "content", label: "المحتوى" },
+        { id: "home-builder", label: "بناء الرئيسية 🧩" },
+        { id: "site-pages", label: "صفحات الموقع" },
+        { id: "content", label: "المحتوى (متقدم)" },
       ],
     },
     {
@@ -201,6 +201,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {tab === "customer-reviews" && <CustomerReviewsPanel />}
           {tab === "centers" && <InstallationCentersPanel />}
           {tab === "hero" && <HeroSlidesPanel />}
+          {tab === "home-builder" && <HomeBuilderPanel />}
+          {tab === "site-pages" && <SitePagesPanel />}
           {tab === "content" && <ContentPanel />}
           {tab === "w-overview" && <WarrantyOverview />}
           {tab === "w-warranties" && <WarrantiesTab />}
@@ -743,6 +745,211 @@ function WalletsPanel() {
 }
 
 /* ===================== Content (key/value) ===================== */
+function HomeBuilderPanel() {
+  const fetchContent = useServerFn(getSiteContent);
+  const save = useServerFn(saveContent);
+  const qc = useQueryClient();
+  const { data: rows = [], isLoading } = useQuery({ queryKey: ["admin-content"], queryFn: () => fetchContent() });
+
+  const getValue = <K extends keyof typeof CONTENT_DEFAULTS>(key: K): (typeof CONTENT_DEFAULTS)[K] => {
+    const row = rows.find((r) => r.key === key);
+    if (!row || typeof row.value !== "object" || row.value === null || Array.isArray(row.value)) {
+      return CONTENT_DEFAULTS[key];
+    }
+    return { ...CONTENT_DEFAULTS[key], ...(row.value as Record<string, unknown>) };
+  };
+
+  const [sections, setSections] = useState<HomeSectionsConfig | null>(null);
+  const [banner, setBanner] = useState<HomeBannerContent | null>(null);
+  const [savedMsg, setSavedMsg] = useState("");
+
+  useEffect(() => {
+    if (!isLoading && !sections) {
+      setSections(getValue("home_sections"));
+      setBanner(getValue("home_banner"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
+
+  const saveKey = async (key: keyof typeof CONTENT_DEFAULTS, value: unknown) => {
+    await save({ data: { password: getPwd(), key, value } });
+    qc.invalidateQueries({ queryKey: ["admin-content"] });
+    qc.invalidateQueries({ queryKey: ["site-content"] });
+    setSavedMsg("تم الحفظ ✓ — التغيير ظاهر في الموقع الآن");
+    setTimeout(() => setSavedMsg(""), 2500);
+  };
+
+  const move = (id: HomeSectionId, dir: -1 | 1) => {
+    if (!sections) return;
+    const idx = sections.order.indexOf(id);
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= sections.order.length) return;
+    const order = [...sections.order];
+    [order[idx], order[newIdx]] = [order[newIdx], order[idx]];
+    setSections({ ...sections, order });
+  };
+
+  const toggleHidden = (id: HomeSectionId) => {
+    if (!sections) return;
+    const hidden = sections.hidden.includes(id)
+      ? sections.hidden.filter((x) => x !== id)
+      : [...sections.hidden, id];
+    setSections({ ...sections, hidden });
+  };
+
+  if (isLoading || !sections || !banner) {
+    return <div className="text-sm text-[var(--color-ink-soft)]">جارِ التحميل...</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <p className="text-xs text-[var(--color-ink-soft)]">
+        تحكم بترتيب أقسام الصفحة الرئيسية، أخفِ أي قسم مؤقتًا، وفعّل بانر موسمي (رمضان، الجمعة البيضاء...) — كل هذا بدون فتح الكود. السلايدر الرئيسي (الهيرو) ثابت دائمًا في الأعلى.
+      </p>
+      {savedMsg && <div className="text-sm font-bold text-green-600">{savedMsg}</div>}
+
+      <div className="card-clean p-4 space-y-3">
+        <h3 className="font-bold text-lg">ترتيب وإظهار أقسام الرئيسية</h3>
+        <div className="space-y-2">
+          {sections.order.map((id, i) => {
+            const hidden = sections.hidden.includes(id);
+            return (
+              <div key={id} className={`flex items-center justify-between gap-3 border rounded-lg px-3 py-2 ${hidden ? "opacity-50 border-dashed" : "border-[var(--color-hairline)]"}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[var(--color-ink-soft)] w-5">{i + 1}</span>
+                  <span className="font-semibold text-sm">{HOME_SECTION_LABELS[id]}</span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button type="button" onClick={() => move(id, -1)} disabled={i === 0}
+                    className="p-1.5 rounded hover:bg-[var(--color-surface)] disabled:opacity-30" aria-label="نقل لأعلى">▲</button>
+                  <button type="button" onClick={() => move(id, 1)} disabled={i === sections.order.length - 1}
+                    className="p-1.5 rounded hover:bg-[var(--color-surface)] disabled:opacity-30" aria-label="نقل لأسفل">▼</button>
+                  <button type="button" onClick={() => toggleHidden(id)}
+                    className="p-1.5 rounded hover:bg-[var(--color-surface)] text-[var(--color-gold)]" aria-label={hidden ? "إظهار" : "إخفاء"}>
+                    {hidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <button className="btn-gold" onClick={() => saveKey("home_sections", sections)}>حفظ الترتيب</button>
+      </div>
+
+      <div className="card-clean p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg">البانر الموسمي</h3>
+          <label className="flex items-center gap-2 text-sm font-bold cursor-pointer">
+            <input type="checkbox" checked={banner.enabled} onChange={(e) => setBanner({ ...banner, enabled: e.target.checked })} />
+            مفعّل
+          </label>
+        </div>
+        <p className="text-xs text-[var(--color-ink-soft)]">يظهر أسفل السلايدر مباشرة عند تفعيله — استخدمه لرمضان، الجمعة البيضاء، أو أي مناسبة موسمية.</p>
+        <Input label="العنوان" value={banner.title} onChange={(v) => setBanner({ ...banner, title: v })} />
+        <Input label="النص الفرعي" value={banner.subtitle} onChange={(v) => setBanner({ ...banner, subtitle: v })} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <Input label="نص الزر" value={banner.buttonText} onChange={(v) => setBanner({ ...banner, buttonText: v })} />
+          <Input label="رابط الزر (مثال: /offers)" value={banner.buttonLink} onChange={(v) => setBanner({ ...banner, buttonLink: v })} ltr />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label className="block">
+            <span className="text-sm font-bold block mb-1">لون الخلفية</span>
+            <input type="color" value={banner.bgColor} onChange={(e) => setBanner({ ...banner, bgColor: e.target.value })} className="w-full h-10 rounded-lg border border-[var(--color-hairline)]" />
+          </label>
+          <label className="block">
+            <span className="text-sm font-bold block mb-1">لون النص</span>
+            <input type="color" value={banner.textColor} onChange={(e) => setBanner({ ...banner, textColor: e.target.value })} className="w-full h-10 rounded-lg border border-[var(--color-hairline)]" />
+          </label>
+        </div>
+        <button className="btn-gold" onClick={() => saveKey("home_banner", banner)}>حفظ البانر</button>
+      </div>
+    </div>
+  );
+}
+
+function SitePagesPanel() {
+  const fetchContent = useServerFn(getSiteContent);
+  const save = useServerFn(saveContent);
+  const qc = useQueryClient();
+  const { data: rows = [], isLoading } = useQuery({ queryKey: ["admin-content"], queryFn: () => fetchContent() });
+
+  const getValue = <K extends keyof typeof CONTENT_DEFAULTS>(key: K): (typeof CONTENT_DEFAULTS)[K] => {
+    const row = rows.find((r) => r.key === key);
+    if (!row || typeof row.value !== "object" || row.value === null || Array.isArray(row.value)) {
+      return CONTENT_DEFAULTS[key];
+    }
+    return { ...CONTENT_DEFAULTS[key], ...(row.value as Record<string, string>) };
+  };
+
+  const [about, setAbout] = useState<AboutContent | null>(null);
+  const [footer, setFooter] = useState<FooterContent | null>(null);
+  const [contact, setContact] = useState<ContactContent | null>(null);
+  const [savedMsg, setSavedMsg] = useState("");
+
+  useEffect(() => {
+    if (!isLoading && !about) {
+      setAbout(getValue("about_page"));
+      setFooter(getValue("footer_content"));
+      setContact(getValue("contact_page"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading]);
+
+  const saveKey = async (key: keyof typeof CONTENT_DEFAULTS, value: unknown) => {
+    await save({ data: { password: getPwd(), key, value } });
+    qc.invalidateQueries({ queryKey: ["admin-content"] });
+    qc.invalidateQueries({ queryKey: ["site-content"] });
+    setSavedMsg("تم الحفظ ✓");
+    setTimeout(() => setSavedMsg(""), 2000);
+  };
+
+  if (isLoading || !about || !footer || !contact) {
+    return <div className="text-sm text-[var(--color-ink-soft)]">جارِ التحميل...</div>;
+  }
+
+  return (
+    <div className="space-y-8">
+      <p className="text-xs text-[var(--color-ink-soft)]">
+        عدّل نصوص صفحات الموقع مباشرة — أي تعديل يظهر في الموقع فورًا بدون نشر جديد. إذا ما عدّلت شي، تبقى النصوص كما هي حاليًا.
+      </p>
+      {savedMsg && <div className="text-sm font-bold text-green-600">{savedMsg}</div>}
+
+      <div className="card-clean p-4 space-y-3">
+        <h3 className="font-bold text-lg">صفحة "من نحن"</h3>
+        <Textarea label="الفقرة الأولى (بعد كلمة زين)" value={about.intro1} onChange={(v) => setAbout({ ...about, intro1: v })} />
+        <Textarea label="الفقرة الثانية" value={about.intro2} onChange={(v) => setAbout({ ...about, intro2: v })} />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Input label="عنوان: رسالتنا" value={about.missionTitle} onChange={(v) => setAbout({ ...about, missionTitle: v })} />
+          <Input label="عنوان: قيمنا" value={about.valuesTitle} onChange={(v) => setAbout({ ...about, valuesTitle: v })} />
+          <Input label="عنوان: فريقنا" value={about.teamTitle} onChange={(v) => setAbout({ ...about, teamTitle: v })} />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Input label="نص: رسالتنا" value={about.missionText} onChange={(v) => setAbout({ ...about, missionText: v })} />
+          <Input label="نص: قيمنا" value={about.valuesText} onChange={(v) => setAbout({ ...about, valuesText: v })} />
+          <Input label="نص: فريقنا" value={about.teamText} onChange={(v) => setAbout({ ...about, teamText: v })} />
+        </div>
+        <button className="btn-gold" onClick={() => saveKey("about_page", about)}>حفظ صفحة "من نحن"</button>
+      </div>
+
+      <div className="card-clean p-4 space-y-3">
+        <h3 className="font-bold text-lg">الفوتر (أسفل كل صفحة)</h3>
+        <Textarea label="الوصف المختصر" value={footer.description} onChange={(v) => setFooter({ ...footer, description: v })} />
+        <Input label="اسم المدير العام" value={footer.managerName} onChange={(v) => setFooter({ ...footer, managerName: v })} />
+        <Input label="العنوان" value={footer.address} onChange={(v) => setFooter({ ...footer, address: v })} />
+        <Input label="أوقات العمل" value={footer.hours} onChange={(v) => setFooter({ ...footer, hours: v })} />
+        <button className="btn-gold" onClick={() => saveKey("footer_content", footer)}>حفظ الفوتر</button>
+      </div>
+
+      <div className="card-clean p-4 space-y-3">
+        <h3 className="font-bold text-lg">صفحة "اتصل بنا"</h3>
+        <Input label="الجملة التعريفية" value={contact.subtitle} onChange={(v) => setContact({ ...contact, subtitle: v })} />
+        <Input label="العنوان" value={contact.address} onChange={(v) => setContact({ ...contact, address: v })} />
+        <Textarea label="أوقات العمل (سطر جديد = فاصل)" value={contact.hours} onChange={(v) => setContact({ ...contact, hours: v })} />
+        <button className="btn-gold" onClick={() => saveKey("contact_page", contact)}>حفظ صفحة "اتصل بنا"</button>
+      </div>
+    </div>
+  );
+          }
 function ContentPanel() {
   const fetchContent = useServerFn(getSiteContent);
   const save = useServerFn(saveContent);
