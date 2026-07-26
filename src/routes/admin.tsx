@@ -27,7 +27,7 @@ import {
 } from "@/components/warranty-admin-panels";
 import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
 import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent } from "@/lib/site-content";
-import { generateAiContent } from "@/lib/ai-content.functions";
+import { generateProductContent } from "@/lib/ai-content.functions";
 // Session token issued by the server-side `adminLogin` function. The actual
 // admin password is never stored in the client bundle or in browser storage.
 const TOKEN_KEY = "mycar_admin_token";
@@ -421,16 +421,23 @@ function ProductForm({ initial, categories, onSave }: {
   const [featured, setFeatured] = useState(initial.is_featured || false);
   const [busy, setBusy] = useState(false);
 
-  const generate = useServerFn(generateAiContent);
+  const generate = useServerFn(generateProductContent);
   const [aiBusy, setAiBusy] = useState<"" | "description" | "instagram">("");
   const [instaPost, setInstaPost] = useState("");
   const catName = categories.find((c) => c.id === catId)?.name || "";
 
+  const buildBrief = () => [
+    `المنتج: ${name}`,
+    catName ? `القسم: ${catName}` : null,
+    price ? `السعر: ${price} ر.ي` : null,
+    desc ? `الوصف الحالي: ${desc}` : null,
+  ].filter(Boolean).join("\n");
+
   const handleGenDesc = async () => {
     setAiBusy("description");
     try {
-      const { text } = await generate({ data: { type: "description", productName: name, category: catName, price: Number(price) || 0 } });
-      setDesc(text);
+      const result = await generate({ data: { password: getPwd(), brief: buildBrief(), kind: "product" } });
+      setDesc(result.description);
     } catch (e) { alert((e as Error).message); }
     setAiBusy("");
   };
@@ -438,8 +445,9 @@ function ProductForm({ initial, categories, onSave }: {
   const handleGenInsta = async () => {
     setAiBusy("instagram");
     try {
-      const { text } = await generate({ data: { type: "instagram", productName: name, price: Number(price) || 0, description: desc } });
-      setInstaPost(text);
+      const result = await generate({ data: { password: getPwd(), brief: buildBrief(), kind: "marketing" } });
+      const withTags = result.hashtags?.length ? `${result.marketing_post}\n\n${result.hashtags.join(" ")}` : result.marketing_post;
+      setInstaPost(withTags);
     } catch (e) { alert((e as Error).message); }
     setAiBusy("");
   };
