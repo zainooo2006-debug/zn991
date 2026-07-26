@@ -27,6 +27,7 @@ import {
 } from "@/components/warranty-admin-panels";
 import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
 import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent } from "@/lib/site-content";
+import { generateAiContent } from "@/lib/ai-content.functions";
 // Session token issued by the server-side `adminLogin` function. The actual
 // admin password is never stored in the client bundle or in browser storage.
 const TOKEN_KEY = "mycar_admin_token";
