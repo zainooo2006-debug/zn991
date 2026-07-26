@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Store, Wrench, ShoppingCart, User } from "lucide-react";
+import { Home, Store, Wrench, ShoppingCart, ShieldCheck } from "lucide-react";
 import { useCart } from "@/lib/cart";
 
 const items = [
@@ -7,7 +7,7 @@ const items = [
   { to: "/shop" as const, label: "المتجر", icon: Store },
   { to: "/services" as const, label: "الخدمات", icon: Wrench },
   { to: "/cart" as const, label: "السلة", icon: ShoppingCart, badge: true },
-  { to: "/admin" as const, label: "الحساب", icon: User },
+  { to: "/warranty" as const, label: "الضمان", icon: ShieldCheck },
 ];
 
 export function BottomNav() {
