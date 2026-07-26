@@ -367,7 +367,12 @@ function ProductsPanel() {
     <div>
       <div className="flex justify-between mb-4">
         <h2 className="font-bold text-lg">المنتجات ({products.length})</h2>
-        <button onClick={() => setEditing({ images: [], is_bestseller: false, is_featured: false })} className="btn-gold"><Plus className="w-4 h-4" /> منتج جديد</button>
+        <div className="flex items-center gap-2">
+          <a href="/admin/ai-training#content-generator" className="btn-outline inline-flex items-center gap-1">
+            <Sparkles className="w-4 h-4" /> مولّد المحتوى والمنشورات
+          </a>
+          <button onClick={() => setEditing({ images: [], is_bestseller: false, is_featured: false })} className="btn-gold"><Plus className="w-4 h-4" /> منتج جديد</button>
+        </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {products.map((p) => (
