@@ -151,6 +151,8 @@ function TrainingUI() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <ContentGenerator />
+
         {/* Form */}
         <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4">
           <div className="flex items-center justify-between">
@@ -263,8 +265,6 @@ function TrainingUI() {
             </ul>
           )}
         </section>
-
-        <ContentGenerator />
       </main>
     </div>
   );
@@ -322,7 +322,7 @@ function ContentGenerator() {
   }
 
   return (
-    <section className="bg-white rounded-2xl border border-slate-200 p-5">
+    <section id="content-generator" className="bg-white rounded-2xl border border-slate-200 p-5">
       <div className="flex items-center gap-2 mb-4">
         <Wand2 className="w-5 h-5 text-amber-600" />
         <h2 className="font-bold text-lg">مولّد محتوى المنتجات والتسويق</h2>
