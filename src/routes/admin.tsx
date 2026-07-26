@@ -420,7 +420,28 @@ function ProductForm({ initial, categories, onSave }: {
   const [bestseller, setBestseller] = useState(initial.is_bestseller || false);
   const [featured, setFeatured] = useState(initial.is_featured || false);
   const [busy, setBusy] = useState(false);
+const generate = useServerFn(generateAiContent);
+const [aiBusy, setAiBusy] = useState<"" | "description" | "instagram">("");
+const [instaPost, setInstaPost] = useState("");
+const catName = categories.find((c) => c.id === catId)?.name || "";
 
+const handleGenDesc = async () => {
+  setAiBusy("description");
+  try {
+    const { text } = await generate({ data: { type: "description", productName: name, category: catName, price: Number(price) || 0 } });
+    setDesc(text);
+  } catch (e) { alert((e as Error).message); }
+  setAiBusy("");
+};
+
+const handleGenInsta = async () => {
+  setAiBusy("instagram");
+  try {
+    const { text } = await generate({ data: { type: "instagram", productName: name, price: Number(price) || 0, description: desc } });
+    setInstaPost(text);
+  } catch (e) { alert((e as Error).message); }
+  setAiBusy("");
+};
   return (
     <form onSubmit={async (e) => {
       e.preventDefault(); setBusy(true);
@@ -435,7 +456,13 @@ function ProductForm({ initial, categories, onSave }: {
       setBusy(false);
     }} className="space-y-3">
       <Input label="الاسم *" value={name} onChange={setName} required />
-      <Textarea label="الوصف" value={desc} onChange={setDesc} />
+      <div>
+  <Textarea label="الوصف" value={desc} onChange={setDesc} />
+  <button type="button" onClick={handleGenDesc} disabled={aiBusy !== "" || !name}
+    className="btn-outline text-xs mt-1 inline-flex items-center gap-1">
+    <Sparkles className="w-3 h-3" /> {aiBusy === "description" ? "جاري التوليد..." : "توليد وصف بالذكاء الاصطناعي"}
+  </button>
+</div>
       <div className="grid grid-cols-2 gap-3">
         <Input label="السعر *" type="number" value={price} onChange={setPrice} required />
         <Input label="السعر القديم (مشطوب)" type="number" value={oldPrice} onChange={setOldPrice} />
@@ -452,6 +479,16 @@ function ProductForm({ initial, categories, onSave }: {
         </label>
       </div>
       <ImagesField images={images} onChange={setImages} />
+      <div>
+  <button type="button" onClick={handleGenInsta} disabled={aiBusy !== "" || !name}
+    className="btn-outline text-xs inline-flex items-center gap-1">
+    <Sparkles className="w-3 h-3" /> {aiBusy === "instagram" ? "جاري التوليد..." : "تجهيز منشور انستغرام"}
+  </button>
+  {instaPost && (
+    <textarea readOnly value={instaPost} rows={6}
+      className="w-full mt-2 border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm" />
+  )}
+</div>
       <button type="submit" disabled={busy} className="btn-gold w-full">{busy ? "جاري الحفظ..." : "حفظ"}</button>
     </form>
   );
