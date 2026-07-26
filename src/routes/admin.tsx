@@ -33,7 +33,10 @@ import { generateProductContent } from "@/lib/ai-content.functions";
 const TOKEN_KEY = "mycar_admin_token";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "لوحة التحكم — زين" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "لوحة التحكم — زين" }, { name: "robots", content: "noindex" }],
+    links: [{ rel: "manifest", href: "/admin-manifest.json" }],
+  }),
   component: AdminPage,
 });
 
