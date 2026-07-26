@@ -1,0 +1,34 @@
+import { createServerFn } from "@tanstack/react-start";
+
+export const generateAiContent = createServerFn({ method: "POST" }).handler(
+  async ({ data }: { data: { type: "description" | "instagram"; productName: string; category?: string; price: number; description?: string } }) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("مفتاح Gemini غير موجود");
+
+    let prompt = "";
+    if (data.type === "description") {
+      prompt = `اكتب وصف تسويقي جذاب لمنتج عناية بالسيارات باللغة العربية.
+اسم المنتج: ${data.productName}
+القسم: ${data.category || "غير محدد"}
+السعر: ${data.price} ريال يمني
+فقرة واحدة قصيرة (2-3 جمل)، احترافي، بدون مبالغة.`;
+    } else {
+      prompt = `اكتب منشور انستغرام لمنتج عناية بالسيارات باللغة العربية.
+اسم المنتج: ${data.productName}
+الوصف: ${data.description || ""}
+السعر: ${data.price} ريال يمني
+يحتوي: عنوان جذاب مع إيموجيات، التفاصيل والسعر، عبارة "للطلب والتواصل عبر الواتساب أو الخاص"، وهاشتاقات: #زين_أصل_الحماية #صنعاء #عناية_بالسيارات #سيارات_اليمن`;
+    }
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+      }
+    );
+    const json = await res.json();
+    return { text: json?.candidates?.[0]?.content?.parts?.[0]?.text ?? "" };
+  }
+);
