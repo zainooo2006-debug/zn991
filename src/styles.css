@@ -95,11 +95,11 @@
 
 @layer components {
   .btn-gold {
-    background-color: var(--color-gold);
-    color: var(--color-ink);
+    background-color: var(--btn-primary-bg, var(--color-gold));
+    color: var(--btn-primary-fg, var(--color-ink));
     font-weight: 700;
     padding: 0.75rem 1.5rem;
-    border-radius: 9999px;
+    border-radius: var(--btn-primary-radius, 9999px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -117,7 +117,7 @@
     color: var(--color-ink);
     font-weight: 600;
     padding: 0.65rem 1.25rem;
-    border-radius: 9999px;
+    border-radius: var(--btn-primary-radius, 9999px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -247,3 +247,38 @@
 .dark input::placeholder,
 .dark textarea::placeholder { color: var(--color-ink-soft); }
 
+
+/* ===================== Occasion Identity — background & decorative layers =====================
+ * Driven by ThemeProvider, which sets --site-bg-type/--site-bg-value/--site-bg-overlay,
+ * --site-decorative-url and --site-logo-url from the active theme's `background`,
+ * `decorative_url` and `logo_url` fields (see ThemeEditor "الخلفية والزخارف" section).
+ * Defaults to the plain surface color when a theme doesn't customize these — fully
+ * backward compatible with existing themes that don't set them.
+ */
+.site-bg-layer {
+  background-color: var(--color-background);
+  background-image: var(--site-bg-image, none);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  isolation: isolate;
+}
+.site-bg-layer::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: black;
+  opacity: var(--site-bg-overlay, 0);
+}
+.site-decorative-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--site-decorative-url, none);
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0.9;
+}
