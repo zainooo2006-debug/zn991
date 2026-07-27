@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Shell } from "@/components/layout/Shell";
 import { getServiceCategories } from "@/lib/catalog.functions";
+import { resolveImage } from "@/lib/asset-map";
 
 const servicesQO = queryOptions({ queryKey: ["services"], queryFn: () => getServiceCategories() });
 
@@ -57,8 +58,12 @@ function ServicesPage() {
               params={{ slug: s.slug }}
               className="card-clean p-5 group flex flex-col"
             >
-              <div className="w-12 h-12 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-gold)] font-black text-lg">
-                {String(s.sort_order).padStart(2, "0")}
+              <div className="w-full aspect-[16/10] rounded-xl overflow-hidden bg-[var(--color-surface)]">
+                <img
+                  src={resolveImage(s.image_url)}
+                  alt={s.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition"
+                />
               </div>
               <h3 className="text-lg font-bold mt-3">{s.name}</h3>
               <p className="text-sm text-[var(--color-ink-soft)] mt-1 flex-1">{s.short_desc}</p>
