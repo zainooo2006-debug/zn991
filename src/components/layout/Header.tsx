@@ -6,10 +6,12 @@ import { useCart } from "@/lib/cart";
 import { ThemeToggle } from "./ThemeToggle";
 import logoAsset from "@/assets/logo-tajalmoluk.png.asset.json";
 import { useSiteContentValue } from "@/lib/site-content";
+import { useActiveThemeLogoUrl } from "@/components/theme/ThemeProvider";
 
 export function Header() {
   const { count } = useCart();
   const branding = useSiteContentValue("branding");
+  const themeLogoUrl = useActiveThemeLogoUrl();
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [qMobile, setQMobile] = useState("");
@@ -24,7 +26,7 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full bg-white border-b border-[var(--color-hairline)]">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="زين">
-          <img src={branding.logoUrl || logoAsset.url} alt="زين لزينة السيارات" className="h-12 md:h-14 w-auto object-contain" />
+          <img src={themeLogoUrl || branding.logoUrl || logoAsset.url} alt="زين لزينة السيارات" className="h-12 md:h-14 w-auto object-contain" />
         </Link>
 
         <div className="flex-1 hidden md:flex">
