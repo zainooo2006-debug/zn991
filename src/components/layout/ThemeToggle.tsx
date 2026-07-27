@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { DARK_MODE_EVENT } from "@/components/theme/ThemeProvider";
 
 const STORAGE_KEY = "mycar_theme";
 
@@ -8,6 +9,7 @@ function applyTheme(theme: "light" | "dark") {
   const root = document.documentElement;
   if (theme === "dark") root.classList.add("dark");
   else root.classList.remove("dark");
+  window.dispatchEvent(new Event(DARK_MODE_EVENT));
 }
 
 export function ThemeToggle() {
