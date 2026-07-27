@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Trash2, Save, Loader2, Star, Copy, Download, Upload, Palette, Check,
+  Plus, Trash2, Save, Loader2, Star, Copy, Download, Upload, Palette, Check, Sparkles,
 } from "lucide-react";
 import { wbList, wbUpsert, wbDelete } from "@/lib/website-builder.functions";
 import {
@@ -37,6 +37,46 @@ const FONT_PRESETS = [
   '"IBM Plex Sans Arabic", system-ui, sans-serif',
   '"Inter", system-ui, sans-serif',
   '"Poppins", system-ui, sans-serif',
+];
+
+/** Ready-made occasion identities. Colors/shape are set; background/logo/decorative
+ * image URLs are left blank for the admin to fill in (paste a hosted image URL —
+ * e.g. upload it via any product/service image field first, then paste the link here). */
+const OCCASION_PRESETS: { key: string; label: string; build: () => any }[] = [
+  {
+    key: "mawlid",
+    label: "المولد النبوي الشريف",
+    build: () => ({
+      ...structuredClone(DEFAULT_THEME_JSON),
+      colors: {
+        ...DEFAULT_THEME_JSON.colors,
+        primary: "#0E6E4E",
+        background: "#FAF7EE",
+        foreground: "#123326",
+        card: "#FFFFFF",
+        accent: "#F1E4B8",
+        border: "#E4D9A8",
+        gold: "#C9A227",
+        "gold-soft": "#EAD98C",
+        ink: "#123326",
+        "ink-soft": "#3E5B4E",
+        surface: "#F3EFDD",
+      },
+      colors_dark: {
+        background: "#0B2A20",
+        foreground: "#F3EFDD",
+        card: "#0F3A2B",
+        surface: "#0F3A2B",
+        border: "#1E4E3B",
+        "ink-soft": "#BFD8CB",
+      },
+      radius: { ...DEFAULT_THEME_JSON.radius, base: "9999px" },
+      buttons: { "primary-bg": "#0E6E4E", "primary-fg": "#FAF7EE", "primary-radius": "9999px" },
+      background: { type: "color", value: "#FAF7EE", overlay_opacity: "0" },
+      logo_url: "",
+      decorative_url: "",
+    }),
+  },
 ];
 
 /** Try to render any color string in a native color input; fall back to text. */
@@ -92,6 +132,16 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
     }});
     await qc.invalidateQueries({ queryKey: key });
     setSelectedId(row?.id ?? null);
+  };
+
+  const createFromPreset = async (preset: typeof OCCASION_PRESETS[number]) => {
+    const row: any = await upsert({ data: {
+      table: "website_themes" as any,
+      values: { name: preset.label, theme_json: preset.build(), is_active: false },
+    }});
+    await qc.invalidateQueries({ queryKey: key });
+    setSelectedId(row?.id ?? null);
+    setMsg(`تم إنشاء هوية "${preset.label}" — عدّل الألوان/الصور ثم اضغط "تفعيل على الموقع" عند الجاهزية.`);
   };
 
   const save = async () => {
@@ -179,6 +229,23 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
 
   return (
     <div className="space-y-4">
+      {/* Occasion presets */}
+      <div className="bg-[var(--color-surface)] rounded-xl p-3">
+        <h3 className="text-sm font-bold mb-2 inline-flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-[var(--color-gold)]" /> هويات مناسبات جاهزة
+        </h3>
+        <p className="text-xs text-[var(--color-ink-soft)] mb-3">
+          تنشئ نسخة جديدة غير مفعّلة يمكنك تعديلها ومعاينتها، وتفعيلها لاحقاً وقت المناسبة.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {OCCASION_PRESETS.map((p) => (
+            <button key={p.key} onClick={() => createFromPreset(p)} className="btn-outline text-xs">
+              <Plus className="w-3 h-3" /> {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Themes list */}
       <div className="bg-[var(--color-surface)] rounded-xl p-3">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -327,6 +394,17 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
           </Section>
 
           <Section title="الأزرار">
+            <div className="flex gap-2 mb-3 flex-wrap">
+              <span className="text-xs font-bold self-center">شكل سريع:</span>
+              {[
+                { label: "دائري (سبحة)", v: "9999px" },
+                { label: "متوسط", v: "0.75rem" },
+                { label: "حاد", v: "0.125rem" },
+              ].map((s) => (
+                <button key={s.v} type="button" onClick={() => patch(["buttons", "primary-radius"], s.v)}
+                  className="btn-outline text-xs">{s.label}</button>
+              ))}
+            </div>
             {[
               { k: "primary-bg", label: "خلفية الزر الأساسي" },
               { k: "primary-fg", label: "لون نص الزر الأساسي" },
@@ -338,6 +416,80 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
                   className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
               </div>
             ))}
+          </Section>
+
+          <Section title="ألوان الوضع الليلي (اختياري)">
+            <p className="text-xs text-[var(--color-ink-soft)] mb-3">
+              اتركها فارغة لأي لون تريد أن يبقى كما هو في الوضع الليلي. عبّي فقط الألوان التي تحتاج قيمة مختلفة في الوضع الليلي.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {COLOR_KEYS.map(({ k, label }) => {
+                const v = draft.colors_dark?.[k] ?? "";
+                return (
+                  <div key={k} className="flex items-center gap-2">
+                    <input type="color" value={isHex(v) ? v : "#000000"} disabled={!isHex(v)}
+                      onChange={(e) => patch(["colors_dark", k], e.target.value)}
+                      className="w-10 h-10 rounded border border-[var(--color-border)] shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs font-bold">{label} <span className="text-[var(--color-ink-soft)] font-normal">({k})</span></div>
+                      <input value={v} placeholder="نفس لون النهار" onChange={(e) => patch(["colors_dark", k], e.target.value)} dir="ltr"
+                        className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Section>
+
+          <Section title="الخلفية">
+            <div className="mb-3">
+              <div className="text-xs font-bold mb-1">نوع الخلفية</div>
+              <select value={draft.background?.type ?? "color"} onChange={(e) => patch(["background", "type"], e.target.value)}
+                className="w-full px-2 py-1.5 text-xs rounded bg-[var(--color-bg)] border border-[var(--color-border)]">
+                <option value="color">لون ثابت</option>
+                <option value="gradient">تدرج لوني (CSS gradient)</option>
+                <option value="image">صورة</option>
+              </select>
+            </div>
+            <div className="mb-3">
+              <div className="text-xs font-bold mb-1">
+                {draft.background?.type === "image" ? "رابط الصورة" : draft.background?.type === "gradient" ? "قيمة CSS gradient" : "قيمة اللون (hex)"}
+              </div>
+              <input value={draft.background?.value ?? ""} onChange={(e) => patch(["background", "value"], e.target.value)} dir="ltr"
+                placeholder={draft.background?.type === "gradient" ? "linear-gradient(135deg, #0E6E4E, #123326)" : draft.background?.type === "image" ? "https://..." : "#FAF7EE"}
+                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+              {draft.background?.type === "image" && (
+                <p className="text-[10px] text-[var(--color-ink-soft)] mt-1">
+                  ارفع الصورة من أي حقل صورة في لوحة التحكم أولاً (مثل صورة منتج أو خدمة)، ثم الصق رابطها هنا.
+                </p>
+              )}
+            </div>
+            {draft.background?.type === "image" && (
+              <div>
+                <div className="text-xs font-bold mb-1">تعتيم فوق الصورة (0 = بدون، 1 = أسود كامل)</div>
+                <input type="number" min={0} max={1} step={0.05} value={draft.background?.overlay_opacity ?? "0"}
+                  onChange={(e) => patch(["background", "overlay_opacity"], e.target.value)} dir="ltr"
+                  className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+              </div>
+            )}
+          </Section>
+
+          <Section title="الشعار والزخارف">
+            <div className="mb-3">
+              <div className="text-xs font-bold mb-1">شعار مخصص لهذه الهوية (اختياري)</div>
+              <input value={draft.logo_url ?? ""} onChange={(e) => patch(["logo_url"], e.target.value)} dir="ltr"
+                placeholder="https://... — اتركه فارغاً لاستخدام الشعار الافتراضي"
+                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+            </div>
+            <div>
+              <div className="text-xs font-bold mb-1">صورة زخرفية فوق الموقع (اختياري، مثل نقوش أو هلال زاوية)</div>
+              <input value={draft.decorative_url ?? ""} onChange={(e) => patch(["decorative_url"], e.target.value)} dir="ltr"
+                placeholder="https://..."
+                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+              <p className="text-[10px] text-[var(--color-ink-soft)] mt-1">
+                يفضّل صورة PNG بخلفية شفافة، بحجم معقول حتى لا تُبطئ تحميل الموقع لزوار الإنترنت الضعيف.
+              </p>
+            </div>
           </Section>
 
           <Section title="JSON خام">
@@ -385,6 +537,7 @@ function mergeDefaults(tj: any): any {
   if (!tj || typeof tj !== "object") return out;
   for (const k of Object.keys(DEFAULT_THEME_JSON) as (keyof typeof DEFAULT_THEME_JSON)[]) {
     if (tj[k] && typeof tj[k] === "object") out[k] = { ...out[k], ...tj[k] };
+    else if (typeof tj[k] === "string") out[k] = tj[k];
   }
   // preserve any extra keys the user added
   for (const k of Object.keys(tj)) if (!(k in out)) out[k] = tj[k];
