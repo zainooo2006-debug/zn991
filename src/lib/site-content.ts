@@ -44,6 +44,7 @@ export type ContactContent = {
 export type HomeSectionId =
   | "quick_access"
   | "categories"
+  | "services"
   | "featured"
   | "hot_deals"
   | "best_sellers"
@@ -68,6 +69,7 @@ export type HomeBannerContent = {
 export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
   quick_access: "أزرار المراكز والضمانات",
   categories: "دائرة الأقسام",
+  services: "خدماتنا",
   featured: "المنتجات المميزة (سلايدر)",
   hot_deals: "العروض المميزة",
   best_sellers: "الأكثر مبيعاً",
@@ -76,8 +78,14 @@ export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
 };
 
 const DEFAULT_HOME_ORDER: HomeSectionId[] = [
-  "quick_access", "categories", "featured", "hot_deals", "best_sellers", "trust", "reviews",
+  "quick_access", "categories", "services", "featured", "hot_deals", "best_sellers", "trust", "reviews",
 ];
+
+/** Appends any section id that exists in code but is missing from a previously-saved order (e.g. a section added after the admin last customized their layout). */
+export function withMissingSections(order: HomeSectionId[]): HomeSectionId[] {
+  const missing = DEFAULT_HOME_ORDER.filter((id) => !order.includes(id));
+  return [...order, ...missing];
+}
 
 export const CONTENT_DEFAULTS = {
   about_page: {
