@@ -29,6 +29,9 @@ export const DEFAULT_THEME_JSON = {
     hairline: "#eeeeee",
     surface: "#fafafa",
   },
+  // Optional per-color overrides applied only while the visitor's device is in dark mode.
+  // Leave a key out to keep the light-mode color for that key in dark mode too.
+  colors_dark: {} as Record<string, string>,
   fonts: {
     sans: '"Cairo", system-ui, sans-serif',
     heading: '"Cairo", system-ui, sans-serif',
@@ -58,6 +61,14 @@ export const DEFAULT_THEME_JSON = {
     "primary-fg": "var(--color-ink)",
     "primary-radius": "9999px",
   },
+  // Occasion identity extras — all optional, all backward compatible.
+  background: {
+    type: "color" as "color" | "gradient" | "image", // "color": plain bg color, "gradient": CSS gradient string in `value`, "image": image url in `value`
+    value: "",
+    overlay_opacity: "0", // 0 to 1 — dark overlay over a background image, helps text stay legible
+  },
+  logo_url: "", // overrides the site logo while this theme is active; empty = use the default logo
+  decorative_url: "", // optional decorative corner/border image overlay (e.g. heritage motif, mosque silhouette)
 } as const;
 
 /** PUBLIC — returns active theme JSON. Fallback: DEFAULT_THEME_JSON. */
