@@ -10,8 +10,9 @@ import { ProductCard } from "@/components/shop/ProductCard";
 import { FeaturedSlider } from "@/components/home/FeaturedSlider";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { CustomerReviewsSection } from "@/components/home/CustomerReviewsSection";
-import { getCategories, getProducts, getPackages, getFeaturedProducts } from "@/lib/catalog.functions";
-import { useSiteContentValue, type HomeSectionId } from "@/lib/site-content";
+import { getCategories, getProducts, getPackages, getFeaturedProducts, getServiceCategories } from "@/lib/catalog.functions";
+import { useSiteContentValue, withMissingSections, type HomeSectionId } from "@/lib/site-content";
+import { resolveImage } from "@/lib/asset-map";
 
 const iconMap: Record<string, LucideIcon> = {
   Zap, Sparkles, Droplets, Wind, Sticker, Cog, Palette,
@@ -21,6 +22,7 @@ const catsQO = queryOptions({ queryKey: ["categories"], queryFn: () => getCatego
 const productsQO = queryOptions({ queryKey: ["products"], queryFn: () => getProducts() });
 const packagesQO = queryOptions({ queryKey: ["packages"], queryFn: () => getPackages() });
 const featuredQO = queryOptions({ queryKey: ["featured-products"], queryFn: () => getFeaturedProducts() });
+const servicesQO = queryOptions({ queryKey: ["services"], queryFn: () => getServiceCategories() });
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,6 +40,7 @@ export const Route = createFileRoute("/")({
     context.queryClient.ensureQueryData(productsQO);
     context.queryClient.ensureQueryData(packagesQO);
     context.queryClient.ensureQueryData(featuredQO);
+    context.queryClient.ensureQueryData(servicesQO);
   },
   component: HomePage,
 });
@@ -47,6 +50,7 @@ function HomePage() {
   const { data: products } = useSuspenseQuery(productsQO);
   const { data: packages } = useSuspenseQuery(packagesQO);
   const { data: featured } = useSuspenseQuery(featuredQO);
+  const { data: services } = useSuspenseQuery(servicesQO);
   const bestSellers = products.filter((p) => p.is_bestseller).slice(0, 4);
 
   const sectionsConfig = useSiteContentValue("home_sections");
@@ -94,6 +98,36 @@ function HomePage() {
               </Link>
             );
           })}
+        </div>
+      </section>
+    ),
+    services: (
+      <section key="services" className="max-w-7xl mx-auto px-4 py-8 md:py-10">
+        <SectionTitle title="خدماتنا" subtitle="خدمات احترافية للعناية بسيارتك" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mt-6">
+          {services.slice(0, 8).map((s) => (
+            <Link
+              key={s.id}
+              to="/services/$slug"
+              params={{ slug: s.slug }}
+              className="card-clean overflow-hidden group flex flex-col"
+            >
+              <div className="w-full aspect-[4/3] bg-[var(--color-surface)] overflow-hidden">
+                <img
+                  src={resolveImage(s.image_url)}
+                  alt={s.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition"
+                />
+              </div>
+              <div className="p-3">
+                <h3 className="text-sm md:text-base font-bold line-clamp-1">{s.name}</h3>
+                {s.short_desc && <p className="text-xs text-[var(--color-ink-soft)] mt-1 line-clamp-2">{s.short_desc}</p>}
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="mt-6 text-center">
+          <Link to="/services" className="btn-outline">عرض جميع الخدمات</Link>
         </div>
       </section>
     ),
@@ -164,7 +198,11 @@ function HomePage() {
     reviews: <CustomerReviewsSection key="reviews" />,
   };
 
-  const orderedIds = sectionsConfig.order.length ? sectionsConfig.order : (["quick_access","categories","featured","hot_deals","best_sellers","trust","reviews"] as HomeSectionId[]);
+  const orderedIds = withMissingSections(
+    sectionsConfig.order.length
+      ? sectionsConfig.order
+      : (["quick_access","categories","services","featured","hot_deals","best_sellers","trust","reviews"] as HomeSectionId[]),
+  );
   const hiddenSet = new Set(sectionsConfig.hidden);
 
   return (
