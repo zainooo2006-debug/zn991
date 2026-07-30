@@ -100,7 +100,7 @@ function TrackPage() {
                     <div>
                       <div className="flex items-center gap-2 text-sm text-[var(--color-ink-soft)]">
                         <Package className="w-4 h-4 text-[var(--color-gold)]" />
-                        <span>طلب رقم: {o.id.slice(0, 8)}</span>
+                        <span>طلب رقم: {o.id.slice(0, 8).toUpperCase()}</span>
                       </div>
                       <div className="text-xs text-[var(--color-ink-soft)] mt-1">
                         {new Date(o.created_at).toLocaleString("ar-EG")}
