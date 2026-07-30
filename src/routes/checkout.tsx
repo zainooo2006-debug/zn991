@@ -40,15 +40,16 @@ function CheckoutPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [placedOrder, setPlacedOrder] = useState<{ shortId: string; waLink: string } | null>(null);
 
   useEffect(() => {
-    if (count === 0 && typeof window !== "undefined") {
+    if (count === 0 && !placedOrder && typeof window !== "undefined") {
       const t = setTimeout(() => navigate({ to: "/shop" }), 1500);
       return () => clearTimeout(t);
     }
-  }, [count, navigate]);
+  }, [count, navigate, placedOrder]);
 
-  if (count === 0) {
+  if (count === 0 && !placedOrder) {
     return (
       <Shell>
         <div className="max-w-md mx-auto px-4 py-20 text-center">
@@ -70,7 +71,7 @@ function CheckoutPage() {
 
     setSubmitting(true);
     try {
-      await submitOrder({
+      const result = await submitOrder({
         data: {
           customer_name: name.trim(),
           phone: phone.trim(),
@@ -83,8 +84,10 @@ function CheckoutPage() {
         },
       });
 
+      const shortId = result.id.slice(0, 8).toUpperCase();
       const lines = [
         "🛒 *طلب جديد من زين*",
+        `📦 رقم الطلب: ${shortId}`,
         `👤 الاسم: ${name}`,
         `📱 الهاتف: ${phone}`,
         address ? `📍 العنوان: ${address}` : "",
@@ -99,7 +102,8 @@ function CheckoutPage() {
       ].filter(Boolean).join("\n");
 
       clear();
-      window.location.href = whatsappLink(lines);
+      setPlacedOrder({ shortId, waLink: whatsappLink(lines) });
+      setSubmitting(false);
     } catch (err) {
       setError((err as Error).message || "تعذّر إرسال الطلب");
       setSubmitting(false);
@@ -111,6 +115,32 @@ function CheckoutPage() {
     setCopied(text);
     setTimeout(() => setCopied(null), 1500);
   };
+
+  if (placedOrder) {
+    return (
+      <Shell>
+        <div className="max-w-md mx-auto px-4 py-16 text-center">
+          <Check className="w-14 h-14 text-green-600 mx-auto bg-green-100 rounded-full p-3" />
+          <h1 className="text-xl font-black mt-4">تم إرسال طلبك بنجاح</h1>
+          <p className="text-[var(--color-ink-soft)] text-sm mt-2">
+            احتفظ برقم الطلب هذا — تحتاجه لتتبع حالة طلبك لاحقاً من صفحة "تتبع الطلب".
+          </p>
+
+          <div className="mt-6 bg-[var(--color-surface)] border border-[var(--color-hairline)] rounded-2xl p-5">
+            <div className="text-xs text-[var(--color-ink-soft)] mb-1">رقم الطلب</div>
+            <div className="text-3xl font-black tracking-widest" dir="ltr">{placedOrder.shortId}</div>
+            <button onClick={() => copy(placedOrder.shortId)} className="btn-outline text-xs mt-3">
+              {copied === placedOrder.shortId ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+              {copied === placedOrder.shortId ? "تم النسخ" : "نسخ رقم الطلب"}
+            </button>
+          </div>
+
+          <a href={placedOrder.waLink} className="btn-gold w-full mt-6">متابعة عبر واتساب لتأكيد الدفع</a>
+          <Link to="/shop" className="block mt-3 text-sm text-[var(--color-ink-soft)] underline">متابعة التسوق</Link>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell>
