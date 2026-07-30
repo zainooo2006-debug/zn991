@@ -37,24 +37,39 @@ const STATUS_COLOR: Record<string, string> = {
 function TrackPage() {
   const [phone, setPhone] = useState("");
   const [orderId, setOrderId] = useState("");
+
   const mutation = useMutation({
-    mutationFn: (v: { phone: string; orderId: string }) => getOrdersByPhone({ data: v }),
+    mutationFn: (v: { phone: string; orderId: string }) =>
+      getOrdersByPhone({ data: v }),
   });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
     if (phone.replace(/\D/g, "").length < 9) return;
     if (orderId.trim().length < 4) return;
-    mutation.mutate({ phone: phone.trim(), orderId: orderId.trim() });
+
+    mutation.mutate({
+      phone: phone.trim(),
+      orderId: orderId.trim(),
+    });
   };
 
   return (
     <Shell>
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl md:text-3xl font-black mb-2">تتبع الطلب</h1>
-        <p className="text-[var(--color-ink-soft)] mb-6">أدخل رقم الطلب (أول 4 أحرف على الأقل) ورقم الهاتف المستخدم في الطلب.</p>
+        <h1 className="text-2xl md:text-3xl font-black mb-2">
+          تتبع الطلب
+        </h1>
 
-        <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-2 mb-8">
+        <p className="text-[var(--color-ink-soft)] mb-6">
+          أدخل رقم الطلب (أول 4 أحرف على الأقل) ورقم الهاتف المستخدم في الطلب.
+        </p>
+
+        <form
+          onSubmit={onSubmit}
+          className="flex flex-col sm:flex-row gap-2 mb-8"
+        >
           <input
             type="text"
             value={orderId}
@@ -62,8 +77,10 @@ function TrackPage() {
             placeholder="رقم الطلب"
             className="flex-1 border-2 border-blue-200 focus:border-[var(--color-gold)] outline-none rounded-full py-3 px-4 text-sm"
           />
+
           <div className="relative flex-1">
             <Phone className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-ink-soft)]" />
+
             <input
               type="tel"
               inputMode="tel"
@@ -74,14 +91,21 @@ function TrackPage() {
               className="w-full border-2 border-blue-200 focus:border-[var(--color-gold)] outline-none rounded-full py-3 pr-10 pl-4 text-sm"
             />
           </div>
-          <button type="submit" disabled={mutation.isPending} className="btn-gold">
-            <Search className="w-4 h-4" /> {mutation.isPending ? "جارٍ البحث..." : "بحث"}
+
+          <button
+            type="submit"
+            disabled={mutation.isPending}
+            className="btn-gold"
+          >
+            <Search className="w-4 h-4" />
+            {mutation.isPending ? "جارٍ البحث..." : "بحث"}
           </button>
         </form>
 
-
         {mutation.isError && (
-          <div className="rounded-xl bg-red-50 text-red-700 p-4 text-sm">حدث خطأ، الرجاء المحاولة لاحقاً</div>
+          <div className="rounded-xl bg-red-50 text-red-700 p-4 text-sm">
+            حدث خطأ، الرجاء المحاولة لاحقاً
+          </div>
         )}
 
         {mutation.data && mutation.data.length === 0 && (
@@ -93,34 +117,63 @@ function TrackPage() {
         {mutation.data && mutation.data.length > 0 && (
           <div className="space-y-4">
             {mutation.data.map((o) => {
-              const items = Array.isArray(o.items) ? (o.items as Array<{ name: string; quantity?: number }>) : [];
+              const items = Array.isArray(o.items)
+                ? (o.items as Array<{
+                    name: string;
+                    quantity?: number;
+                  }>)
+                : [];
+
               return (
-                <div key={o.id} className="bg-white border border-[var(--color-hairline)] rounded-2xl p-4">
+                <div
+                  key={o.id}
+                  className="bg-white border border-[var(--color-hairline)] rounded-2xl p-4"
+                >
                   <div className="flex justify-between items-start gap-3 flex-wrap">
                     <div>
                       <div className="flex items-center gap-2 text-sm text-[var(--color-ink-soft)]">
                         <Package className="w-4 h-4 text-[var(--color-gold)]" />
-                        <span>طلب رقم: {o.id.slice(0, 8).toUpperCase()}</span>
+                        <span>طلب رقم: {o.id.slice(0, 8)}</span>
                       </div>
+
                       <div className="text-xs text-[var(--color-ink-soft)] mt-1">
                         {new Date(o.created_at).toLocaleString("ar-EG")}
                       </div>
                     </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${STATUS_COLOR[o.status] || "bg-gray-100 text-gray-700"}`}>
+
+                    <span
+                      className={`text-xs font-bold px-3 py-1 rounded-full ${
+                        STATUS_COLOR[o.status] ||
+                        "bg-gray-100 text-gray-700"
+                      }`}
+                    >
                       {STATUS_LABEL[o.status] || o.status}
                     </span>
                   </div>
+
                   <div className="mt-3 text-sm">
-                    <div className="text-[var(--color-ink-soft)] mb-1">المنتجات:</div>
+                    <div className="text-[var(--color-ink-soft)] mb-1">
+                      المنتجات:
+                    </div>
+
                     <ul className="list-disc pr-5 space-y-0.5">
                       {items.map((it, i) => (
-                        <li key={i}>{it.name} {it.quantity ? `× ${it.quantity}` : ""}</li>
+                        <li key={i}>
+                          {it.name}{" "}
+                          {it.quantity ? `× ${it.quantity}` : ""}
+                        </li>
                       ))}
                     </ul>
                   </div>
+
                   <div className="mt-3 flex justify-between items-center border-t border-[var(--color-hairline)] pt-3">
-                    <span className="text-sm text-[var(--color-ink-soft)]">الإجمالي</span>
-                    <span className="price">{Number(o.total).toLocaleString()} ر.ي</span>
+                    <span className="text-sm text-[var(--color-ink-soft)]">
+                      الإجمالي
+                    </span>
+
+                    <span className="price">
+                      {Number(o.total).toLocaleString()} ر.ي
+                    </span>
                   </div>
                 </div>
               );
