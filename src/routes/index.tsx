@@ -9,6 +9,7 @@ import { Shell } from "@/components/layout/Shell";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { FeaturedSlider } from "@/components/home/FeaturedSlider";
 import { HeroSlider } from "@/components/home/HeroSlider";
+import { SeasonalBanner } from "@/components/home/SeasonalBanner";
 import { CustomerReviewsSection } from "@/components/home/CustomerReviewsSection";
 import { getCategories, getProducts, getPackages, getFeaturedProducts, getServiceCategories } from "@/lib/catalog.functions";
 import { useSiteContentValue, withMissingSections, type HomeSectionId } from "@/lib/site-content";
@@ -55,6 +56,7 @@ function HomePage() {
 
   const sectionsConfig = useSiteContentValue("home_sections");
   const banner = useSiteContentValue("home_banner");
+  const sliderSettings = useSiteContentValue("featured_slider");
 
   const sectionMap: Record<HomeSectionId, ReactNode> = {
     quick_access: (
@@ -131,7 +133,7 @@ function HomePage() {
         </div>
       </section>
     ),
-    featured: <FeaturedSlider key="featured" products={featured} />,
+    featured: <FeaturedSlider key="featured" products={featured} autoplay={sliderSettings.autoplay} speedSeconds={sliderSettings.speedSeconds} />,
     hot_deals: (
       <section key="hot_deals" className="max-w-7xl mx-auto px-4 py-8">
         <SectionTitle title="🔥 العروض المميزة" subtitle="بكجات حصرية لفترة محدودة" />
@@ -211,24 +213,7 @@ function HomePage() {
       <HeroSlider />
 
       {/* SEASONAL BANNER — shown only when enabled from the dashboard */}
-      {banner.enabled && (
-        <div style={{ backgroundColor: banner.bgColor, color: banner.textColor }} className="w-full">
-          <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-right">
-            <div>
-              <h3 className="font-black text-lg">{banner.title}</h3>
-              {banner.subtitle && <p className="text-sm opacity-90">{banner.subtitle}</p>}
-            </div>
-            {banner.buttonText && (
-              <Link
-                to={banner.buttonLink || "/"}
-                className="shrink-0 rounded-full px-5 py-2 font-bold bg-black/10 hover:bg-black/20 transition"
-              >
-                {banner.buttonText}
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
+      <SeasonalBanner banner={banner} />
 
       {orderedIds
         .filter((id) => !hiddenSet.has(id) && sectionMap[id])
