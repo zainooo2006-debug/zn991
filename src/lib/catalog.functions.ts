@@ -147,7 +147,7 @@ export const getOrdersByPhone = createServerFn({ method: "POST" })
       .ilike("id", `${orderIdPrefix}%`)
       .ilike("phone", `%${normalized}%`)
       .order("created_at", { ascending: false })
-      .limit(20);
+      .limit(80);
     if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
     return rows ?? [];
   });
