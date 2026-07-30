@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { resolveImage } from "@/lib/asset-map";
@@ -12,8 +12,17 @@ export interface FeaturedProduct {
   rating: number;
 }
 
-export function FeaturedSlider({ products }: { products: FeaturedProduct[] }) {
+export function FeaturedSlider({
+  products,
+  autoplay = true,
+  speedSeconds = 3,
+}: {
+  products: FeaturedProduct[];
+  autoplay?: boolean;
+  speedSeconds?: number;
+}) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const hovering = useRef(false);
 
   if (!products.length) return null;
 
@@ -23,6 +32,25 @@ export function FeaturedSlider({ products }: { products: FeaturedProduct[] }) {
     const amount = el.clientWidth * 0.8;
     el.scrollBy({ left: dir * amount, behavior: "smooth" });
   };
+
+  // Autoplay: move one card to the left (RTL "next") every `speedSeconds`,
+  // looping back to the start once it reaches the end. Pauses on hover/touch
+  // so people can browse without the slider fighting them.
+  useEffect(() => {
+    if (!autoplay || products.length < 2) return;
+    const ms = Math.max(1, speedSeconds || 3) * 1000;
+    const id = window.setInterval(() => {
+      const el = scrollerRef.current;
+      if (!el || hovering.current) return;
+      const atEnd = el.scrollLeft <= -(el.scrollWidth - el.clientWidth - 4);
+      if (atEnd) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: -(el.clientWidth * 0.35), behavior: "smooth" });
+      }
+    }, ms);
+    return () => window.clearInterval(id);
+  }, [autoplay, speedSeconds, products.length]);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-8 md:py-10">
@@ -55,6 +83,10 @@ export function FeaturedSlider({ products }: { products: FeaturedProduct[] }) {
 
       <div
         ref={scrollerRef}
+        onMouseEnter={() => (hovering.current = true)}
+        onMouseLeave={() => (hovering.current = false)}
+        onTouchStart={() => (hovering.current = true)}
+        onTouchEnd={() => (hovering.current = false)}
         className="flex gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-2 -mx-4 px-4 scroll-smooth"
         style={{ scrollbarWidth: "none" }}
       >
