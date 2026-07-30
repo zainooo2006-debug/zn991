@@ -64,6 +64,19 @@ export type HomeBannerContent = {
   buttonLink: string;
   bgColor: string;
   textColor: string;
+  /** One or more background images that rotate like a slider behind the text. Empty = solid bgColor only. */
+  bgImages: string[];
+  /** Banner height in pixels. 0/empty = auto height based on content. */
+  heightPx: number;
+  autoplay: boolean;
+  /** Seconds between automatic image transitions. */
+  speedSeconds: number;
+};
+
+export type FeaturedSliderContent = {
+  autoplay: boolean;
+  /** Seconds between automatic slide movements. */
+  speedSeconds: number;
 };
 
 export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
@@ -131,7 +144,16 @@ export const CONTENT_DEFAULTS = {
     buttonLink: "/offers",
     bgColor: "#D4AF37",
     textColor: "#0a0a0a",
+    bgImages: [],
+    heightPx: 0,
+    autoplay: true,
+    speedSeconds: 5,
   } as HomeBannerContent,
+
+  featured_slider: {
+    autoplay: true,
+    speedSeconds: 3,
+  } as FeaturedSliderContent,
 };
 
 export type ContentKey = keyof typeof CONTENT_DEFAULTS;
