@@ -26,7 +26,7 @@ import {
   WarrantyOverview, WarrantiesTab, WarrantyCustomersTab, WarrantySimpleCrud, WarrantyUsersTab,
 } from "@/components/warranty-admin-panels";
 import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
-import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, withMissingSections, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent } from "@/lib/site-content";
+import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, withMissingSections, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent, type FeaturedSliderContent } from "@/lib/site-content";
 import { generateProductContent } from "@/lib/ai-content.functions";
 import { resolveImage } from "@/lib/asset-map";
 // Session token issued by the server-side `adminLogin` function. The actual
@@ -905,6 +905,7 @@ function HomeBuilderPanel() {
 
   const [sections, setSections] = useState<HomeSectionsConfig | null>(null);
   const [banner, setBanner] = useState<HomeBannerContent | null>(null);
+  const [sliderSettings, setSliderSettings] = useState<FeaturedSliderContent>(CONTENT_DEFAULTS.featured_slider);
   const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
@@ -912,6 +913,7 @@ function HomeBuilderPanel() {
       const saved = getValue("home_sections");
       setSections({ ...saved, order: withMissingSections(saved.order) });
       setBanner(getValue("home_banner"));
+      setSliderSettings(getValue("featured_slider"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
@@ -954,49 +956,6 @@ function HomeBuilderPanel() {
       {savedMsg && <div className="text-sm font-bold text-green-600">{savedMsg}</div>}
 
       <div className="card-clean p-4 space-y-3">
-        <h3 className="font-bold text-lg">ترتيب وإظهار أقسام الرئيسية</h3>
-        <div className="space-y-2">
-          {sections.order.map((id, i) => {
-            const hidden = sections.hidden.includes(id);
-            return (
-              <div key={id} className={`flex items-center justify-between gap-3 border rounded-lg px-3 py-2 ${hidden ? "opacity-50 border-dashed" : "border-[var(--color-hairline)]"}`}>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-[var(--color-ink-soft)] w-5">{i + 1}</span>
-                  <span className="font-semibold text-sm">{HOME_SECTION_LABELS[id]}</span>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <button type="button" onClick={() => move(id, -1)} disabled={i === 0}
-                    className="p-1.5 rounded hover:bg-[var(--color-surface)] disabled:opacity-30" aria-label="نقل لأعلى">▲</button>
-                  <button type="button" onClick={() => move(id, 1)} disabled={i === sections.order.length - 1}
-                    className="p-1.5 rounded hover:bg-[var(--color-surface)] disabled:opacity-30" aria-label="نقل لأسفل">▼</button>
-                  <button type="button" onClick={() => toggleHidden(id)}
-                    className="p-1.5 rounded hover:bg-[var(--color-surface)] text-[var(--color-gold)]" aria-label={hidden ? "إظهار" : "إخفاء"}>
-                    {hidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <button className="btn-gold" onClick={() => saveKey("home_sections", sections)}>حفظ الترتيب</button>
-      </div>
-
-      <div className="card-clean p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-lg">البانر الموسمي</h3>
-          <label className="flex items-center gap-2 text-sm font-bold cursor-pointer">
-            <input type="checkbox" checked={banner.enabled} onChange={(e) => setBanner({ ...banner, enabled: e.target.checked })} />
-            مفعّل
-          </label>
-        </div>
-        <p className="text-xs text-[var(--color-ink-soft)]">يظهر أسفل السلايدر مباشرة عند تفعيله — استخدمه لرمضان، الجمعة البيضاء، أو أي مناسبة موسمية.</p>
-        <Input label="العنوان" value={banner.title} onChange={(v) => setBanner({ ...banner, title: v })} />
-        <Input label="النص الفرعي" value={banner.subtitle} onChange={(v) => setBanner({ ...banner, subtitle: v })} />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Input label="نص الزر" value={banner.buttonText} onChange={(v) => setBanner({ ...banner, buttonText: v })} />
-          <Input label="رابط الزر (مثال: /offers)" value={banner.buttonLink} onChange={(v) => setBanner({ ...banner, buttonLink: v })} ltr />
-        </div>
-              <div className="card-clean p-4 space-y-3">
         <h3 className="font-bold text-lg">ترتيب وإظهار أقسام الرئيسية</h3>
         <div className="space-y-2">
           {sections.order.map((id, i) => {
@@ -1137,6 +1096,11 @@ function HomeBuilderPanel() {
         </div>
         <button className="btn-gold" onClick={() => saveKey("featured_slider", sliderSettings)}>حفظ إعدادات السلايدر</button>
       </div>
+    </div>
+  );
+}
+
+
 
 
 function SitePagesPanel() {
