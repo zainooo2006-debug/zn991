@@ -9,110 +9,45 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WarrantyRouteImport } from './routes/warranty'
-import { Route as VipRouteImport } from './routes/vip'
-import { Route as TrackRouteImport } from './routes/track'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ShopRouteImport } from './routes/shop'
-import { Route as ServicesRouteImport } from './routes/services'
-import { Route as OffersRouteImport } from './routes/offers'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as CentersRouteImport } from './routes/centers'
-import { Route as CartRouteImport } from './routes/cart'
-import { Route as AssistantRouteImport } from './routes/assistant'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as WarrantyIndexRouteImport } from './routes/warranty.index'
-import { Route as CentersIndexRouteImport } from './routes/centers.index'
-import { Route as WarrantyVerifyRouteImport } from './routes/warranty.verify'
-import { Route as WarrantyDashboardRouteImport } from './routes/warranty.dashboard'
-import { Route as WarrantyCarsRouteImport } from './routes/warranty.cars'
-import { Route as WarrantyAuthRouteImport } from './routes/warranty.auth'
-import { Route as WarrantyAdminRouteImport } from './routes/warranty.admin'
-import { Route as WarrantyActivateRouteImport } from './routes/warranty.activate'
-import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
-import { Route as ProductIdRouteImport } from './routes/product.$id'
-import { Route as CentersIdRouteImport } from './routes/centers.$id'
-import { Route as AdminWebsiteBuilderRouteImport } from './routes/admin_.website-builder'
-import { Route as AdminAiTrainingRouteImport } from './routes/admin_.ai-training'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as CentersRouteImport } from './routes/centers'
+import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as OffersRouteImport } from './routes/offers'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TrackRouteImport } from './routes/track'
+import { Route as VipRouteImport } from './routes/vip'
+import { Route as WarrantyRouteImport } from './routes/warranty'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as WarrantyCertificateIdRouteImport } from './routes/warranty.certificate.$id'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as AdminAiTrainingRouteImport } from './routes/admin_.ai-training'
+import { Route as AdminWebsiteBuilderRouteImport } from './routes/admin_.website-builder'
+import { Route as CentersIndexRouteImport } from './routes/centers.index'
+import { Route as CentersIdRouteImport } from './routes/centers.$id'
+import { Route as ProductIdRouteImport } from './routes/product.$id'
+import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as WarrantyIndexRouteImport } from './routes/warranty.index'
+import { Route as WarrantyActivateRouteImport } from './routes/warranty.activate'
+import { Route as WarrantyAdminRouteImport } from './routes/warranty.admin'
+import { Route as WarrantyAuthRouteImport } from './routes/warranty.auth'
+import { Route as WarrantyCarsRouteImport } from './routes/warranty.cars'
+import { Route as WarrantyDashboardRouteImport } from './routes/warranty.dashboard'
+import { Route as WarrantyVerifyRouteImport } from './routes/warranty.verify'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as WarrantyCertificateIdRouteImport } from './routes/warranty.certificate.$id'
 import { Route as ApiPublicImgSplatRouteImport } from './routes/api/public/img/$'
 
-const WarrantyRoute = WarrantyRouteImport.update({
-  id: '/warranty',
-  path: '/warranty',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const VipRoute = VipRouteImport.update({
-  id: '/vip',
-  path: '/vip',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TrackRoute = TrackRouteImport.update({
-  id: '/track',
-  path: '/track',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesRoute = ServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OffersRoute = OffersRouteImport.update({
-  id: '/offers',
-  path: '/offers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CentersRoute = CentersRouteImport.update({
-  id: '/centers',
-  path: '/centers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CartRoute = CartRouteImport.update({
-  id: '/cart',
-  path: '/cart',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssistantRoute = AssistantRouteImport.update({
-  id: '/assistant',
-  path: '/assistant',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -120,44 +55,121 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WarrantyIndexRoute = WarrantyIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => WarrantyRoute,
+const AssistantRoute = AssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CentersRoute = CentersRouteImport.update({
+  id: '/centers',
+  path: '/centers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VipRoute = VipRouteImport.update({
+  id: '/vip',
+  path: '/vip',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarrantyRoute = WarrantyRouteImport.update({
+  id: '/warranty',
+  path: '/warranty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AdminAiTrainingRoute = AdminAiTrainingRouteImport.update({
+  id: '/admin_/ai-training',
+  path: '/admin/ai-training',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminWebsiteBuilderRoute = AdminWebsiteBuilderRouteImport.update({
+  id: '/admin_/website-builder',
+  path: '/admin/website-builder',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CentersIndexRoute = CentersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CentersRoute,
 } as any)
-const WarrantyVerifyRoute = WarrantyVerifyRouteImport.update({
-  id: '/verify',
-  path: '/verify',
-  getParentRoute: () => WarrantyRoute,
+const CentersIdRoute = CentersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => CentersRoute,
 } as any)
-const WarrantyDashboardRoute = WarrantyDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => WarrantyRoute,
+const ProductIdRoute = ProductIdRouteImport.update({
+  id: '/product/$id',
+  path: '/product/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const WarrantyCarsRoute = WarrantyCarsRouteImport.update({
-  id: '/cars',
-  path: '/cars',
-  getParentRoute: () => WarrantyRoute,
+const ServicesSlugRoute = ServicesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ServicesRoute,
 } as any)
-const WarrantyAuthRoute = WarrantyAuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => WarrantyRoute,
-} as any)
-const WarrantyAdminRoute = WarrantyAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const WarrantyIndexRoute = WarrantyIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => WarrantyRoute,
 } as any)
 const WarrantyActivateRoute = WarrantyActivateRouteImport.update({
@@ -165,47 +177,35 @@ const WarrantyActivateRoute = WarrantyActivateRouteImport.update({
   path: '/activate',
   getParentRoute: () => WarrantyRoute,
 } as any)
-const ServicesSlugRoute = ServicesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ServicesRoute,
-} as any)
-const ProductIdRoute = ProductIdRouteImport.update({
-  id: '/product/$id',
-  path: '/product/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CentersIdRoute = CentersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => CentersRoute,
-} as any)
-const AdminWebsiteBuilderRoute = AdminWebsiteBuilderRouteImport.update({
-  id: '/admin_/website-builder',
-  path: '/admin/website-builder',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminAiTrainingRoute = AdminAiTrainingRouteImport.update({
-  id: '/admin_/ai-training',
-  path: '/admin/ai-training',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const WarrantyCertificateIdRoute = WarrantyCertificateIdRouteImport.update({
-  id: '/certificate/$id',
-  path: '/certificate/$id',
+const WarrantyAdminRoute = WarrantyAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => WarrantyRoute,
+} as any)
+const WarrantyAuthRoute = WarrantyAuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => WarrantyRoute,
+} as any)
+const WarrantyCarsRoute = WarrantyCarsRouteImport.update({
+  id: '/cars',
+  path: '/cars',
+  getParentRoute: () => WarrantyRoute,
+} as any)
+const WarrantyDashboardRoute = WarrantyDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => WarrantyRoute,
+} as any)
+const WarrantyVerifyRoute = WarrantyVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => WarrantyRoute,
+} as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
@@ -213,10 +213,10 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
-const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
-  id: '/.lovable/oauth/consent',
-  path: '/.lovable/oauth/consent',
-  getParentRoute: () => rootRouteImport,
+const WarrantyCertificateIdRoute = WarrantyCertificateIdRouteImport.update({
+  id: '/certificate/$id',
+  path: '/certificate/$id',
+  getParentRoute: () => WarrantyRoute,
 } as any)
 const ApiPublicImgSplatRoute = ApiPublicImgSplatRouteImport.update({
   id: '/api/public/img/$',
@@ -475,102 +475,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/warranty': {
-      id: '/warranty'
-      path: '/warranty'
-      fullPath: '/warranty'
-      preLoaderRoute: typeof WarrantyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/vip': {
-      id: '/vip'
-      path: '/vip'
-      fullPath: '/vip'
-      preLoaderRoute: typeof VipRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/track': {
-      id: '/track'
-      path: '/track'
-      fullPath: '/track'
-      preLoaderRoute: typeof TrackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services': {
-      id: '/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/offers': {
-      id: '/offers'
-      path: '/offers'
-      fullPath: '/offers'
-      preLoaderRoute: typeof OffersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/centers': {
-      id: '/centers'
-      path: '/centers'
-      fullPath: '/centers'
-      preLoaderRoute: typeof CentersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cart': {
-      id: '/cart'
-      path: '/cart'
-      fullPath: '/cart'
-      preLoaderRoute: typeof CartRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assistant': {
-      id: '/assistant'
-      path: '/assistant'
-      fullPath: '/assistant'
-      preLoaderRoute: typeof AssistantRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -580,109 +489,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/warranty/': {
-      id: '/warranty/'
-      path: '/'
-      fullPath: '/warranty/'
-      preLoaderRoute: typeof WarrantyIndexRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/centers/': {
-      id: '/centers/'
-      path: '/'
-      fullPath: '/centers/'
-      preLoaderRoute: typeof CentersIndexRouteImport
-      parentRoute: typeof CentersRoute
-    }
-    '/warranty/verify': {
-      id: '/warranty/verify'
-      path: '/verify'
-      fullPath: '/warranty/verify'
-      preLoaderRoute: typeof WarrantyVerifyRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/warranty/dashboard': {
-      id: '/warranty/dashboard'
-      path: '/dashboard'
-      fullPath: '/warranty/dashboard'
-      preLoaderRoute: typeof WarrantyDashboardRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/warranty/cars': {
-      id: '/warranty/cars'
-      path: '/cars'
-      fullPath: '/warranty/cars'
-      preLoaderRoute: typeof WarrantyCarsRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/warranty/auth': {
-      id: '/warranty/auth'
-      path: '/auth'
-      fullPath: '/warranty/auth'
-      preLoaderRoute: typeof WarrantyAuthRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/warranty/admin': {
-      id: '/warranty/admin'
+    '/admin': {
+      id: '/admin'
       path: '/admin'
-      fullPath: '/warranty/admin'
-      preLoaderRoute: typeof WarrantyAdminRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/warranty/activate': {
-      id: '/warranty/activate'
-      path: '/activate'
-      fullPath: '/warranty/activate'
-      preLoaderRoute: typeof WarrantyActivateRouteImport
-      parentRoute: typeof WarrantyRoute
-    }
-    '/services/$slug': {
-      id: '/services/$slug'
-      path: '/$slug'
-      fullPath: '/services/$slug'
-      preLoaderRoute: typeof ServicesSlugRouteImport
-      parentRoute: typeof ServicesRoute
-    }
-    '/product/$id': {
-      id: '/product/$id'
-      path: '/product/$id'
-      fullPath: '/product/$id'
-      preLoaderRoute: typeof ProductIdRouteImport
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/centers/$id': {
-      id: '/centers/$id'
-      path: '/$id'
-      fullPath: '/centers/$id'
-      preLoaderRoute: typeof CentersIdRouteImport
-      parentRoute: typeof CentersRoute
-    }
-    '/admin_/website-builder': {
-      id: '/admin_/website-builder'
-      path: '/admin/website-builder'
-      fullPath: '/admin/website-builder'
-      preLoaderRoute: typeof AdminWebsiteBuilderRouteImport
+    '/assistant': {
+      id: '/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AssistantRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin_/ai-training': {
-      id: '/admin_/ai-training'
-      path: '/admin/ai-training'
-      fullPath: '/admin/ai-training'
-      preLoaderRoute: typeof AdminAiTrainingRouteImport
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/centers': {
+      id: '/centers'
+      path: '/centers'
+      fullPath: '/centers'
+      preLoaderRoute: typeof CentersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vip': {
+      id: '/vip'
+      path: '/vip'
+      fullPath: '/vip'
+      preLoaderRoute: typeof VipRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warranty': {
+      id: '/warranty'
+      path: '/warranty'
+      fullPath: '/warranty'
+      preLoaderRoute: typeof WarrantyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/.mcp/list-tools': {
@@ -692,12 +594,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/warranty/certificate/$id': {
-      id: '/warranty/certificate/$id'
-      path: '/certificate/$id'
-      fullPath: '/warranty/certificate/$id'
-      preLoaderRoute: typeof WarrantyCertificateIdRouteImport
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/ai-training': {
+      id: '/admin_/ai-training'
+      path: '/admin/ai-training'
+      fullPath: '/admin/ai-training'
+      preLoaderRoute: typeof AdminAiTrainingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin_/website-builder': {
+      id: '/admin_/website-builder'
+      path: '/admin/website-builder'
+      fullPath: '/admin/website-builder'
+      preLoaderRoute: typeof AdminWebsiteBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/centers/': {
+      id: '/centers/'
+      path: '/'
+      fullPath: '/centers/'
+      preLoaderRoute: typeof CentersIndexRouteImport
+      parentRoute: typeof CentersRoute
+    }
+    '/centers/$id': {
+      id: '/centers/$id'
+      path: '/$id'
+      fullPath: '/centers/$id'
+      preLoaderRoute: typeof CentersIdRouteImport
+      parentRoute: typeof CentersRoute
+    }
+    '/product/$id': {
+      id: '/product/$id'
+      path: '/product/$id'
+      fullPath: '/product/$id'
+      preLoaderRoute: typeof ProductIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof ServicesRoute
+    }
+    '/warranty/': {
+      id: '/warranty/'
+      path: '/'
+      fullPath: '/warranty/'
+      preLoaderRoute: typeof WarrantyIndexRouteImport
       parentRoute: typeof WarrantyRoute
+    }
+    '/warranty/activate': {
+      id: '/warranty/activate'
+      path: '/activate'
+      fullPath: '/warranty/activate'
+      preLoaderRoute: typeof WarrantyActivateRouteImport
+      parentRoute: typeof WarrantyRoute
+    }
+    '/warranty/admin': {
+      id: '/warranty/admin'
+      path: '/admin'
+      fullPath: '/warranty/admin'
+      preLoaderRoute: typeof WarrantyAdminRouteImport
+      parentRoute: typeof WarrantyRoute
+    }
+    '/warranty/auth': {
+      id: '/warranty/auth'
+      path: '/auth'
+      fullPath: '/warranty/auth'
+      preLoaderRoute: typeof WarrantyAuthRouteImport
+      parentRoute: typeof WarrantyRoute
+    }
+    '/warranty/cars': {
+      id: '/warranty/cars'
+      path: '/cars'
+      fullPath: '/warranty/cars'
+      preLoaderRoute: typeof WarrantyCarsRouteImport
+      parentRoute: typeof WarrantyRoute
+    }
+    '/warranty/dashboard': {
+      id: '/warranty/dashboard'
+      path: '/dashboard'
+      fullPath: '/warranty/dashboard'
+      preLoaderRoute: typeof WarrantyDashboardRouteImport
+      parentRoute: typeof WarrantyRoute
+    }
+    '/warranty/verify': {
+      id: '/warranty/verify'
+      path: '/verify'
+      fullPath: '/warranty/verify'
+      preLoaderRoute: typeof WarrantyVerifyRouteImport
+      parentRoute: typeof WarrantyRoute
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
@@ -706,12 +706,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.lovable/oauth/consent': {
-      id: '/.lovable/oauth/consent'
-      path: '/.lovable/oauth/consent'
-      fullPath: '/.lovable/oauth/consent'
-      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
-      parentRoute: typeof rootRouteImport
+    '/warranty/certificate/$id': {
+      id: '/warranty/certificate/$id'
+      path: '/certificate/$id'
+      fullPath: '/warranty/certificate/$id'
+      preLoaderRoute: typeof WarrantyCertificateIdRouteImport
+      parentRoute: typeof WarrantyRoute
     }
     '/api/public/img/$': {
       id: '/api/public/img/$'

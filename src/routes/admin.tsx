@@ -1094,6 +1094,11 @@ function HomeBuilderPanel() {
         </div>
         <button className="btn-gold" onClick={() => saveKey("featured_slider", sliderSettings)}>حفظ إعدادات السلايدر</button>
       </div>
+    </div>
+  );
+}
+
+
 
 
 function SitePagesPanel() {
