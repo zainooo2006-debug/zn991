@@ -26,7 +26,7 @@ import {
   WarrantyOverview, WarrantiesTab, WarrantyCustomersTab, WarrantySimpleCrud, WarrantyUsersTab,
 } from "@/components/warranty-admin-panels";
 import { ThemeManagerPanel } from "@/components/admin/ThemeManagerPanel";
-import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, withMissingSections, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent } from "@/lib/site-content";
+import { CONTENT_DEFAULTS, HOME_SECTION_LABELS, withMissingSections, type AboutContent, type FooterContent, type ContactContent, type HomeSectionsConfig, type HomeBannerContent, type HomeSectionId, type BrandingContent, type FeaturedSliderContent } from "@/lib/site-content";
 import { generateProductContent } from "@/lib/ai-content.functions";
 import { resolveImage } from "@/lib/asset-map";
 // Session token issued by the server-side `adminLogin` function. The actual
