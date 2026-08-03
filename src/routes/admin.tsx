@@ -905,6 +905,7 @@ function HomeBuilderPanel() {
 
   const [sections, setSections] = useState<HomeSectionsConfig | null>(null);
   const [banner, setBanner] = useState<HomeBannerContent | null>(null);
+  const [sliderSettings, setSliderSettings] = useState<FeaturedSliderContent>(CONTENT_DEFAULTS.featured_slider);
   const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
@@ -912,6 +913,7 @@ function HomeBuilderPanel() {
       const saved = getValue("home_sections");
       setSections({ ...saved, order: withMissingSections(saved.order) });
       setBanner(getValue("home_banner"));
+      setSliderSettings(getValue("featured_slider"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
