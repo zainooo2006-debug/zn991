@@ -151,7 +151,7 @@ function CheckoutPage() {
           </div>
         </div>
 
-        <form onSubmit={submit} className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <form noValidate onSubmit={submit} className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
           <div className="space-y-6">
             <section className="card-clean p-5 md:p-6" aria-labelledby="customer-details">
               <h2 id="customer-details" className="text-lg font-bold">بيانات العميل</h2>
