@@ -593,6 +593,17 @@ function NewUserModal({ onClose, onCreate }: { onClose: () => void; onCreate: (e
             <option value="branch_staff">موظف فرع</option>
           </select>
         </label>
+        {role === "branch_staff" && (
+          <label className="block text-sm">
+            <span className="text-slate-600 dark:text-slate-300">الفرع *</span>
+            <select required value={branchId} onChange={(e) => setBranchId(e.target.value)}
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+              <option value="">-- اختر الفرع --</option>
+              {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </label>
+        )}
+
         {err && <div className="p-2 rounded bg-red-50 text-red-700 text-sm border border-red-200">{err}</div>}
         <div className="flex gap-2 pt-2">
           <button type="submit" disabled={busy} className="flex-1 py-2 rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600 disabled:opacity-60">
