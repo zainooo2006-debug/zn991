@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+
 import { formatDateAr, statusLabel, statusColor, computeStatus, type WarrantyStatus } from "@/lib/warranty-utils";
 import { Loader2, Search, Trash2, Ban, RefreshCw, CheckCircle2, UserPlus, Shield, X } from "lucide-react";
 import {
