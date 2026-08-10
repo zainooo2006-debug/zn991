@@ -534,19 +534,35 @@ export function WarrantyUsersTab() {
   );
 }
 
-function NewUserModal({ onClose, onCreate }: { onClose: () => void; onCreate: (email: string, password: string, role: AppRole) => Promise<void> }) {
+function NewUserModal({ onClose, onCreate }: { onClose: () => void; onCreate: (email: string, password: string, role: AppRole, branchId?: string | null) => Promise<void> }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<AppRole>("branch_staff");
+  const [branchId, setBranchId] = useState("");
+  const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("branches").select("id, name").eq("is_active", true).order("sort_order");
+      if (!cancelled) setBranches((data as { id: string; name: string }[]) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setErr(null);
-    try { await onCreate(email.trim(), password, role); }
+    try {
+      if (role === "branch_staff" && !branchId) throw new Error("اختر الفرع");
+      await onCreate(email.trim(), password, role, role === "branch_staff" ? branchId : null);
+    }
     catch (e) { setErr(e instanceof Error ? e.message : "خطأ"); }
     finally { setBusy(false); }
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <form onClick={(e) => e.stopPropagation()} onSubmit={submit}
