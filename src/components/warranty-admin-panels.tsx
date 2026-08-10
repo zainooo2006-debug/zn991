@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
+
 import { formatDateAr, statusLabel, statusColor, computeStatus, type WarrantyStatus } from "@/lib/warranty-utils";
 import { Loader2, Search, Trash2, Ban, RefreshCw, CheckCircle2, UserPlus, Shield, X } from "lucide-react";
 import {
@@ -522,30 +524,47 @@ export function WarrantyUsersTab() {
       {openNew && (
         <NewUserModal
           onClose={() => setOpenNew(false)}
-          onCreate={async (email, password, role) => {
-            await create({ data: { email, password, role } });
+          onCreate={async (email, password, role, branchId) => {
+            await create({ data: { email, password, role, branch_id: branchId ?? null } });
             setOpenNew(false);
             load();
           }}
         />
+
       )}
     </div>
   );
 }
 
-function NewUserModal({ onClose, onCreate }: { onClose: () => void; onCreate: (email: string, password: string, role: AppRole) => Promise<void> }) {
+function NewUserModal({ onClose, onCreate }: { onClose: () => void; onCreate: (email: string, password: string, role: AppRole, branchId?: string | null) => Promise<void> }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<AppRole>("branch_staff");
+  const [branchId, setBranchId] = useState("");
+  const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.from("branches").select("id, name").eq("is_active", true).order("sort_order");
+      if (!cancelled) setBranches((data as { id: string; name: string }[]) ?? []);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true); setErr(null);
-    try { await onCreate(email.trim(), password, role); }
+    try {
+      if (role === "branch_staff" && !branchId) throw new Error("اختر الفرع");
+      await onCreate(email.trim(), password, role, role === "branch_staff" ? branchId : null);
+    }
     catch (e) { setErr(e instanceof Error ? e.message : "خطأ"); }
     finally { setBusy(false); }
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <form onClick={(e) => e.stopPropagation()} onSubmit={submit}
@@ -574,6 +593,17 @@ function NewUserModal({ onClose, onCreate }: { onClose: () => void; onCreate: (e
             <option value="branch_staff">موظف فرع</option>
           </select>
         </label>
+        {role === "branch_staff" && (
+          <label className="block text-sm">
+            <span className="text-slate-600 dark:text-slate-300">الفرع *</span>
+            <select required value={branchId} onChange={(e) => setBranchId(e.target.value)}
+              className="mt-1 w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+              <option value="">-- اختر الفرع --</option>
+              {branches.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </label>
+        )}
+
         {err && <div className="p-2 rounded bg-red-50 text-red-700 text-sm border border-red-200">{err}</div>}
         <div className="flex gap-2 pt-2">
           <button type="submit" disabled={busy} className="flex-1 py-2 rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600 disabled:opacity-60">
