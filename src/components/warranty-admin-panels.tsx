@@ -522,12 +522,13 @@ export function WarrantyUsersTab() {
       {openNew && (
         <NewUserModal
           onClose={() => setOpenNew(false)}
-          onCreate={async (email, password, role) => {
-            await create({ data: { email, password, role } });
+          onCreate={async (email, password, role, branchId) => {
+            await create({ data: { email, password, role, branch_id: branchId ?? null } });
             setOpenNew(false);
             load();
           }}
         />
+
       )}
     </div>
   );
