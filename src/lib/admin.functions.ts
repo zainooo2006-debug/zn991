@@ -151,6 +151,20 @@ export const createOrder = createServerFn({ method: "POST" })
       console.error("[createOrder] DB error:", error);
       throw new Error("تعذّر إنشاء الطلب، الرجاء المحاولة لاحقاً");
     }
+
+    try {
+      const { notifyAdmin } = await import("./push.server");
+      const count = trustedItems.reduce((s, i) => s + i.qty, 0);
+      await notifyAdmin({
+        type: "order",
+        title: "طلب جديد",
+        body: `العميل: ${data.customer_name} — ${count} منتج — الإجمالي: ${subtotal.toLocaleString("ar-EG")}`,
+        ref_id: row!.id,
+      });
+    } catch (e) {
+      console.error("[createOrder] notify failed:", e);
+    }
+
     return { id: row!.id };
   });
 
