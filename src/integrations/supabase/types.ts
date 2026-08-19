@@ -50,30 +50,36 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          logo_url: string | null
           name: string
           phone: string | null
           sort_order: number
           updated_at: string
+          warranty_prefix: string | null
         }
         Insert: {
           address?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          logo_url?: string | null
           name: string
           phone?: string | null
           sort_order?: number
           updated_at?: string
+          warranty_prefix?: string | null
         }
         Update: {
           address?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
+          logo_url?: string | null
           name?: string
           phone?: string | null
           sort_order?: number
           updated_at?: string
+          warranty_prefix?: string | null
         }
         Relationships: []
       }
@@ -361,6 +367,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          ref_id: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          ref_id?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          ref_id?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address: string | null
@@ -538,6 +574,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+        }
+        Relationships: []
       }
       service_categories: {
         Row: {
@@ -1042,7 +1102,10 @@ export type Database = {
         Args: { _activation: string; _months: number }
         Returns: string
       }
-      generate_warranty_number: { Args: never; Returns: string }
+      generate_warranty_number: {
+        Args: { _branch_id?: string }
+        Returns: string
+      }
       get_user_branch: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
@@ -1055,6 +1118,7 @@ export type Database = {
         Args: { _num: string }
         Returns: {
           activation_date: string
+          branch_logo_url: string
           branch_name: string
           brand_name: string
           customer_name: string

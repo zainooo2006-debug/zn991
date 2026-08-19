@@ -13,3 +13,39 @@ self.addEventListener("fetch", (event) => {
     fetch(event.request).catch(() => caches.match(event.request))
   );
 });
+
+// ===== إشعارات المتصفح (Web Push) =====
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch (e) {
+    payload = { title: "إشعار جديد", body: event.data ? event.data.text() : "" };
+  }
+  const title = payload.title || "إشعار جديد";
+  const body = payload.body || "";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: "/manifest-icon.png",
+      badge: "/manifest-icon.png",
+      dir: "rtl",
+      lang: "ar",
+      tag: payload.ref_id || undefined,
+      data: { url: "/admin", type: payload.type || null, ref_id: payload.ref_id || null },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/admin";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes("/admin") && "focus" in client) return client.focus();
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});

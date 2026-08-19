@@ -40,6 +40,18 @@ export const submitCustomerReview = createServerFn({ method: "POST" })
       is_featured: false,
     });
     if (error) { console.error("[reviews] submit error:", error); throw new Error("تعذّر إرسال التقييم"); }
+
+    try {
+      const { notifyAdmin } = await import("./push.server");
+      await notifyAdmin({
+        type: "customer_review",
+        title: "تقييم جديد من عميل",
+        body: `${data.customer_name} — ${"★".repeat(data.rating)}${"☆".repeat(Math.max(0, 5 - data.rating))} (${data.rating}/5)`,
+      });
+    } catch (e) {
+      console.error("[reviews] notify failed:", e);
+    }
+
     return { ok: true };
   });
 
