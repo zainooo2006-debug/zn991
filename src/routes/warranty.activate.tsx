@@ -114,6 +114,8 @@ function ActivatePage() {
         ...(carId ? { car_id: carId } : {}),
       } as never);
       if (error) throw error;
+      // إشعار المسؤول — fire and forget، لا يوقف تدفق المستخدم لو فشل
+      void notifyActivated({ data: { warranty_number: num, customer_name: customerName.trim() || "عميل" } }).catch(() => {});
       setMsg({ t: "ok", m: `تم تسجيل الضمان: ${num} — بانتظار موافقة المسؤول` });
       setTimeout(() => navigate({ to: "/warranty/dashboard" }), 1000);
     } catch (e) {
