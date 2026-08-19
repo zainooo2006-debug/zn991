@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWarrantyAuth } from "@/lib/warranty-auth";
 import { Loader2, PlusCircle, Car } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { notifyWarrantyActivated } from "@/lib/notifications.functions";
 
 export const Route = createFileRoute("/warranty/activate")({
   component: ActivatePage,
@@ -36,6 +38,7 @@ function ActivatePage() {
   const [activationDate, setActivationDate] = useState(new Date().toISOString().slice(0, 10));
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ t: "err" | "ok"; m: string } | null>(null);
+  const notifyActivated = useServerFn(notifyWarrantyActivated);
 
   useEffect(() => {
     if (loading) return;
