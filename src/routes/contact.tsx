@@ -9,9 +9,9 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "اتصل بنا — زين" },
-      { name: "description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع 22 مايو، جوار فندق الأحلام، قبل جولة الثقافة." },
+      { name: "description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع الخمسين، جوار اس بي سي مول." },
       { property: "og:title", content: "اتصل بنا — زين" },
-      { property: "og:description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع 22 مايو، جوار فندق الأحلام، قبل جولة الثقافة." },
+      { property: "og:description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع الخمسين، جوار اس بي سي مول." },
       { property: "og:url", content: "https://zn991.lovable.app/contact" },
       { property: "og:type", content: "website" },
     ],
