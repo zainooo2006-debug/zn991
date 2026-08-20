@@ -27,8 +27,8 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: "/manifest-icon.png",
-      badge: "/manifest-icon.png",
+      icon: "https://id-preview--4878ae39-10e2-4d14-b8ba-c4bbe7950027.lovable.app/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
+      badge: "https://id-preview--4878ae39-10e2-4d14-b8ba-c4bbe7950027.lovable.app/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
       dir: "rtl",
       lang: "ar",
       tag: payload.ref_id || undefined,
