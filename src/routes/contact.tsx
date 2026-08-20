@@ -12,7 +12,7 @@ export const Route = createFileRoute("/contact")({
       { name: "description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع 22 مايو، جوار فندق الأحلام، قبل جولة الثقافة." },
       { property: "og:title", content: "اتصل بنا — زين" },
       { property: "og:description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع 22 مايو، جوار فندق الأحلام، قبل جولة الثقافة." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/contact" },
+      { property: "og:url", content: "https://zn991.lovable.app/contact" },
       { property: "og:type", content: "website" },
     ],
   }),

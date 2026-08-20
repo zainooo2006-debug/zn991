@@ -12,7 +12,7 @@ export const Route = createFileRoute("/track")({
       { name: "description", content: "تتبع حالة طلبك عبر رقم الهاتف." },
       { property: "og:title", content: "تتبع الطلب — زين" },
       { property: "og:description", content: "تتبع حالة طلبك عبر رقم الهاتف." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/track" },
+      { property: "og:url", content: "https://zn991.lovable.app/track" },
     ],
   }),
   component: TrackPage,

@@ -13,12 +13,12 @@ const serviceQO = (slug: string) =>
 export const Route = createFileRoute("/services/$slug")({
   head: ({ params, loaderData }) => {
     const data = loaderData as { name: string; short_desc: string | null; long_desc: string | null; image_url: string | null } | undefined;
-    const url = `https://tajalmoluk.lovable.app/services/${params.slug}`;
+    const url = `https://zn991.lovable.app/services/${params.slug}`;
     const title = data ? `${data.name} — زين` : "خدمة — زين";
     const desc = (data?.short_desc || data?.long_desc || "تفاصيل الخدمة وحجز سريع.").slice(0, 160);
     const imgRaw = data?.image_url ? resolveImage(data.image_url) : null;
     const img = imgRaw
-      ? (imgRaw.startsWith("http") ? imgRaw : `https://tajalmoluk.lovable.app${imgRaw}`)
+      ? (imgRaw.startsWith("http") ? imgRaw : `https://zn991.lovable.app${imgRaw}`)
       : null;
     return {
       meta: [

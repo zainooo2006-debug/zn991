@@ -15,7 +15,7 @@ export const Route = createFileRoute("/services")({
       { name: "description", content: "خدمات احترافية للعناية بسيارتك: PPF، نانو سيراميك، تنجيد، سمكرة ورش، كهرباء، واكسسوارات." },
       { property: "og:title", content: "الخدمات — زين" },
       { property: "og:description", content: "خدمات احترافية للعناية بسيارتك: PPF، نانو سيراميك، تنجيد، سمكرة ورش، كهرباء، واكسسوارات." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/services" },
+      { property: "og:url", content: "https://zn991.lovable.app/services" },
       { property: "og:type", content: "website" },
     ],
   }),

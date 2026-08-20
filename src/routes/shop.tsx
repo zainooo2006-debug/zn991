@@ -18,7 +18,7 @@ export const Route = createFileRoute("/shop")({
       { name: "description", content: "تسوق منتجات العناية والاكسسوارات والكهربائيات لسيارتك بأفضل الأسعار." },
       { property: "og:title", content: "المتجر — زين" },
       { property: "og:description", content: "تسوق منتجات العناية والاكسسوارات والكهربائيات لسيارتك بأفضل الأسعار." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/shop" },
+      { property: "og:url", content: "https://zn991.lovable.app/shop" },
       { property: "og:type", content: "website" },
     ],
   }),

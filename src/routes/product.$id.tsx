@@ -18,12 +18,12 @@ const productsQO = queryOptions({ queryKey: ["products"], queryFn: () => getProd
 export const Route = createFileRoute("/product/$id")({
   head: ({ params, loaderData }) => {
     const data = loaderData as { name: string; description: string | null; images: string[] } | undefined;
-    const url = `https://tajalmoluk.lovable.app/product/${params.id}`;
+    const url = `https://zn991.lovable.app/product/${params.id}`;
     const title = data ? `${data.name} — زين` : "تفاصيل المنتج — زين";
     const desc = data?.description?.slice(0, 160) || "تفاصيل المنتج وخيارات الطلب.";
     const imgRaw = data?.images?.[0] ? resolveImage(data.images[0]) : null;
     const img = imgRaw
-      ? (imgRaw.startsWith("http") ? imgRaw : `https://tajalmoluk.lovable.app${imgRaw}`)
+      ? (imgRaw.startsWith("http") ? imgRaw : `https://zn991.lovable.app${imgRaw}`)
       : null;
     return {
       meta: [
