@@ -17,7 +17,9 @@ const productsQO = queryOptions({ queryKey: ["products"], queryFn: () => getProd
 
 export const Route = createFileRoute("/product/$id")({
   head: ({ params, loaderData }) => {
-    const data = loaderData as { name: string; description: string | null; images: string[] } | undefined;
+    const data = loaderData as
+      | { name: string; description: string | null; images: string[]; price?: number | null; rating?: number | null }
+      | undefined;
     const url = `https://zn991.lovable.app/product/${params.id}`;
     const title = data ? `${data.name} — زين` : "تفاصيل المنتج — زين";
     const desc = data?.description?.slice(0, 160) || "تفاصيل المنتج وخيارات الطلب.";
@@ -35,6 +37,45 @@ export const Route = createFileRoute("/product/$id")({
         { property: "og:type", content: "product" },
         ...(img ? [{ property: "og:image", content: img }, { name: "twitter:image", content: img }] : []),
       ],
+      links: [{ rel: "canonical", href: url }],
+      ...(data
+        ? {
+            scripts: [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Product",
+                  name: data.name,
+                  description: desc,
+                  url,
+                  ...(img ? { image: img } : {}),
+                  ...(data.price
+                    ? {
+                        offers: {
+                          "@type": "Offer",
+                          price: data.price,
+                          priceCurrency: "YER",
+                          availability: "https://schema.org/InStock",
+                          url,
+                        },
+                      }
+                    : {}),
+                  ...(data.rating
+                    ? {
+                        aggregateRating: {
+                          "@type": "AggregateRating",
+                          ratingValue: data.rating,
+                          bestRating: 5,
+                          ratingCount: 1,
+                        },
+                      }
+                    : {}),
+                }),
+              },
+            ],
+          }
+        : {}),
     };
   },
   loader: async ({ context, params }) => {
