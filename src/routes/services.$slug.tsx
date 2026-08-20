@@ -30,6 +30,37 @@ export const Route = createFileRoute("/services/$slug")({
         { property: "og:type", content: "website" },
         ...(img ? [{ property: "og:image", content: img }, { name: "twitter:image", content: img }] : []),
       ],
+      links: [{ rel: "canonical", href: url }],
+      ...(data
+        ? {
+            scripts: [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Service",
+                  name: data.name,
+                  description: desc,
+                  url,
+                  ...(img ? { image: img } : {}),
+                  serviceType: data.name,
+                  areaServed: { "@type": "City", name: "صنعاء" },
+                  provider: {
+                    "@type": "LocalBusiness",
+                    name: "زين أصل الحماية",
+                    address: {
+                      "@type": "PostalAddress",
+                      streetAddress: "شارع الخمسين، جوار اس بي سي مول",
+                      addressLocality: "صنعاء",
+                      addressCountry: "YE",
+                    },
+                    telephone: "+967773144403",
+                  },
+                }),
+              },
+            ],
+          }
+        : {}),
     };
   },
   loader: async ({ context, params }) => {
