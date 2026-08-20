@@ -10,7 +10,7 @@ export const Route = createFileRoute("/cart")({
       { name: "description", content: "راجع منتجاتك في السلة وأكمل الطلب بسهولة عبر زين." },
       { property: "og:title", content: "السلة — زين" },
       { property: "og:description", content: "راجع منتجاتك في السلة وأكمل الطلب بسهولة عبر زين." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/cart" },
+      { property: "og:url", content: "https://zn991.lovable.app/cart" },
       { property: "og:type", content: "website" },
     ],
   }),

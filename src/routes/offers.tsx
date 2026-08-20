@@ -14,7 +14,7 @@ export const Route = createFileRoute("/offers")({
       { name: "description", content: "بكجات وعروض حصرية على خدمات ومنتجات زين — استفد قبل انتهاء العرض." },
       { property: "og:title", content: "العروض — زين" },
       { property: "og:description", content: "بكجات وعروض حصرية على خدمات ومنتجات زين — استفد قبل انتهاء العرض." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/offers" },
+      { property: "og:url", content: "https://zn991.lovable.app/offers" },
       { property: "og:type", content: "website" },
     ],
   }),

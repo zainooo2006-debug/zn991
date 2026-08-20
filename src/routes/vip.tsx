@@ -11,7 +11,7 @@ export const Route = createFileRoute("/vip")({
       { name: "description", content: "فريق زين المتنقل يصلك أينما كنت في صنعاء — كراج كامل + إضاءة + كهرباء." },
       { property: "og:title", content: "VIP — خدمة الفريق المتنقل — زين" },
       { property: "og:description", content: "فريق زين المتنقل يصلك أينما كنت في صنعاء — كراج كامل + إضاءة + كهرباء." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/vip" },
+      { property: "og:url", content: "https://zn991.lovable.app/vip" },
       { property: "og:type", content: "website" },
     ],
   }),

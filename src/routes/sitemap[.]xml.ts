@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = "";
+const BASE_URL = "https://zn991.lovable.app";
 
 const paths = ["/", "/shop", "/services", "/vip", "/offers", "/about", "/contact", "/track"];
 

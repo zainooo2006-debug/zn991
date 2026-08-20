@@ -13,12 +13,12 @@ const serviceQO = (slug: string) =>
 export const Route = createFileRoute("/services/$slug")({
   head: ({ params, loaderData }) => {
     const data = loaderData as { name: string; short_desc: string | null; long_desc: string | null; image_url: string | null } | undefined;
-    const url = `https://tajalmoluk.lovable.app/services/${params.slug}`;
+    const url = `https://zn991.lovable.app/services/${params.slug}`;
     const title = data ? `${data.name} — زين` : "خدمة — زين";
     const desc = (data?.short_desc || data?.long_desc || "تفاصيل الخدمة وحجز سريع.").slice(0, 160);
     const imgRaw = data?.image_url ? resolveImage(data.image_url) : null;
     const img = imgRaw
-      ? (imgRaw.startsWith("http") ? imgRaw : `https://tajalmoluk.lovable.app${imgRaw}`)
+      ? (imgRaw.startsWith("http") ? imgRaw : `https://zn991.lovable.app${imgRaw}`)
       : null;
     return {
       meta: [
@@ -30,6 +30,37 @@ export const Route = createFileRoute("/services/$slug")({
         { property: "og:type", content: "website" },
         ...(img ? [{ property: "og:image", content: img }, { name: "twitter:image", content: img }] : []),
       ],
+      links: [{ rel: "canonical", href: url }],
+      ...(data
+        ? {
+            scripts: [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify({
+                  "@context": "https://schema.org",
+                  "@type": "Service",
+                  name: data.name,
+                  description: desc,
+                  url,
+                  ...(img ? { image: img } : {}),
+                  serviceType: data.name,
+                  areaServed: { "@type": "City", name: "صنعاء" },
+                  provider: {
+                    "@type": "LocalBusiness",
+                    name: "زين أصل الحماية",
+                    address: {
+                      "@type": "PostalAddress",
+                      streetAddress: "شارع الخمسين، جوار اس بي سي مول",
+                      addressLocality: "صنعاء",
+                      addressCountry: "YE",
+                    },
+                    telephone: "+967773144403",
+                  },
+                }),
+              },
+            ],
+          }
+        : {}),
     };
   },
   loader: async ({ context, params }) => {

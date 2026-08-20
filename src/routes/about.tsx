@@ -10,7 +10,7 @@ export const Route = createFileRoute("/about")({
       { name: "description", content: "زين - مركز متكامل للعناية بالسيارات في صنعاء يقدم خدمات احترافية وقطع وإكسسوارات أصلية." },
       { property: "og:title", content: "من نحن — زين" },
       { property: "og:description", content: "زين - مركز متكامل للعناية بالسيارات في صنعاء يقدم خدمات احترافية وقطع وإكسسوارات أصلية." },
-      { property: "og:url", content: "https://tajalmoluk.lovable.app/about" },
+      { property: "og:url", content: "https://zn991.lovable.app/about" },
       { property: "og:type", content: "website" },
     ],
   }),
