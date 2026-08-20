@@ -9,10 +9,16 @@ import hero4 from "@/assets/hero/hero-4.png.asset.json";
 import { listPublicHeroSlides } from "@/lib/hero-slides.functions";
 
 type Slide = { key: string; url: string; alt?: string | null };
-const FALLBACK: Slide[] = [hero1, hero2, hero3, hero4].map((s) => ({
+const FALLBACK_ALTS = [
+  "سيارة فاخرة بعد تلميع ونانو سيراميك في مركز زين أصل الحماية بصنعاء",
+  "تركيب فيلم حماية الطلاء PPF على سيارة في مركز زين",
+  "عزل حراري لزجاج السيارات من زين أصل الحماية",
+  "تنجيد داخلي فاخر وإكسسوارات سيارات من زين",
+];
+const FALLBACK: Slide[] = [hero1, hero2, hero3, hero4].map((s, idx) => ({
   key: s.asset_id,
   url: s.url,
-  alt: "",
+  alt: FALLBACK_ALTS[idx],
 }));
 const INTERVAL = 5500;
 
