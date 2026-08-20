@@ -32,8 +32,31 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة لسيارتك." },
       { property: "og:title", content: "ZAIN — زين أصل الحماية" },
       { property: "og:description", content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة." },
-      { property: "og:url", content: "https://zn99.lovable.app/" },
+      { property: "og:url", content: "https://zn991.lovable.app/" },
       { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://zn991.lovable.app/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "زين أصل الحماية",
+          description: "نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات السيارات الفاخرة في صنعاء.",
+          url: "https://zn991.lovable.app/",
+          telephone: "+967773144403",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "شارع الخمسين، جوار اس بي سي مول",
+            addressLocality: "صنعاء",
+            addressCountry: "YE",
+          },
+          areaServed: { "@type": "City", name: "صنعاء" },
+          openingHours: "Sa-Th 09:00-23:00",
+          sameAs: ["https://instagram.com/z_n.9.9"],
+        }),
+      },
     ],
   }),
   loader: ({ context }) => {
