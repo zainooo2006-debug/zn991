@@ -171,6 +171,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <p className="text-sm text-[var(--color-ink-soft)]">إدارة المتجر والضمانات</p>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell token={getPwd()} />
             <a href="/admin/website-builder" className="btn-outline"><Sparkles className="w-4 h-4" /> Website Builder</a>
             <a href="/admin/ai-training" className="btn-outline"><Sparkles className="w-4 h-4" /> تدريب المساعد</a>
             <button onClick={onLogout} className="btn-outline"><LogOut className="w-4 h-4" /> خروج</button>
