@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Shell } from "@/components/layout/Shell";
+import { NotificationBell } from "@/components/admin/NotificationBell";
 import { Lock, LogOut, Plus, Pencil, Trash2, X, Upload, Loader2, Sparkles, Eye, EyeOff } from "lucide-react";
 import {
   getProducts, getCategories, getServiceCategories, getPackages, getWallets, getSiteContent,
@@ -170,6 +171,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <p className="text-sm text-[var(--color-ink-soft)]">إدارة المتجر والضمانات</p>
           </div>
           <div className="flex items-center gap-2">
+            <NotificationBell token={getPwd()} />
             <a href="/admin/website-builder" className="btn-outline"><Sparkles className="w-4 h-4" /> Website Builder</a>
             <a href="/admin/ai-training" className="btn-outline"><Sparkles className="w-4 h-4" /> تدريب المساعد</a>
             <button onClick={onLogout} className="btn-outline"><LogOut className="w-4 h-4" /> خروج</button>
