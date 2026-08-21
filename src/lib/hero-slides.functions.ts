@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHmac, timingSafeEqual } from "crypto";
+import { assertAdmin } from "./admin-auth.server";
 
 /* ============ Public ============ */
 
@@ -21,23 +21,11 @@ export const listPublicHeroSlides = createServerFn({ method: "GET" }).handler(as
 
 /* ============ Admin ============ */
 
-function verifyAdmin(token: string) {
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) throw new Error("Server misconfigured");
-  if (!token?.includes(".")) throw new Error("غير مصرح");
-  const [body, sig] = token.split(".");
-  const expected = createHmac("sha256", secret).update(body).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("غير مصرح");
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as { exp?: number };
-  if (!payload.exp || Date.now() > payload.exp) throw new Error("انتهت الجلسة");
-}
-
 export const adminListHeroSlides = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("hero_slides")
