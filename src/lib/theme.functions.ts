@@ -2,7 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
-import { assertAdmin } from "./admin.functions";
+import { assertAdmin } from "./admin-auth.server";
+
 
 export const getSiteTheme = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
