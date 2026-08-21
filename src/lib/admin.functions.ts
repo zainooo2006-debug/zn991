@@ -50,7 +50,7 @@ function verifyToken(token: string | undefined | null): void {
 
 // Back-compat: server fns still receive a `password` field, but it's actually
 // the session token issued by `adminLogin`. The client never sees the real password.
-function assertAdmin(token: string) {
+export function assertAdmin(token: string) {
   verifyToken(token);
 }
 
