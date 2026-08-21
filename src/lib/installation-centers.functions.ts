@@ -57,7 +57,7 @@ function verifyAdmin(token: string) {
 export const adminListCenters = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("installation_centers")
@@ -108,7 +108,7 @@ export const adminSaveCenter = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.id) {
       const { error } = await supabaseAdmin
@@ -135,7 +135,7 @@ export const adminUpdateCenterFlags = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: { is_approved?: boolean; is_active?: boolean } = {};
     if (typeof data.is_approved === "boolean") patch.is_approved = data.is_approved;
@@ -151,7 +151,7 @@ export const adminUpdateCenterFlags = createServerFn({ method: "POST" })
 export const adminDeleteCenter = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("installation_centers").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

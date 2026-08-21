@@ -54,7 +54,7 @@ export const adminSaveHeroSlide = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.id) {
       const { error } = await supabaseAdmin
@@ -81,7 +81,7 @@ export const adminUpdateHeroSlideFlags = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: { is_active?: boolean; sort_order?: number } = {};
     if (typeof data.is_active === "boolean") patch.is_active = data.is_active;
@@ -94,7 +94,7 @@ export const adminUpdateHeroSlideFlags = createServerFn({ method: "POST" })
 export const adminDeleteHeroSlide = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("hero_slides").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -118,7 +118,7 @@ export const adminUploadHeroImage = createServerFn({ method: "POST" })
     return { password, file };
   })
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ext = data.file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `hero/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;

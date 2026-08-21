@@ -119,7 +119,7 @@ export const adminListCustomerReviews = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("customer_reviews")
@@ -150,7 +150,7 @@ export const adminUpdateCustomerReview = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: { is_approved?: boolean; is_featured?: boolean } = {};
     if (typeof data.is_approved === "boolean") patch.is_approved = data.is_approved;
@@ -166,7 +166,7 @@ export const adminUpdateCustomerReview = createServerFn({ method: "POST" })
 export const adminDeleteCustomerReview = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("customer_reviews").delete().eq("id", data.id);
     if (error) {
