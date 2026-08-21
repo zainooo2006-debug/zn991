@@ -97,7 +97,6 @@ export const uploadReviewImage = createServerFn({ method: "POST" })
 import { assertAdmin } from "./admin-auth.server";
 
 export const adminListCustomerReviews = createServerFn({ method: "POST" })
-
   .inputValidator((d) =>
     z
       .object({

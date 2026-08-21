@@ -2,7 +2,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "./admin-auth.server";
 
-
 /* ============ Public: list approved active centers ============ */
 
 export const listPublicCenters = createServerFn({ method: "GET" }).handler(async () => {
@@ -43,7 +42,6 @@ export const getPublicCenterById = createServerFn({ method: "GET" })
 /* ============ Admin ============ */
 
 export const adminListCenters = createServerFn({ method: "POST" })
-
   .inputValidator((d) => z.object({ password: z.string() }).parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);

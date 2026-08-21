@@ -4,7 +4,6 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
 import { assertAdmin } from "./admin-auth.server";
 
-
 export const getSiteTheme = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
     .from("site_settings")
@@ -88,4 +87,3 @@ export const restoreDefaultTheme = createServerFn({ method: "POST" })
     }
     return { default_theme_json: defaultTheme };
   });
-

@@ -1,12 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  assertAdmin,
-  verifyAdminPassword,
-  signToken,
-  base64ToBytes,
-} from "./admin-auth.server";
+import { assertAdmin, verifyAdminPassword, signToken, base64ToBytes } from "./admin-auth.server";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
 
@@ -21,7 +16,6 @@ export const adminLogin = createServerFn({ method: "POST" })
     const token = signToken({ exp: Date.now() + SESSION_TTL_MS });
     return { token };
   });
-
 
 /* ============ Orders (public create, admin list/update) ============ */
 
@@ -523,7 +517,6 @@ export const uploadImage = createServerFn({ method: "POST" })
     if (buffer.length === 0 || buffer.length > MAX_UPLOAD_BYTES) {
       throw new Error("حجم الملف غير صالح (الحد الأقصى 5MB).");
     }
-
 
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `uploads/${Date.now()}-${safe}`;

@@ -8,7 +8,6 @@ const Input = z.object({
   kind: z.enum(["product", "marketing", "both"]).default("both"),
 });
 
-
 export const generateProductContent = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }) => {

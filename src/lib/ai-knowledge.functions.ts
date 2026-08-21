@@ -4,7 +4,6 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { assertAdmin } from "./admin-auth.server";
 
 export type KnowledgeItem = {
-
   id: string;
   title: string | null;
   content: string;
