@@ -519,10 +519,11 @@ export const uploadImage = createServerFn({ method: "POST" })
       throw new Error("امتداد الملف غير مسموح به.");
     }
 
-    const buffer = Buffer.from(data.base64, "base64");
+    const buffer = base64ToBytes(data.base64);
     if (buffer.length === 0 || buffer.length > MAX_UPLOAD_BYTES) {
       throw new Error("حجم الملف غير صالح (الحد الأقصى 5MB).");
     }
+
 
     const safe = data.filename.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `uploads/${Date.now()}-${safe}`;
