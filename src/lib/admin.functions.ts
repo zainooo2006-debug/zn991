@@ -1,84 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHmac, timingSafeEqual } from "crypto";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-
-/* ============ Server-side admin auth (token-based) ============ */
+import {
+  assertAdmin,
+  verifyAdminPassword,
+  signToken,
+  base64ToBytes,
+} from "./admin-auth.server";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
-
-function getAdminPassword(): string {
-  const pwd = process.env.ADMIN_PASSWORD;
-  if (!pwd) throw new Error("Server misconfigured: ADMIN_PASSWORD not set");
-  return pwd;
-}
-
-function getSessionSecret(): string {
-  // Derive from service-role key (server-only, already provisioned by Lovable Cloud).
-  const s = process.env.ADMIN_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!s) throw new Error("Server misconfigured: no session secret available");
-  return s;
-}
-
-function signToken(payload: { exp: number }): string {
-  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = createHmac("sha256", getSessionSecret()).update(body).digest("hex");
-  return `${body}.${sig}`;
-}
-
-function verifyToken(token: string | undefined | null): void {
-  if (!token || typeof token !== "string" || !token.includes(".")) {
-    throw new Error("غير مصرح");
-  }
-  const [body, sig] = token.split(".");
-  const expected = createHmac("sha256", getSessionSecret()).update(body).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) {
-    throw new Error("غير مصرح");
-  }
-  let payload: { exp?: number };
-  try {
-    payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-  } catch {
-    throw new Error("غير مصرح");
-  }
-  if (!payload.exp || Date.now() > payload.exp) {
-    throw new Error("انتهت الجلسة، الرجاء تسجيل الدخول مجدداً");
-  }
-}
-
-// Back-compat: server fns still receive a `password` field, but it's actually
-// the session token issued by `adminLogin`. The client never sees the real password.
-export function assertAdmin(token: string) {
-  verifyToken(token);
-}
 
 /* ============ Admin login ============ */
 
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string().min(1).max(200) }).parse(d))
   .handler(async ({ data }) => {
-    const candidates = [getAdminPassword(), process.env.ADMIN_PASSWORD_2].filter(
-      (p): p is string => typeof p === "string" && p.length > 0,
-    );
-    const a = Buffer.from(data.password);
-    let matched = false;
-    for (const expected of candidates) {
-      const b = Buffer.from(expected);
-      const maxLen = Math.max(a.length, b.length);
-      const ap = Buffer.concat([a, Buffer.alloc(maxLen - a.length)]);
-      const bp = Buffer.concat([b, Buffer.alloc(maxLen - b.length)]);
-      // Always run timingSafeEqual to keep timing uniform across candidates.
-      const eq = a.length === b.length && timingSafeEqual(ap, bp);
-      if (eq) matched = true;
-    }
-    if (!matched) {
+    if (!verifyAdminPassword(data.password)) {
       throw new Error("كلمة المرور غير صحيحة");
     }
     const token = signToken({ exp: Date.now() + SESSION_TTL_MS });
     return { token };
   });
+
 
 /* ============ Orders (public create, admin list/update) ============ */
 
