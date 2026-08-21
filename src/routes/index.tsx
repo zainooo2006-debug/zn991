@@ -2,8 +2,18 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
-  Zap, Sparkles, Droplets, Wind, Sticker, Cog, Palette,
-  ShieldCheck, Truck, Star, MapPin, type LucideIcon,
+  Zap,
+  Sparkles,
+  Droplets,
+  Wind,
+  Sticker,
+  Cog,
+  Palette,
+  ShieldCheck,
+  Truck,
+  Star,
+  MapPin,
+  type LucideIcon,
 } from "lucide-react";
 import { Shell } from "@/components/layout/Shell";
 import { ProductCard } from "@/components/shop/ProductCard";
@@ -11,27 +21,48 @@ import { FeaturedSlider } from "@/components/home/FeaturedSlider";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { SeasonalBanner } from "@/components/home/SeasonalBanner";
 import { CustomerReviewsSection } from "@/components/home/CustomerReviewsSection";
-import { getCategories, getProducts, getPackages, getFeaturedProducts, getServiceCategories } from "@/lib/catalog.functions";
+import {
+  getCategories,
+  getProducts,
+  getPackages,
+  getFeaturedProducts,
+  getServiceCategories,
+} from "@/lib/catalog.functions";
 import { useSiteContentValue, withMissingSections, type HomeSectionId } from "@/lib/site-content";
 import { resolveImage } from "@/lib/asset-map";
 
 const iconMap: Record<string, LucideIcon> = {
-  Zap, Sparkles, Droplets, Wind, Sticker, Cog, Palette,
+  Zap,
+  Sparkles,
+  Droplets,
+  Wind,
+  Sticker,
+  Cog,
+  Palette,
 };
 
 const catsQO = queryOptions({ queryKey: ["categories"], queryFn: () => getCategories() });
 const productsQO = queryOptions({ queryKey: ["products"], queryFn: () => getProducts() });
 const packagesQO = queryOptions({ queryKey: ["packages"], queryFn: () => getPackages() });
-const featuredQO = queryOptions({ queryKey: ["featured-products"], queryFn: () => getFeaturedProducts() });
+const featuredQO = queryOptions({
+  queryKey: ["featured-products"],
+  queryFn: () => getFeaturedProducts(),
+});
 const servicesQO = queryOptions({ queryKey: ["services"], queryFn: () => getServiceCategories() });
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ZAIN — زين أصل الحماية" },
-      { name: "description", content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة لسيارتك." },
+      {
+        name: "description",
+        content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة لسيارتك.",
+      },
       { property: "og:title", content: "ZAIN — زين أصل الحماية" },
-      { property: "og:description", content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة." },
+      {
+        property: "og:description",
+        content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/" },
       { property: "og:type", content: "website" },
     ],
@@ -119,7 +150,9 @@ function HomePage() {
                 <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[var(--color-surface)] border border-[var(--color-hairline)] flex items-center justify-center hover:border-[var(--color-gold)] transition">
                   <Icon className="w-7 h-7 md:w-8 md:h-8 text-[var(--color-gold)]" />
                 </div>
-                <span className="text-xs md:text-sm text-[var(--color-ink)] font-semibold">{c.name}</span>
+                <span className="text-xs md:text-sm text-[var(--color-ink)] font-semibold">
+                  {c.name}
+                </span>
               </Link>
             );
           })}
@@ -146,27 +179,36 @@ function HomePage() {
               </div>
               <div className="p-3">
                 <h3 className="text-sm md:text-base font-bold line-clamp-1">{s.name}</h3>
-                {s.short_desc && <p className="text-xs text-[var(--color-ink-soft)] mt-1 line-clamp-2">{s.short_desc}</p>}
+                {s.short_desc && (
+                  <p className="text-xs text-[var(--color-ink-soft)] mt-1 line-clamp-2">
+                    {s.short_desc}
+                  </p>
+                )}
               </div>
             </Link>
           ))}
         </div>
         <div className="mt-6 text-center">
-          <Link to="/services" className="btn-outline">عرض جميع الخدمات</Link>
+          <Link to="/services" className="btn-outline">
+            عرض جميع الخدمات
+          </Link>
         </div>
       </section>
     ),
-    featured: <FeaturedSlider key="featured" products={featured} autoplay={sliderSettings.autoplay} speedSeconds={sliderSettings.speedSeconds} />,
+    featured: (
+      <FeaturedSlider
+        key="featured"
+        products={featured}
+        autoplay={sliderSettings.autoplay}
+        speedSeconds={sliderSettings.speedSeconds}
+      />
+    ),
     hot_deals: (
       <section key="hot_deals" className="max-w-7xl mx-auto px-4 py-8">
         <SectionTitle title="🔥 العروض المميزة" subtitle="بكجات حصرية لفترة محدودة" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
           {packages.map((p) => (
-            <Link
-              key={p.id}
-              to="/offers"
-              className="card-clean group flex flex-col p-5 relative"
-            >
+            <Link key={p.id} to="/offers" className="card-clean group flex flex-col p-5 relative">
               {p.badge && (
                 <span className="absolute top-3 left-3 bg-[var(--color-gold)] text-[var(--color-ink)] text-[10px] font-bold px-2 py-1 rounded-full">
                   {p.badge}
@@ -183,7 +225,11 @@ function HomePage() {
               </ul>
               <div className="mt-4 flex items-baseline gap-2">
                 <span className="price text-xl">{p.price}</span>
-                {p.old_price && <span className="text-xs text-[var(--color-ink-soft)] line-through">{p.old_price}</span>}
+                {p.old_price && (
+                  <span className="text-xs text-[var(--color-ink-soft)] line-through">
+                    {p.old_price}
+                  </span>
+                )}
               </div>
             </Link>
           ))}
@@ -199,12 +245,17 @@ function HomePage() {
           ))}
         </div>
         <div className="mt-6 text-center">
-          <Link to="/shop" className="btn-outline">عرض جميع المنتجات</Link>
+          <Link to="/shop" className="btn-outline">
+            عرض جميع المنتجات
+          </Link>
         </div>
       </section>
     ),
     trust: (
-      <section key="trust" className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section
+        key="trust"
+        className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-3 gap-4"
+      >
         {[
           { Icon: ShieldCheck, title: "ضمان الجودة", text: "منتجات أصلية بأعلى المعايير" },
           { Icon: Truck, title: "خدمة منزلية VIP", text: "فريقنا يصلك أينما كنت في صنعاء" },
@@ -226,7 +277,16 @@ function HomePage() {
   const orderedIds = withMissingSections(
     sectionsConfig.order.length
       ? sectionsConfig.order
-      : (["quick_access","categories","services","featured","hot_deals","best_sellers","trust","reviews"] as HomeSectionId[]),
+      : ([
+          "quick_access",
+          "categories",
+          "services",
+          "featured",
+          "hot_deals",
+          "best_sellers",
+          "trust",
+          "reviews",
+        ] as HomeSectionId[]),
   );
   const hiddenSet = new Set(sectionsConfig.hidden);
 
@@ -238,9 +298,7 @@ function HomePage() {
       {/* SEASONAL BANNER — shown only when enabled from the dashboard */}
       <SeasonalBanner banner={banner} />
 
-      {orderedIds
-        .filter((id) => !hiddenSet.has(id) && sectionMap[id])
-        .map((id) => sectionMap[id])}
+      {orderedIds.filter((id) => !hiddenSet.has(id) && sectionMap[id]).map((id) => sectionMap[id])}
     </Shell>
   );
 }
@@ -255,4 +313,4 @@ function SectionTitle({ title, subtitle }: { title: string; subtitle?: string })
       <div className="h-1 w-16 bg-[var(--color-gold)] rounded-full hidden md:block" />
     </div>
   );
-          }
+}

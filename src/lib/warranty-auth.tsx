@@ -23,7 +23,10 @@ export function WarrantyAuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadRoles = async (uid: string | undefined) => {
-    if (!uid) { setRoles([]); return; }
+    if (!uid) {
+      setRoles([]);
+      return;
+    }
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     setRoles((data ?? []).map((r: { role: Role }) => r.role));
   };
@@ -47,7 +50,10 @@ export function WarrantyAuthProvider({ children }: { children: ReactNode }) {
       // Defer to avoid deadlock inside callback
       setTimeout(() => loadRoles(s?.user?.id), 0);
     });
-    return () => { mounted = false; sub.subscription.unsubscribe(); };
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const value: Ctx = {
@@ -58,7 +64,10 @@ export function WarrantyAuthProvider({ children }: { children: ReactNode }) {
     isAdmin: roles.includes("admin") || roles.includes("super_admin"),
     isStaff: roles.some((r) => ["admin", "super_admin", "manager", "branch_staff"].includes(r)),
     refresh,
-    signOut: async () => { await supabase.auth.signOut(); setRoles([]); },
+    signOut: async () => {
+      await supabase.auth.signOut();
+      setRoles([]);
+    },
   };
   return <WAuth.Provider value={value}>{children}</WAuth.Provider>;
 }

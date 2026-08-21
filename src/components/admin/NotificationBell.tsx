@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Bell, BellRing, Loader2 } from "lucide-react";
 import {
-  listNotifications, markNotificationsRead, getPushPublicKey, subscribePush,
+  listNotifications,
+  markNotificationsRead,
+  getPushPublicKey,
+  subscribePush,
 } from "@/lib/notifications.functions";
 
 type Item = {
@@ -55,7 +58,9 @@ export function NotificationBell({ token }: { token: string }) {
       const r = await list({ data: { password: token } });
       setItems(r.items as Item[]);
       setUnread(r.unread);
-    } catch { /* تجاهل أخطاء التحديث الدوري */ }
+    } catch {
+      /* تجاهل أخطاء التحديث الدوري */
+    }
   }, [list, token]);
 
   useEffect(() => {
@@ -67,7 +72,11 @@ export function NotificationBell({ token }: { token: string }) {
   // حالة اشتراك الإشعارات بالمتصفح
   useEffect(() => {
     (async () => {
-      if (typeof window === "undefined" || !("serviceWorker" in navigator) || !("PushManager" in window)) {
+      if (
+        typeof window === "undefined" ||
+        !("serviceWorker" in navigator) ||
+        !("PushManager" in window)
+      ) {
         setPushOn(true); // غير مدعوم — لا نعرض الزر
         return;
       }
@@ -75,7 +84,9 @@ export function NotificationBell({ token }: { token: string }) {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         setPushOn(!!sub);
-      } catch { setPushOn(true); }
+      } catch {
+        setPushOn(true);
+      }
     })();
   }, []);
 
@@ -97,13 +108,18 @@ export function NotificationBell({ token }: { token: string }) {
       if (unread > 0) {
         setUnread(0);
         setItems((prev) => prev.map((i) => ({ ...i, is_read: true })));
-        try { await markRead({ data: { password: token, id: null } }); } catch { /* تجاهل */ }
+        try {
+          await markRead({ data: { password: token, id: null } });
+        } catch {
+          /* تجاهل */
+        }
       }
     }
   };
 
   const enablePush = async () => {
-    setPushBusy(true); setPushErr(null);
+    setPushBusy(true);
+    setPushErr(null);
     try {
       const perm = await Notification.requestPermission();
       if (perm !== "granted") throw new Error("تم رفض إذن الإشعارات من المتصفح");
@@ -115,12 +131,21 @@ export function NotificationBell({ token }: { token: string }) {
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
       const json = sub.toJSON() as { endpoint?: string; keys?: { p256dh?: string; auth?: string } };
-      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) throw new Error("تعذّر قراءة بيانات الاشتراك");
-      await subscribe({ data: { password: token, endpoint: json.endpoint, keys: { p256dh: json.keys.p256dh, auth: json.keys.auth } } });
+      if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth)
+        throw new Error("تعذّر قراءة بيانات الاشتراك");
+      await subscribe({
+        data: {
+          password: token,
+          endpoint: json.endpoint,
+          keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
+        },
+      });
       setPushOn(true);
     } catch (e) {
       setPushErr(e instanceof Error ? e.message : "تعذّر تفعيل الإشعارات");
-    } finally { setPushBusy(false); }
+    } finally {
+      setPushBusy(false);
+    }
   };
 
   return (
@@ -137,7 +162,9 @@ export function NotificationBell({ token }: { token: string }) {
 
       {open && (
         <div className="absolute left-0 mt-2 w-80 max-w-[90vw] bg-[var(--color-surface)] border border-[var(--color-hairline)] rounded-xl shadow-xl z-50 overflow-hidden">
-          <div className="px-3 py-2 border-b border-[var(--color-hairline)] text-sm font-bold">الإشعارات</div>
+          <div className="px-3 py-2 border-b border-[var(--color-hairline)] text-sm font-bold">
+            الإشعارات
+          </div>
 
           {pushOn === false && (
             <div className="p-3 border-b border-[var(--color-hairline)]">
@@ -150,13 +177,20 @@ export function NotificationBell({ token }: { token: string }) {
 
           <div className="max-h-80 overflow-y-auto">
             {items.length === 0 ? (
-              <div className="p-6 text-center text-sm text-[var(--color-ink-soft)]">لا توجد إشعارات</div>
+              <div className="p-6 text-center text-sm text-[var(--color-ink-soft)]">
+                لا توجد إشعارات
+              </div>
             ) : (
               items.map((n) => (
-                <div key={n.id} className="px-3 py-2 border-b border-[var(--color-hairline)] last:border-0">
+                <div
+                  key={n.id}
+                  className="px-3 py-2 border-b border-[var(--color-hairline)] last:border-0"
+                >
                   <div className="flex items-start justify-between gap-2">
                     <div className="font-bold text-sm">{n.title}</div>
-                    <div className="text-[11px] text-[var(--color-ink-soft)] whitespace-nowrap">{timeAgo(n.created_at)}</div>
+                    <div className="text-[11px] text-[var(--color-ink-soft)] whitespace-nowrap">
+                      {timeAgo(n.created_at)}
+                    </div>
                   </div>
                   <div className="text-xs text-[var(--color-ink-soft)] mt-0.5">{n.body}</div>
                 </div>

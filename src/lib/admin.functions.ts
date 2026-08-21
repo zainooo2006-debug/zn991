@@ -57,9 +57,7 @@ export function assertAdmin(token: string) {
 /* ============ Admin login ============ */
 
 export const adminLogin = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z.object({ password: z.string().min(1).max(200) }).parse(d),
-  )
+  .inputValidator((d) => z.object({ password: z.string().min(1).max(200) }).parse(d))
   .handler(async ({ data }) => {
     const candidates = [getAdminPassword(), process.env.ADMIN_PASSWORD_2].filter(
       (p): p is string => typeof p === "string" && p.length > 0,
@@ -94,16 +92,18 @@ const cartItemSchema = z.object({
 
 export const createOrder = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      customer_name: z.string().trim().min(2).max(100),
-      phone: z.string().trim().min(6).max(30),
-      address: z.string().trim().max(500).optional().nullable(),
-      items: z.array(cartItemSchema).min(1).max(50),
-      wallet_id: z.string().uuid().optional().nullable(),
-      wallet_name: z.string().max(100).optional().nullable(),
-      payment_ref: z.string().trim().max(100).optional().nullable(),
-      notes: z.string().trim().max(1000).optional().nullable(),
-    }).parse(d),
+    z
+      .object({
+        customer_name: z.string().trim().min(2).max(100),
+        phone: z.string().trim().min(6).max(30),
+        address: z.string().trim().max(500).optional().nullable(),
+        items: z.array(cartItemSchema).min(1).max(50),
+        wallet_id: z.string().uuid().optional().nullable(),
+        wallet_name: z.string().max(100).optional().nullable(),
+        payment_ref: z.string().trim().max(100).optional().nullable(),
+        notes: z.string().trim().max(1000).optional().nullable(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     // Server-trusted prices — fetch from DB, never trust client-supplied prices.
@@ -177,40 +177,58 @@ export const listOrders = createServerFn({ method: "POST" })
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return rows ?? [];
   });
 
 export const updateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid(),
-      status: z.enum(["new", "confirmed", "shipped", "delivered", "cancelled"]),
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid(),
+        status: z.enum(["new", "confirmed", "shipped", "delivered", "cancelled"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    const { error } = await supabaseAdmin.from("orders").update({ status: data.status }).eq("id", data.id);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update({ status: data.status })
+      .eq("id", data.id);
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return { ok: true };
   });
 
 export const deleteOrder = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z.object({ password: z.string(), id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     const { data: row, error: selErr } = await supabaseAdmin
-      .from("orders").select("status").eq("id", data.id).maybeSingle();
-    if (selErr) { console.error("[server] DB error:", selErr); throw new Error("حدث خطأ"); }
+      .from("orders")
+      .select("status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (selErr) {
+      console.error("[server] DB error:", selErr);
+      throw new Error("حدث خطأ");
+    }
     if (!row) throw new Error("الطلب غير موجود");
     if (row.status !== "delivered" && row.status !== "cancelled") {
       throw new Error("يمكن حذف الطلبات المكتملة أو الملغية فقط");
     }
     const { error } = await supabaseAdmin.from("orders").delete().eq("id", data.id);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ");
+    }
     return { ok: true };
   });
 
@@ -218,10 +236,12 @@ export const deleteOrder = createServerFn({ method: "POST" })
 
 export const listAllReviews = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      maxRating: z.number().int().min(1).max(5).optional().nullable(),
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        maxRating: z.number().int().min(1).max(5).optional().nullable(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
@@ -232,39 +252,55 @@ export const listAllReviews = createServerFn({ method: "POST" })
       .limit(300);
     if (data.maxRating) q = q.lte("rating", data.maxRating);
     const { data: rows, error } = await q;
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ");
+    }
     return rows ?? [];
   });
 
 export const deleteReview = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
-    z.object({ password: z.string(), id: z.string().uuid() }).parse(d),
-  )
+  .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     const { error } = await supabaseAdmin.from("product_reviews").delete().eq("id", data.id);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ");
+    }
     return { ok: true };
   });
 
 /* ============ Generic helpers ============ */
 
-const TABLES = ["products", "categories", "service_categories", "packages", "wallets", "site_content"] as const;
+const TABLES = [
+  "products",
+  "categories",
+  "service_categories",
+  "packages",
+  "wallets",
+  "site_content",
+] as const;
 
 export const adminDelete = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      table: z.enum(TABLES),
-      id: z.string(),
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        table: z.enum(TABLES),
+        id: z.string(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     const col = data.table === "site_content" ? "key" : "id";
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabaseAdmin.from(data.table) as any).delete().eq(col, data.id);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return { ok: true };
   });
 
@@ -284,20 +320,28 @@ const productSchema = z.object({
 
 export const saveProduct = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid().optional().nullable(),
-      data: productSchema,
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        data: productSchema,
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin.from("products").update(data.data).eq("id", data.id);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     } else {
       const { error } = await supabaseAdmin.from("products").insert(data.data);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     }
     return { ok: true };
   });
@@ -305,7 +349,12 @@ export const saveProduct = createServerFn({ method: "POST" })
 /* ============ Categories ============ */
 
 const categorySchema = z.object({
-  slug: z.string().trim().min(1).max(80).regex(/^[a-z0-9-]+$/i),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .regex(/^[a-z0-9-]+$/i),
   name: z.string().trim().min(1).max(100),
   icon: z.string().trim().max(500).optional().nullable(),
   sort_order: z.number().int().min(0).max(999).default(0),
@@ -313,20 +362,28 @@ const categorySchema = z.object({
 
 export const saveCategory = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid().optional().nullable(),
-      data: categorySchema,
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        data: categorySchema,
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin.from("categories").update(data.data).eq("id", data.id);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     } else {
       const { error } = await supabaseAdmin.from("categories").insert(data.data);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     }
     return { ok: true };
   });
@@ -334,7 +391,12 @@ export const saveCategory = createServerFn({ method: "POST" })
 /* ============ Services ============ */
 
 const serviceSchema = z.object({
-  slug: z.string().trim().min(1).max(80).regex(/^[a-z0-9-]+$/i),
+  slug: z
+    .string()
+    .trim()
+    .min(1)
+    .max(80)
+    .regex(/^[a-z0-9-]+$/i),
   name: z.string().trim().min(1).max(100),
   short_desc: z.string().trim().max(300).optional().nullable(),
   long_desc: z.string().trim().max(5000).optional().nullable(),
@@ -344,20 +406,31 @@ const serviceSchema = z.object({
 
 export const saveService = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid().optional().nullable(),
-      data: serviceSchema,
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        data: serviceSchema,
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     if (data.id) {
-      const { error } = await supabaseAdmin.from("service_categories").update(data.data).eq("id", data.id);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      const { error } = await supabaseAdmin
+        .from("service_categories")
+        .update(data.data)
+        .eq("id", data.id);
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     } else {
       const { error } = await supabaseAdmin.from("service_categories").insert(data.data);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     }
     return { ok: true };
   });
@@ -372,20 +445,28 @@ const walletSchema = z.object({
 
 export const saveWallet = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid().optional().nullable(),
-      data: walletSchema,
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        data: walletSchema,
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin.from("wallets").update(data.data).eq("id", data.id);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     } else {
       const { error } = await supabaseAdmin.from("wallets").insert(data.data);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     }
     return { ok: true };
   });
@@ -405,20 +486,28 @@ const packageSchema = z.object({
 
 export const savePackage = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid().optional().nullable(),
-      data: packageSchema,
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        data: packageSchema,
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
     if (data.id) {
       const { error } = await supabaseAdmin.from("packages").update(data.data).eq("id", data.id);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     } else {
       const { error } = await supabaseAdmin.from("packages").insert(data.data);
-      if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
     }
     return { ok: true };
   });
@@ -429,11 +518,13 @@ const RESERVED_CONTENT_KEYS = new Set(["coupons"]);
 
 export const saveContent = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      key: z.string().trim().min(1).max(80),
-      value: z.unknown(),
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        key: z.string().trim().min(1).max(80),
+        value: z.unknown(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
@@ -444,7 +535,10 @@ export const saveContent = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin
       .from("site_content")
       .upsert({ key: data.key, value: data.value as never }, { onConflict: "key" });
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return { ok: true };
   });
 
@@ -462,12 +556,14 @@ const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
 
 export const uploadImage = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      filename: z.string().trim().min(1).max(150),
-      contentType: z.string().trim().min(1).max(100),
-      base64: z.string().min(1).max(8_000_000), // ~6 MB encoded cap
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        filename: z.string().trim().min(1).max(150),
+        contentType: z.string().trim().min(1).max(100),
+        base64: z.string().min(1).max(8_000_000), // ~6 MB encoded cap
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
@@ -490,7 +586,10 @@ export const uploadImage = createServerFn({ method: "POST" })
     const { error } = await supabaseAdmin.storage
       .from("media")
       .upload(path, buffer, { contentType: data.contentType.toLowerCase(), upsert: false });
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     const { data: pub } = supabaseAdmin.storage.from("media").getPublicUrl(path);
     return { url: pub.publicUrl, path };
   });

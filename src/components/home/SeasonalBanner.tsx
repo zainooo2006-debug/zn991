@@ -48,7 +48,8 @@ export function SeasonalBanner({ banner }: { banner: HomeBannerContent }) {
   };
 
   const hasImages = images.length > 0;
-  const heightStyle = banner.heightPx > 0 ? `${banner.heightPx}px` : hasImages ? "220px" : undefined;
+  const heightStyle =
+    banner.heightPx > 0 ? `${banner.heightPx}px` : hasImages ? "220px" : undefined;
 
   return (
     <div
@@ -67,8 +68,16 @@ export function SeasonalBanner({ banner }: { banner: HomeBannerContent }) {
             }`}
             aria-hidden={idx !== i}
           >
-            <img src={url} alt="" className="w-full h-full object-cover" loading={idx === 0 ? "eager" : "lazy"} />
-            <div className="absolute inset-0" style={{ backgroundColor: banner.bgColor, opacity: 0.45 }} />
+            <img
+              src={url}
+              alt=""
+              className="w-full h-full object-cover"
+              loading={idx === 0 ? "eager" : "lazy"}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: banner.bgColor, opacity: 0.45 }}
+            />
           </div>
         ))}
 

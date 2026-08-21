@@ -2,7 +2,6 @@
 @source "../src";
 @import "tw-animate-css";
 
-
 @custom-variant dark (&:is(.dark *));
 
 /*
@@ -46,11 +45,11 @@
 :root {
   --radius: 0.5rem;
   /* Brand */
-  --gold: oklch(0.78 0.13 85);          /* #D4AF37 ~ */
+  --gold: oklch(0.78 0.13 85); /* #D4AF37 ~ */
   --gold-soft: oklch(0.92 0.07 88);
-  --ink: oklch(0.18 0 0);                /* near-black */
-  --ink-soft: oklch(0.42 0 0);           /* #333 */
-  --hairline: oklch(0.93 0 0);           /* #eee */
+  --ink: oklch(0.18 0 0); /* near-black */
+  --ink-soft: oklch(0.42 0 0); /* #333 */
+  --hairline: oklch(0.93 0 0); /* #eee */
   --surface: oklch(0.985 0 0);
 
   --background: oklch(1 0 0);
@@ -87,7 +86,11 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, h5 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
     font-weight: 700;
     letter-spacing: -0.01em;
   }
@@ -165,16 +168,25 @@
 }
 
 @keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 .animate-marquee {
   animation: marquee 28s linear infinite;
 }
 
 /* Hide scrollbar on horizontal scroll rows */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 /* ============================================================
  * DARK MODE — Luxury automotive palette
@@ -183,11 +195,11 @@
 .dark {
   --background: oklch(0.18 0.025 260);
   --foreground: oklch(0.96 0.005 90);
-  --surface:    oklch(0.23 0.028 260);
-  --hairline:   oklch(0.32 0.02 260);
-  --ink:        oklch(0.96 0.005 90);
-  --ink-soft:   oklch(0.75 0.015 90);
-  --card:       oklch(0.22 0.028 260);
+  --surface: oklch(0.23 0.028 260);
+  --hairline: oklch(0.32 0.02 260);
+  --ink: oklch(0.96 0.005 90);
+  --ink-soft: oklch(0.75 0.015 90);
+  --card: oklch(0.22 0.028 260);
   --card-foreground: oklch(0.96 0.005 90);
   --popover: oklch(0.22 0.028 260);
   --popover-foreground: oklch(0.96 0.005 90);
@@ -208,18 +220,31 @@
   color: var(--color-foreground);
 }
 
-.dark .bg-white { background-color: var(--color-card) !important; color: var(--color-foreground); }
-.dark .bg-black { background-color: oklch(0.1 0.02 260) !important; }
+.dark .bg-white {
+  background-color: var(--color-card) !important;
+  color: var(--color-foreground);
+}
+.dark .bg-black {
+  background-color: oklch(0.1 0.02 260) !important;
+}
 .dark .bg-gray-50,
 .dark .bg-gray-100,
-.dark .bg-gray-200 { background-color: var(--color-surface) !important; }
-.dark .text-black { color: var(--color-foreground) !important; }
+.dark .bg-gray-200 {
+  background-color: var(--color-surface) !important;
+}
+.dark .text-black {
+  color: var(--color-foreground) !important;
+}
 .dark .text-gray-300,
 .dark .text-gray-400,
 .dark .text-gray-500,
 .dark .text-gray-600,
-.dark .text-gray-700 { color: var(--color-ink-soft) !important; }
-.dark .border-blue-200 { border-color: var(--color-hairline) !important; }
+.dark .text-gray-700 {
+  color: var(--color-ink-soft) !important;
+}
+.dark .border-blue-200 {
+  border-color: var(--color-hairline) !important;
+}
 
 .dark .card-clean {
   background: var(--color-card);
@@ -245,8 +270,9 @@
   border-color: var(--color-hairline);
 }
 .dark input::placeholder,
-.dark textarea::placeholder { color: var(--color-ink-soft); }
-
+.dark textarea::placeholder {
+  color: var(--color-ink-soft);
+}
 
 /* ===================== Occasion Identity — background & decorative layers =====================
  * Driven by ThemeProvider, which sets --site-bg-type/--site-bg-value/--site-bg-overlay,

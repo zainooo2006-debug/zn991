@@ -55,13 +55,15 @@ export const listKnowledge = createServerFn({ method: "POST" })
 
 export const saveKnowledge = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      password: z.string(),
-      id: z.string().uuid().optional().nullable(),
-      title: z.string().trim().max(200).optional().nullable(),
-      content: z.string().trim().min(1).max(20000),
-      is_active: z.boolean().optional(),
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        title: z.string().trim().max(200).optional().nullable(),
+        content: z.string().trim().min(1).max(20000),
+        is_active: z.boolean().optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
@@ -107,10 +109,7 @@ export const deleteKnowledge = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    const { error } = await supabaseAdmin
-      .from("ai_knowledge_base")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await supabaseAdmin.from("ai_knowledge_base").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

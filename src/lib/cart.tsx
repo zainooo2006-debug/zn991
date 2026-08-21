@@ -47,7 +47,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const remove = useCallback((id: string) => setItems((p) => p.filter((i) => i.id !== id)), []);
   const setQty = useCallback((id: string, qty: number) => {
-    setItems((p) => (qty <= 0 ? p.filter((i) => i.id !== id) : p.map((i) => (i.id === id ? { ...i, qty } : i))));
+    setItems((p) =>
+      qty <= 0 ? p.filter((i) => i.id !== id) : p.map((i) => (i.id === id ? { ...i, qty } : i)),
+    );
   }, []);
   const clear = useCallback(() => setItems([]), []);
 

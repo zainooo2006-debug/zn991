@@ -12,9 +12,17 @@ export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
       { title: "الخدمات — زين" },
-      { name: "description", content: "خدمات احترافية للعناية بسيارتك: PPF، نانو سيراميك، تنجيد، سمكرة ورش، كهرباء، واكسسوارات." },
+      {
+        name: "description",
+        content:
+          "خدمات احترافية للعناية بسيارتك: PPF، نانو سيراميك، تنجيد، سمكرة ورش، كهرباء، واكسسوارات.",
+      },
       { property: "og:title", content: "الخدمات — زين" },
-      { property: "og:description", content: "خدمات احترافية للعناية بسيارتك: PPF، نانو سيراميك، تنجيد، سمكرة ورش، كهرباء، واكسسوارات." },
+      {
+        property: "og:description",
+        content:
+          "خدمات احترافية للعناية بسيارتك: PPF، نانو سيراميك، تنجيد، سمكرة ورش، كهرباء، واكسسوارات.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/services" },
       { property: "og:type", content: "website" },
     ],
@@ -30,15 +38,16 @@ function ServicesPage() {
   const filtered = q
     ? services.filter(
         (s) =>
-          s.name.toLowerCase().includes(q) ||
-          (s.short_desc?.toLowerCase().includes(q) ?? false),
+          s.name.toLowerCase().includes(q) || (s.short_desc?.toLowerCase().includes(q) ?? false),
       )
     : services;
   return (
     <Shell>
       <div className="max-w-7xl mx-auto px-4 py-8">
         <h1 className="text-3xl md:text-4xl font-black">خدماتنا الاحترافية</h1>
-        <p className="text-[var(--color-ink-soft)] mt-2">11 خدمة متكاملة لراحتك — تنفذها أيدي خبراء.</p>
+        <p className="text-[var(--color-ink-soft)] mt-2">
+          11 خدمة متكاملة لراحتك — تنفذها أيدي خبراء.
+        </p>
 
         <div className="mt-6">
           <input

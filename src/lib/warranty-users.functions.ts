@@ -17,9 +17,13 @@ export const adminListUsers = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: usersData, error: uerr } = await supabaseAdmin.auth.admin.listUsers({ perPage: 200 });
+    const { data: usersData, error: uerr } = await supabaseAdmin.auth.admin.listUsers({
+      perPage: 200,
+    });
     if (uerr) throw new Error(uerr.message);
-    const { data: roles, error: rerr } = await supabaseAdmin.from("user_roles").select("user_id, role, branch_id");
+    const { data: roles, error: rerr } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id, role, branch_id");
     if (rerr) throw new Error(rerr.message);
     const rolesByUser = new Map<string, { role: AppRole; branch_id: string | null }[]>();
     for (const r of roles ?? []) {
@@ -38,12 +42,14 @@ export const adminListUsers = createServerFn({ method: "POST" })
 
 export const adminCreateStaff = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { email: string; password: string; role: AppRole; branch_id?: string | null }) => {
-    if (!input.email || !input.password) throw new Error("البريد وكلمة المرور مطلوبة");
-    if (input.password.length < 6) throw new Error("كلمة المرور قصيرة");
-    if (!ALL_ROLES.includes(input.role)) throw new Error("دور غير صالح");
-    return input;
-  })
+  .inputValidator(
+    (input: { email: string; password: string; role: AppRole; branch_id?: string | null }) => {
+      if (!input.email || !input.password) throw new Error("البريد وكلمة المرور مطلوبة");
+      if (input.password.length < 6) throw new Error("كلمة المرور قصيرة");
+      if (!ALL_ROLES.includes(input.role)) throw new Error("دور غير صالح");
+      return input;
+    },
+  )
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -72,11 +78,14 @@ export const adminGrantRole = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("user_roles").upsert({
-      user_id: data.user_id,
-      role: data.role,
-      branch_id: data.branch_id ?? null,
-    } as never, { onConflict: "user_id,role" });
+    const { error } = await supabaseAdmin.from("user_roles").upsert(
+      {
+        user_id: data.user_id,
+        role: data.role,
+        branch_id: data.branch_id ?? null,
+      } as never,
+      { onConflict: "user_id,role" },
+    );
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -90,8 +99,11 @@ export const adminRevokeRole = createServerFn({ method: "POST" })
     if (data.user_id === context.userId && (data.role === "admin" || data.role === "super_admin")) {
       throw new Error("لا يمكنك إزالة دور الأدمن من حسابك");
     }
-    const { error } = await supabaseAdmin.from("user_roles").delete()
-      .eq("user_id", data.user_id).eq("role", data.role as never);
+    const { error } = await supabaseAdmin
+      .from("user_roles")
+      .delete()
+      .eq("user_id", data.user_id)
+      .eq("role", data.role as never);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

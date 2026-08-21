@@ -11,7 +11,10 @@ export const Route = createFileRoute("/warranty")({
 function WarrantyLayout() {
   return (
     <WarrantyAuthProvider>
-      <div dir="rtl" className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-cairo">
+      <div
+        dir="rtl"
+        className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-cairo"
+      >
         <WHeader />
         <main className="max-w-7xl mx-auto px-4 py-6">
           <Outlet />
@@ -36,36 +39,61 @@ function WHeader() {
           <img src={branding.logoUrl || logoAsset.url} alt="زين" className="h-10 w-auto" />
           <div className="hidden sm:block">
             <div className="font-bold text-sm leading-tight">زين</div>
-            <div className="text-[11px] text-amber-600 dark:text-amber-400">نظام إدارة الضمانات</div>
+            <div className="text-[11px] text-amber-600 dark:text-amber-400">
+              نظام إدارة الضمانات
+            </div>
           </div>
         </Link>
 
         <nav className="flex items-center gap-1 mr-auto text-sm">
-          <Link to="/" className="hidden md:inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+          <Link
+            to="/"
+            className="hidden md:inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
             <Home className="w-4 h-4" /> المتجر
           </Link>
-          <Link to="/warranty/verify" className="inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+          <Link
+            to="/warranty/verify"
+            className="inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
             <Search className="w-4 h-4" /> <span className="hidden sm:inline">تحقق</span>
           </Link>
           {user ? (
             <>
-              <Link to="/warranty/dashboard" className="inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
-                <LayoutDashboard className="w-4 h-4" /> <span className="hidden sm:inline">لوحتي</span>
+              <Link
+                to="/warranty/dashboard"
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <LayoutDashboard className="w-4 h-4" />{" "}
+                <span className="hidden sm:inline">لوحتي</span>
               </Link>
-              <Link to="/warranty/cars" className="inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+              <Link
+                to="/warranty/cars"
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
                 <Car className="w-4 h-4" /> <span className="hidden sm:inline">سياراتي</span>
               </Link>
-              <Link to="/warranty/activate" search={{}} className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30">
-
-                <PlusCircle className="w-4 h-4" /> <span className="hidden sm:inline">تفعيل ضمان</span>
+              <Link
+                to="/warranty/activate"
+                search={{}}
+                className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+              >
+                <PlusCircle className="w-4 h-4" />{" "}
+                <span className="hidden sm:inline">تفعيل ضمان</span>
               </Link>
               {(isAdmin || isStaff) && (
-                <Link to="/admin" className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600">
+                <Link
+                  to="/admin"
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+                >
                   <ShieldCheck className="w-4 h-4" /> لوحة التحكم
                 </Link>
               )}
               <button
-                onClick={async () => { await signOut(); navigate({ to: "/warranty/auth" }); }}
+                onClick={async () => {
+                  await signOut();
+                  navigate({ to: "/warranty/auth" });
+                }}
                 className="inline-flex items-center gap-1 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
                 aria-label="تسجيل الخروج"
               >
@@ -73,7 +101,10 @@ function WHeader() {
               </button>
             </>
           ) : (
-            <Link to="/warranty/auth" className="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 font-medium">
+            <Link
+              to="/warranty/auth"
+              className="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 font-medium"
+            >
               تسجيل الدخول
             </Link>
           )}

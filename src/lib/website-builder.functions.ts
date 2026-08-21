@@ -32,7 +32,9 @@ export const wbList = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const q = supabaseAdmin.from(data.table).select("*")
+    const q = supabaseAdmin
+      .from(data.table)
+      .select("*")
       .order(data.orderBy ?? "created_at", { ascending: data.ascending ?? false });
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -48,7 +50,11 @@ export const wbGet = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin.from(data.table).select("*").eq("id", data.id).maybeSingle();
+    const { data: row, error } = await supabaseAdmin
+      .from(data.table)
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -65,7 +71,11 @@ export const wbUpsert = createServerFn({ method: "POST" })
     const values: any = { ...data.values };
     // Auto-clean: drop empty id so DB generates one
     if (!values.id) delete values.id;
-    const { data: row, error } = await supabaseAdmin.from(data.table).upsert(values).select().maybeSingle();
+    const { data: row, error } = await supabaseAdmin
+      .from(data.table)
+      .upsert(values)
+      .select()
+      .maybeSingle();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -97,10 +107,14 @@ export const wbCreateBackup = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       snapshot[t] = rows ?? [];
     }
-    const { data: row, error } = await supabaseAdmin.from("website_backups").insert({
-      label: data.label ?? new Date().toISOString(),
-      snapshot_json: snapshot,
-    } as never).select().maybeSingle();
+    const { data: row, error } = await supabaseAdmin
+      .from("website_backups")
+      .insert({
+        label: data.label ?? new Date().toISOString(),
+        snapshot_json: snapshot,
+      } as never)
+      .select()
+      .maybeSingle();
     if (error) throw new Error(error.message);
     return row;
   });
@@ -113,7 +127,11 @@ export const wbRestoreBackup = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin: any = supabaseAdmin;
-    const { data: b, error: e1 } = await admin.from("website_backups").select("snapshot_json").eq("id", data.id).maybeSingle();
+    const { data: b, error: e1 } = await admin
+      .from("website_backups")
+      .select("snapshot_json")
+      .eq("id", data.id)
+      .maybeSingle();
     if (e1 || !b) throw new Error(e1?.message ?? "Backup not found");
     const snap = b.snapshot_json as Record<string, any[]>;
     for (const t of Object.keys(snap)) {
@@ -153,7 +171,10 @@ export const wbImportAll = createServerFn({ method: "POST" })
     const results: Record<string, number> = {};
     for (const [t, rows] of Object.entries(data.snapshot)) {
       if (!TABLES.includes(t as WBTable) || t === "website_backups") continue;
-      if (!Array.isArray(rows) || rows.length === 0) { results[t] = 0; continue; }
+      if (!Array.isArray(rows) || rows.length === 0) {
+        results[t] = 0;
+        continue;
+      }
       const { error } = await (supabaseAdmin as any).from(t).upsert(rows);
       if (error) throw new Error(`${t}: ${error.message}`);
       results[t] = rows.length;

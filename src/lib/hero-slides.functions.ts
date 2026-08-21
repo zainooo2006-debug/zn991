@@ -12,7 +12,10 @@ export const listPublicHeroSlides = createServerFn({ method: "GET" }).handler(as
     .eq("is_active", true)
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
-  if (error) { console.error("[hero] list error:", error); return []; }
+  if (error) {
+    console.error("[hero] list error:", error);
+    return [];
+  }
   return data ?? [];
 });
 
@@ -53,16 +56,23 @@ const slideSchema = z.object({
 });
 
 export const adminSaveHeroSlide = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({
-    password: z.string(),
-    id: z.string().uuid().optional().nullable(),
-    values: slideSchema,
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        values: slideSchema,
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     verifyAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.id) {
-      const { error } = await supabaseAdmin.from("hero_slides").update(data.values).eq("id", data.id);
+      const { error } = await supabaseAdmin
+        .from("hero_slides")
+        .update(data.values)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin.from("hero_slides").insert(data.values);
@@ -72,12 +82,16 @@ export const adminSaveHeroSlide = createServerFn({ method: "POST" })
   });
 
 export const adminUpdateHeroSlideFlags = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({
-    password: z.string(),
-    id: z.string().uuid(),
-    is_active: z.boolean().optional(),
-    sort_order: z.number().int().optional(),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid(),
+        is_active: z.boolean().optional(),
+        sort_order: z.number().int().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     verifyAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

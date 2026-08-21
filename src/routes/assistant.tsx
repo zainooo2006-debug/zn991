@@ -39,9 +39,16 @@ export const Route = createFileRoute("/assistant")({
   head: () => ({
     meta: [
       { title: "المساعد الذكي — زين أصل الحماية" },
-      { name: "description", content: "مساعد ذكي متخصص في تعديل وحماية السيارات: استشارات فورية، تجربة المنتجات على سيارتك بالذكاء الاصطناعي، واقتراحات احترافية." },
+      {
+        name: "description",
+        content:
+          "مساعد ذكي متخصص في تعديل وحماية السيارات: استشارات فورية، تجربة المنتجات على سيارتك بالذكاء الاصطناعي، واقتراحات احترافية.",
+      },
       { property: "og:title", content: "المساعد الذكي — زين أصل الحماية" },
-      { property: "og:description", content: "استشر خبير زين الذكي واختر التعديل المناسب لسيارتك." },
+      {
+        property: "og:description",
+        content: "استشر خبير زين الذكي واختر التعديل المناسب لسيارتك.",
+      },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -78,7 +85,9 @@ function AssistantPage() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setMessages(JSON.parse(raw));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setHydrated(true);
   }, []);
 
@@ -87,7 +96,9 @@ function AssistantPage() {
     if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [messages, hydrated]);
 
   // Auto-scroll
@@ -121,7 +132,12 @@ function AssistantPage() {
     try {
       const payloadMessages = next.map((m) => ({ role: m.role, content: m.content }));
       const res = await chatWithAssistant({ data: { messages: payloadMessages } });
-      const asst: Msg = { id: newId(), role: "assistant", content: res.text || "…", ts: Date.now() };
+      const asst: Msg = {
+        id: newId(),
+        role: "assistant",
+        content: res.text || "…",
+        ts: Date.now(),
+      };
       setMessages((cur) => [...cur, asst]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "حدث خطأ غير متوقع");
@@ -178,7 +194,11 @@ function AssistantPage() {
             <p className="text-xs text-slate-500">زين أصل الحماية · متصل الآن</p>
           </div>
           {messages.length > 0 && (
-            <button onClick={clearChat} className="p-2 rounded-full hover:bg-slate-100 text-slate-500" aria-label="مسح المحادثة">
+            <button
+              onClick={clearChat}
+              className="p-2 rounded-full hover:bg-slate-100 text-slate-500"
+              aria-label="مسح المحادثة"
+            >
               <Trash2 className="w-4 h-4" />
             </button>
           )}
@@ -189,10 +209,16 @@ function AssistantPage() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="max-w-3xl mx-auto px-4 py-6">
           {showWelcome ? (
-            <WelcomeScreen onPick={(s) => { setInput(s); }} />
+            <WelcomeScreen
+              onPick={(s) => {
+                setInput(s);
+              }}
+            />
           ) : (
             <div className="space-y-4">
-              {messages.map((m) => <MessageBubble key={m.id} m={m} />)}
+              {messages.map((m) => (
+                <MessageBubble key={m.id} m={m} />
+              ))}
               {loading && (
                 <div className="flex items-center gap-2 text-slate-500 text-sm">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -200,7 +226,9 @@ function AssistantPage() {
                 </div>
               )}
               {error && (
-                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</div>
+                <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
+                  {error}
+                </div>
               )}
             </div>
           )}
@@ -212,7 +240,11 @@ function AssistantPage() {
         <div className="max-w-3xl mx-auto px-4 py-3">
           {pendingImage && (
             <div className="mb-2 relative inline-block">
-              <img src={pendingImage} alt="مرفقة" className="h-20 rounded-lg border border-slate-200" />
+              <img
+                src={pendingImage}
+                alt="مرفقة"
+                className="h-20 rounded-lg border border-slate-200"
+              />
               <button
                 onClick={() => setPendingImage(null)}
                 className="absolute -top-2 -left-2 bg-slate-800 text-white rounded-full p-1"
@@ -272,9 +304,8 @@ function AssistantPage() {
 
 function MessageBubble({ m }: { m: Msg }) {
   const isUser = m.role === "user";
-  const parts: ContentPart[] = typeof m.content === "string"
-    ? [{ type: "text", text: m.content }]
-    : m.content;
+  const parts: ContentPart[] =
+    typeof m.content === "string" ? [{ type: "text", text: m.content }] : m.content;
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div className={`max-w-[85%] ${isUser ? "" : "flex gap-2"}`}>
@@ -283,17 +314,29 @@ function MessageBubble({ m }: { m: Msg }) {
             <Sparkles className="w-4 h-4" />
           </div>
         )}
-        <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-amber-500 text-white" : "bg-white border border-slate-200 text-slate-800"} space-y-2`}>
+        <div
+          className={`rounded-2xl px-4 py-3 ${isUser ? "bg-amber-500 text-white" : "bg-white border border-slate-200 text-slate-800"} space-y-2`}
+        >
           {parts.map((p, i) =>
             p.type === "image_url" ? (
-              <img key={i} src={p.image_url.url} alt="" className="rounded-lg max-h-56 object-cover" />
+              <img
+                key={i}
+                src={p.image_url.url}
+                alt=""
+                className="rounded-lg max-h-56 object-cover"
+              />
             ) : isUser ? (
-              <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed">{p.text}</p>
+              <p key={i} className="whitespace-pre-wrap text-sm leading-relaxed">
+                {p.text}
+              </p>
             ) : (
-              <div key={i} className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1">
+              <div
+                key={i}
+                className="prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1"
+              >
                 <ReactMarkdown>{p.text}</ReactMarkdown>
               </div>
-            )
+            ),
           )}
         </div>
       </div>
@@ -309,7 +352,8 @@ function WelcomeScreen({ onPick }: { onPick: (s: string) => void }) {
       </div>
       <h2 className="text-2xl font-black mb-2">مرحباً بك في المساعد الذكي 👋</h2>
       <p className="text-slate-600 mb-6 max-w-md mx-auto">
-        استشر خبير زين الذكي لاختيار التعديل المناسب لسيارتك، أو ارفع صورة سيارتك لتجربة أي منتج عليها.
+        استشر خبير زين الذكي لاختيار التعديل المناسب لسيارتك، أو ارفع صورة سيارتك لتجربة أي منتج
+        عليها.
       </p>
       <div className="grid gap-2 max-w-md mx-auto text-right">
         {SUGGESTIONS.map((s) => (

@@ -6,7 +6,10 @@ export const getCategories = createServerFn({ method: "GET" }).handler(async () 
     .from("categories")
     .select("id, slug, name, icon, sort_order")
     .order("sort_order");
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return data ?? [];
 });
 
@@ -15,7 +18,10 @@ export const getServiceCategories = createServerFn({ method: "GET" }).handler(as
     .from("service_categories")
     .select("id, slug, name, short_desc, long_desc, image_url, sort_order")
     .order("sort_order");
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return data ?? [];
 });
 
@@ -27,16 +33,24 @@ export const getServiceBySlug = createServerFn({ method: "GET" })
       .select("id, slug, name, short_desc, long_desc, image_url")
       .eq("slug", data.slug)
       .maybeSingle();
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return row;
   });
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
     .from("products")
-    .select("id, name, description, price, old_price, images, rating, is_bestseller, is_featured, category_id")
+    .select(
+      "id, name, description, price, old_price, images, rating, is_bestseller, is_featured, category_id",
+    )
     .order("created_at", { ascending: false });
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return data ?? [];
 });
 
@@ -47,7 +61,10 @@ export const getFeaturedProducts = createServerFn({ method: "GET" }).handler(asy
     .eq("is_featured", true)
     .order("created_at", { ascending: false })
     .limit(20);
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return data ?? [];
 });
 
@@ -59,7 +76,10 @@ export const getProductById = createServerFn({ method: "GET" })
       .select("id, name, description, price, old_price, images, video_url, rating, category_id")
       .eq("id", data.id)
       .maybeSingle();
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return row;
   });
 
@@ -68,7 +88,10 @@ export const getPackages = createServerFn({ method: "GET" }).handler(async () =>
     .from("packages")
     .select("id, slug, name, description, price, old_price, features, badge, sort_order")
     .order("sort_order");
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return data ?? [];
 });
 
@@ -77,17 +100,21 @@ export const getWallets = createServerFn({ method: "GET" }).handler(async () => 
     .from("wallets")
     .select("id, name, account_number, sort_order")
     .order("sort_order");
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return data ?? [];
 });
 
 type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
 
 export const getSiteContent = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
-    .from("site_content")
-    .select("key, value");
-  if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+  const { data, error } = await supabaseAdmin.from("site_content").select("key, value");
+  if (error) {
+    console.error("[server] DB error:", error);
+    throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+  }
   return (data ?? []) as Array<{ key: string; value: Json }>;
 });
 
@@ -102,7 +129,10 @@ export const getProductReviews = createServerFn({ method: "GET" })
       .eq("product_id", data.productId)
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return rows ?? [];
   });
 
@@ -122,7 +152,10 @@ export const submitProductReview = createServerFn({ method: "POST" })
       rating: data.rating,
       comment: data.comment || null,
     });
-    if (error) { console.error("[server] DB error:", error); throw new Error("تعذّر إرسال التقييم"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("تعذّر إرسال التقييم");
+    }
     return { ok: true };
   });
 
@@ -148,7 +181,9 @@ export const getOrdersByPhone = createServerFn({ method: "POST" })
       .ilike("phone", `%${normalized}%`)
       .order("created_at", { ascending: false })
       .limit(80);
-    if (error) { console.error("[server] DB error:", error); throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً"); }
+    if (error) {
+      console.error("[server] DB error:", error);
+      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
     return rows ?? [];
   });
-

@@ -9,9 +9,15 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "اتصل بنا — زين" },
-      { name: "description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع الخمسين، جوار اس بي سي مول." },
+      {
+        name: "description",
+        content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع الخمسين، جوار اس بي سي مول.",
+      },
       { property: "og:title", content: "اتصل بنا — زين" },
-      { property: "og:description", content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع الخمسين، جوار اس بي سي مول." },
+      {
+        property: "og:description",
+        content: "تواصل مع زين للعناية وزينة السيارات — صنعاء، شارع الخمسين، جوار اس بي سي مول.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/contact" },
       { property: "og:type", content: "website" },
     ],
@@ -40,17 +46,24 @@ function ContactPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <div className="space-y-4">
             <InfoRow Icon={Phone} title="الهاتف">
-              <a href={`tel:${SALES_PHONE}`} className="hover:text-[var(--color-gold)]">{SALES_PHONE}</a>
+              <a href={`tel:${SALES_PHONE}`} className="hover:text-[var(--color-gold)]">
+                {SALES_PHONE}
+              </a>
             </InfoRow>
             <InfoRow Icon={MessageCircle} title="واتساب">
-              <a href={whatsappLink("مرحباً")} className="hover:text-[var(--color-gold)]">{WHATSAPP_NUMBER.replace("967","")}</a>
+              <a href={whatsappLink("مرحباً")} className="hover:text-[var(--color-gold)]">
+                {WHATSAPP_NUMBER.replace("967", "")}
+              </a>
             </InfoRow>
             <InfoRow Icon={MapPin} title="العنوان">
               {c.address}
             </InfoRow>
             <InfoRow Icon={Clock} title="أوقات العمل">
               {c.hours.split("\n").map((line, i) => (
-                <span key={i}>{i > 0 && <br />}{line}</span>
+                <span key={i}>
+                  {i > 0 && <br />}
+                  {line}
+                </span>
               ))}
             </InfoRow>
           </div>
@@ -58,11 +71,32 @@ function ContactPage() {
           <form onSubmit={submit} className="card-clean p-6">
             <h2 className="text-xl font-bold">أرسل رسالة</h2>
             <div className="space-y-3 mt-4">
-              <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم" className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]" />
-              <input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="رقم الجوال" className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]" />
-              <textarea required value={message} onChange={(e) => setMessage(e.target.value)} placeholder="رسالتك" rows={4} className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]" />
+              <input
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="الاسم"
+                className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
+              />
+              <input
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="رقم الجوال"
+                className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
+              />
+              <textarea
+                required
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="رسالتك"
+                rows={4}
+                className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
+              />
             </div>
-            <button type="submit" className="btn-gold mt-4 w-full">إرسال عبر واتساب</button>
+            <button type="submit" className="btn-gold mt-4 w-full">
+              إرسال عبر واتساب
+            </button>
           </form>
         </div>
       </div>
@@ -70,7 +104,15 @@ function ContactPage() {
   );
 }
 
-function InfoRow({ Icon, title, children }: { Icon: typeof Phone; title: string; children: React.ReactNode }) {
+function InfoRow({
+  Icon,
+  title,
+  children,
+}: {
+  Icon: typeof Phone;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="card-clean p-4 flex items-start gap-3">
       <div className="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center shrink-0">

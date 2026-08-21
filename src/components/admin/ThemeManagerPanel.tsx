@@ -75,10 +75,16 @@ export function ThemeManagerPanel() {
     const parsed = validate(text);
     if (!parsed) return;
     const token = sessionStorage.getItem(TOKEN_KEY);
-    if (!token) { setMsg({ type: "err", text: "الجلسة منتهية" }); return; }
-    setBusy(true); setMsg(null);
+    if (!token) {
+      setMsg({ type: "err", text: "الجلسة منتهية" });
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
     try {
-      await doSave({ data: { password: token, active_theme_json: parsed as Record<string, unknown> } });
+      await doSave({
+        data: { password: token, active_theme_json: parsed as Record<string, unknown> },
+      });
       await qc.invalidateQueries({ queryKey: ["admin-site-theme"] });
       await qc.invalidateQueries({ queryKey: ["site-theme"] });
       setMsg({ type: "ok", text: "تم حفظ وتطبيق المظهر" });
@@ -91,9 +97,13 @@ export function ThemeManagerPanel() {
 
   const onRestore = async () => {
     const token = sessionStorage.getItem(TOKEN_KEY);
-    if (!token) { setMsg({ type: "err", text: "الجلسة منتهية" }); return; }
+    if (!token) {
+      setMsg({ type: "err", text: "الجلسة منتهية" });
+      return;
+    }
     if (!confirm("استعادة المظهر الافتراضي؟ سيتم استبدال المظهر الحالي.")) return;
-    setBusy(true); setMsg(null);
+    setBusy(true);
+    setMsg(null);
     try {
       const res = await doRestore({ data: { password: token } });
       if (res.default_theme_json) {
@@ -120,7 +130,11 @@ export function ThemeManagerPanel() {
         </div>
         <div className="flex gap-2">
           <button onClick={onRestore} disabled={busy} className="btn-outline">
-            {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <RotateCcw className="w-4 h-4" />}
+            {busy ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RotateCcw className="w-4 h-4" />
+            )}
             استعادة الافتراضي
           </button>
           <button onClick={onSave} disabled={busy || !!jsonError} className="btn-gold">
@@ -131,10 +145,16 @@ export function ThemeManagerPanel() {
       </div>
 
       {msg && (
-        <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-          msg.type === "ok" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
-        }`}>
-          {msg.type === "ok" ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+        <div
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+            msg.type === "ok" ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"
+          }`}
+        >
+          {msg.type === "ok" ? (
+            <CheckCircle2 className="w-4 h-4" />
+          ) : (
+            <AlertCircle className="w-4 h-4" />
+          )}
           {msg.text}
         </div>
       )}
@@ -155,9 +175,10 @@ export function ThemeManagerPanel() {
       />
 
       <p className="text-xs text-[var(--color-ink-soft)]">
-        البنية المدعومة: <code>theme.colors</code>, <code>theme.fonts</code>, <code>theme.spacing</code>,
-        <code> layout</code>, <code>components</code>. الألوان تُطبّق كمتغيرات CSS
-        (<code>--color-*</code>)، الخطوط كـ <code>--font-*</code>، والمسافات كـ <code>--space-*</code>.
+        البنية المدعومة: <code>theme.colors</code>, <code>theme.fonts</code>,{" "}
+        <code>theme.spacing</code>,<code> layout</code>, <code>components</code>. الألوان تُطبّق
+        كمتغيرات CSS (<code>--color-*</code>)، الخطوط كـ <code>--font-*</code>، والمسافات كـ{" "}
+        <code>--space-*</code>.
       </p>
     </div>
   );

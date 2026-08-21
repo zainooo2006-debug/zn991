@@ -8,9 +8,15 @@ export const Route = createFileRoute("/vip")({
   head: () => ({
     meta: [
       { title: "VIP — خدمة الفريق المتنقل — زين" },
-      { name: "description", content: "فريق زين المتنقل يصلك أينما كنت في صنعاء — كراج كامل + إضاءة + كهرباء." },
+      {
+        name: "description",
+        content: "فريق زين المتنقل يصلك أينما كنت في صنعاء — كراج كامل + إضاءة + كهرباء.",
+      },
       { property: "og:title", content: "VIP — خدمة الفريق المتنقل — زين" },
-      { property: "og:description", content: "فريق زين المتنقل يصلك أينما كنت في صنعاء — كراج كامل + إضاءة + كهرباء." },
+      {
+        property: "og:description",
+        content: "فريق زين المتنقل يصلك أينما كنت في صنعاء — كراج كامل + إضاءة + كهرباء.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/vip" },
       { property: "og:type", content: "website" },
     ],
@@ -35,7 +41,9 @@ function VipPage() {
       <section className="relative bg-black text-white">
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
           <Crown className="w-12 h-12 text-[var(--color-gold)] mx-auto" />
-          <h1 className="text-3xl md:text-5xl font-black mt-3 text-[var(--color-gold)]">خدمة VIP المتنقلة</h1>
+          <h1 className="text-3xl md:text-5xl font-black mt-3 text-[var(--color-gold)]">
+            خدمة VIP المتنقلة
+          </h1>
           <p className="text-lg mt-3">فريقنا الكامل يصلك أينما كنت — صنعاء فقط</p>
         </div>
       </section>
@@ -58,12 +66,38 @@ function VipPage() {
         <form onSubmit={submit} className="card-clean p-6 mt-8">
           <h2 className="text-xl font-bold">احجز خدمة VIP</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-            <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="الاسم" className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]" />
-            <input required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="رقم الجوال" className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]" />
-            <input required value={location} onChange={(e) => setLocation(e.target.value)} placeholder="الموقع في صنعاء" className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)] md:col-span-2" />
-            <textarea value={details} onChange={(e) => setDetails(e.target.value)} placeholder="تفاصيل الخدمة المطلوبة" rows={3} className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)] md:col-span-2" />
+            <input
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="الاسم"
+              className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
+            />
+            <input
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="رقم الجوال"
+              className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
+            />
+            <input
+              required
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="الموقع في صنعاء"
+              className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)] md:col-span-2"
+            />
+            <textarea
+              value={details}
+              onChange={(e) => setDetails(e.target.value)}
+              placeholder="تفاصيل الخدمة المطلوبة"
+              rows={3}
+              className="border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)] md:col-span-2"
+            />
           </div>
-          <button type="submit" className="btn-gold mt-4">إرسال الطلب عبر واتساب</button>
+          <button type="submit" className="btn-gold mt-4">
+            إرسال الطلب عبر واتساب
+          </button>
         </form>
       </div>
     </Shell>

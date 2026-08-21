@@ -2,14 +2,23 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWarrantyAuth } from "@/lib/warranty-auth";
-import { statusLabel, statusColor, formatDateAr, computeStatus, type WarrantyStatus } from "@/lib/warranty-utils";
+import {
+  statusLabel,
+  statusColor,
+  formatDateAr,
+  computeStatus,
+  type WarrantyStatus,
+} from "@/lib/warranty-utils";
 import { Loader2, Store, PlusCircle, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/warranty/branch")({
   head: () => ({
     meta: [
       { title: "لوحة مركز التركيب — زين" },
-      { name: "description", content: "لوحة خاصة بموظفي مراكز التركيب لعرض ضمانات الفرع وتسجيل ضمان جديد." },
+      {
+        name: "description",
+        content: "لوحة خاصة بموظفي مراكز التركيب لعرض ضمانات الفرع وتسجيل ضمان جديد.",
+      },
       { property: "og:title", content: "لوحة مركز التركيب — زين" },
       { property: "og:description", content: "عرض ضمانات الفرع وتسجيل ضمان جديد بسرعة من الجوال." },
       { property: "og:type", content: "website" },
@@ -45,16 +54,28 @@ function BranchPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/warranty/auth" }); return; }
-    if (!isBranchStaff) { navigate({ to: "/warranty/dashboard" }); return; }
+    if (!user) {
+      navigate({ to: "/warranty/auth" });
+      return;
+    }
+    if (!isBranchStaff) {
+      navigate({ to: "/warranty/dashboard" });
+      return;
+    }
   }, [user, loading, isBranchStaff, navigate]);
 
   const loadWarranties = useCallback(async () => {
     const { data, error } = await supabase
       .from("warranties")
-      .select("id, warranty_number, activation_date, expiry_date, status, vin, warranty_brands(name), film_types(name)")
+      .select(
+        "id, warranty_number, activation_date, expiry_date, status, vin, warranty_brands(name), film_types(name)",
+      )
       .order("created_at", { ascending: false });
-    if (error) { setErr(error.message); setRows([]); return; }
+    if (error) {
+      setErr(error.message);
+      setRows([]);
+      return;
+    }
     setErr(null);
     setRows((data as unknown as Row[]) ?? []);
   }, []);
@@ -64,9 +85,12 @@ function BranchPage() {
     let cancelled = false;
     (async () => {
       try {
-        const r = await (supabase.rpc as unknown as (n: string, p: Record<string, unknown>) => Promise<{ data: string | null; error: { message: string } | null }>)(
-          "get_user_branch", { _user_id: user.id }
-        );
+        const r = await (
+          supabase.rpc as unknown as (
+            n: string,
+            p: Record<string, unknown>,
+          ) => Promise<{ data: string | null; error: { message: string } | null }>
+        )("get_user_branch", { _user_id: user.id });
         if (cancelled) return;
         if (r.data) {
           setBranchId(r.data);
@@ -75,14 +99,23 @@ function BranchPage() {
         }
         await loadWarranties();
       } catch (e) {
-        if (!cancelled) { setErr(e instanceof Error ? e.message : "تعذر التحميل"); setRows([]); }
+        if (!cancelled) {
+          setErr(e instanceof Error ? e.message : "تعذر التحميل");
+          setRows([]);
+        }
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [user, loading, isBranchStaff, loadWarranties]);
 
   if (loading || !user || !isBranchStaff) {
-    return <div className="text-center py-16"><Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-500" /></div>;
+    return (
+      <div className="text-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-500" />
+      </div>
+    );
   }
 
   return (
@@ -93,19 +126,31 @@ function BranchPage() {
           <h1 className="text-xl font-bold leading-tight">{branchName || "فرعي"}</h1>
           <p className="text-xs text-slate-500">ضمانات الفرع وتسجيل ضمان جديد</p>
         </div>
-        <button onClick={() => loadWarranties()} className="mr-auto p-2 rounded-lg border border-slate-200 dark:border-slate-700" aria-label="تحديث">
+        <button
+          onClick={() => loadWarranties()}
+          className="mr-auto p-2 rounded-lg border border-slate-200 dark:border-slate-700"
+          aria-label="تحديث"
+        >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
       <NewWarrantyForm branchId={branchId} onDone={loadWarranties} />
 
-      {err && <div className="p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">{err}</div>}
+      {err && (
+        <div className="p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">
+          {err}
+        </div>
+      )}
 
       <div className="space-y-3">
-        <h2 className="font-bold text-sm text-slate-600 dark:text-slate-300">ضمانات الفرع ({rows?.length ?? 0})</h2>
+        <h2 className="font-bold text-sm text-slate-600 dark:text-slate-300">
+          ضمانات الفرع ({rows?.length ?? 0})
+        </h2>
         {!rows ? (
-          <div className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin mx-auto text-amber-500" /></div>
+          <div className="text-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin mx-auto text-amber-500" />
+          </div>
         ) : rows.length === 0 ? (
           <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm text-slate-500">
             لا توجد ضمانات بعد.
@@ -114,16 +159,36 @@ function BranchPage() {
           rows.map((r) => {
             const s = computeStatus(r.expiry_date, r.status);
             return (
-              <div key={r.id} className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+              <div
+                key={r.id}
+                className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700"
+              >
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-xs font-mono bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded">{r.warranty_number}</span>
-                  <span className={`text-xs px-2 py-1 rounded-full font-bold border ${statusColor[s]}`}>{statusLabel[s]}</span>
+                  <span className="text-xs font-mono bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded">
+                    {r.warranty_number}
+                  </span>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full font-bold border ${statusColor[s]}`}
+                  >
+                    {statusLabel[s]}
+                  </span>
                 </div>
                 <div className="text-sm space-y-0.5">
-                  <div><span className="text-slate-500">الماركة:</span> <b>{r.warranty_brands?.name ?? "-"}</b></div>
-                  <div><span className="text-slate-500">النوع:</span> <b>{r.film_types?.name ?? "-"}</b></div>
-                  <div><span className="text-slate-500">التفعيل:</span> {formatDateAr(r.activation_date)}</div>
-                  <div><span className="text-slate-500">الانتهاء:</span> {formatDateAr(r.expiry_date)}</div>
+                  <div>
+                    <span className="text-slate-500">الماركة:</span>{" "}
+                    <b>{r.warranty_brands?.name ?? "-"}</b>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">النوع:</span>{" "}
+                    <b>{r.film_types?.name ?? "-"}</b>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">التفعيل:</span>{" "}
+                    {formatDateAr(r.activation_date)}
+                  </div>
+                  <div>
+                    <span className="text-slate-500">الانتهاء:</span> {formatDateAr(r.expiry_date)}
+                  </div>
                 </div>
               </div>
             );
@@ -134,7 +199,13 @@ function BranchPage() {
   );
 }
 
-function NewWarrantyForm({ branchId, onDone }: { branchId: string | null; onDone: () => Promise<void> }) {
+function NewWarrantyForm({
+  branchId,
+  onDone,
+}: {
+  branchId: string | null;
+  onDone: () => Promise<void>;
+}) {
   const [open, setOpen] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [films, setFilms] = useState<Film[]>([]);
@@ -151,8 +222,16 @@ function NewWarrantyForm({ branchId, onDone }: { branchId: string | null; onDone
     if (!open) return;
     (async () => {
       const [b, f] = await Promise.all([
-        supabase.from("warranty_brands").select("id, name").eq("is_active", true).order("sort_order"),
-        supabase.from("film_types").select("id, name, warranty_months").eq("is_active", true).order("sort_order"),
+        supabase
+          .from("warranty_brands")
+          .select("id, name")
+          .eq("is_active", true)
+          .order("sort_order"),
+        supabase
+          .from("film_types")
+          .select("id, name, warranty_months")
+          .eq("is_active", true)
+          .order("sort_order"),
       ]);
       setBrands((b.data as Brand[]) ?? []);
       setFilms((f.data as Film[]) ?? []);
@@ -161,15 +240,23 @@ function NewWarrantyForm({ branchId, onDone }: { branchId: string | null; onDone
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true); setMsg(null);
+    setBusy(true);
+    setMsg(null);
     try {
-      if (!customerName.trim() || !customerPhone.trim()) throw new Error("الاسم ورقم الجوال مطلوبان");
-      const ins = await supabase.from("customers")
+      if (!customerName.trim() || !customerPhone.trim())
+        throw new Error("الاسم ورقم الجوال مطلوبان");
+      const ins = await supabase
+        .from("customers")
         .insert({ full_name: customerName.trim(), phone: customerPhone.trim() })
-        .select("id").single();
+        .select("id")
+        .single();
       if (ins.error) throw ins.error;
 
-      const r = await (supabase.rpc as unknown as (n: string) => Promise<{ data: string | null; error: { message: string } | null }>)("generate_warranty_number");
+      const r = await (
+        supabase.rpc as unknown as (
+          n: string,
+        ) => Promise<{ data: string | null; error: { message: string } | null }>
+      )("generate_warranty_number");
       if (r.error) throw r.error;
       const num = r.data ?? "";
 
@@ -190,51 +277,107 @@ function NewWarrantyForm({ branchId, onDone }: { branchId: string | null; onDone
       if (error) throw error;
 
       setMsg({ t: "ok", m: `تم تسجيل الضمان: ${num}` });
-      setCustomerName(""); setCustomerPhone(""); setVin(""); setBrandId(""); setFilmId("");
+      setCustomerName("");
+      setCustomerPhone("");
+      setVin("");
+      setBrandId("");
+      setFilmId("");
       await onDone();
     } catch (e) {
       setMsg({ t: "err", m: e instanceof Error ? e.message : "حدث خطأ" });
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold inline-flex items-center justify-center gap-2">
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold inline-flex items-center justify-center gap-2"
+      >
         <PlusCircle className="w-5 h-5" /> تسجيل ضمان جديد
       </button>
     );
   }
 
   return (
-    <form onSubmit={submit} className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 space-y-3">
+    <form
+      onSubmit={submit}
+      className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700 space-y-3"
+    >
       <div className="flex items-center justify-between">
         <h2 className="font-bold text-sm">ضمان جديد</h2>
-        <button type="button" onClick={() => setOpen(false)} className="text-xs text-slate-500 hover:underline">إلغاء</button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-xs text-slate-500 hover:underline"
+        >
+          إلغاء
+        </button>
       </div>
-      <Fld label="اسم العميل *"><input value={customerName} onChange={(e) => setCustomerName(e.target.value)} required className="fld" /></Fld>
-      <Fld label="رقم الجوال *"><input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} required className="fld" /></Fld>
+      <Fld label="اسم العميل *">
+        <input
+          value={customerName}
+          onChange={(e) => setCustomerName(e.target.value)}
+          required
+          className="fld"
+        />
+      </Fld>
+      <Fld label="رقم الجوال *">
+        <input
+          type="tel"
+          value={customerPhone}
+          onChange={(e) => setCustomerPhone(e.target.value)}
+          required
+          className="fld"
+        />
+      </Fld>
       <Fld label="الماركة">
         <select value={brandId} onChange={(e) => setBrandId(e.target.value)} className="fld">
           <option value="">-- اختر --</option>
-          {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
         </select>
       </Fld>
       <Fld label="نوع اللاصق">
         <select value={filmId} onChange={(e) => setFilmId(e.target.value)} className="fld">
           <option value="">-- اختر --</option>
-          {films.map((f) => <option key={f.id} value={f.id}>{f.name} ({f.warranty_months} شهر)</option>)}
+          {films.map((f) => (
+            <option key={f.id} value={f.id}>
+              {f.name} ({f.warranty_months} شهر)
+            </option>
+          ))}
         </select>
       </Fld>
-      <Fld label="رقم الهيكل (VIN)"><input value={vin} onChange={(e) => setVin(e.target.value)} className="fld" dir="ltr" /></Fld>
-      <Fld label="تاريخ التركيب *"><input type="date" value={activationDate} onChange={(e) => setActivationDate(e.target.value)} required className="fld" /></Fld>
+      <Fld label="رقم الهيكل (VIN)">
+        <input value={vin} onChange={(e) => setVin(e.target.value)} className="fld" dir="ltr" />
+      </Fld>
+      <Fld label="تاريخ التركيب *">
+        <input
+          type="date"
+          value={activationDate}
+          onChange={(e) => setActivationDate(e.target.value)}
+          required
+          className="fld"
+        />
+      </Fld>
 
       {msg && (
-        <div className={`text-sm p-3 rounded-lg ${msg.t === "err" ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}>
+        <div
+          className={`text-sm p-3 rounded-lg ${msg.t === "err" ? "bg-red-50 text-red-700 border border-red-200" : "bg-green-50 text-green-700 border border-green-200"}`}
+        >
           {msg.m}
         </div>
       )}
 
-      <button disabled={busy} className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold disabled:opacity-60 inline-flex items-center justify-center gap-2">
+      <button
+        disabled={busy}
+        className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold disabled:opacity-60 inline-flex items-center justify-center gap-2"
+      >
         {busy && <Loader2 className="w-4 h-4 animate-spin" />} حفظ الضمان
       </button>
     </form>

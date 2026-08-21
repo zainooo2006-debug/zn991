@@ -16,7 +16,10 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const saved = (typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY)) as "light" | "dark" | null;
+    const saved = (typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY)) as
+      | "light"
+      | "dark"
+      | null;
     const initial = saved === "dark" ? "dark" : "light";
     setTheme(initial);
     applyTheme(initial);
@@ -26,7 +29,11 @@ export function ThemeToggle() {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
     applyTheme(next);
-    try { localStorage.setItem(STORAGE_KEY, next); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      /* ignore */
+    }
   };
 
   return (
@@ -35,9 +42,11 @@ export function ThemeToggle() {
       aria-label={theme === "dark" ? "تفعيل الوضع النهاري" : "تفعيل الوضع الليلي"}
       className="p-2 rounded-full hover:bg-[var(--color-surface)] transition-colors"
     >
-      {theme === "dark"
-        ? <Sun className="w-5 h-5 text-[var(--color-gold)]" />
-        : <Moon className="w-5 h-5 text-[var(--color-gold)]" />}
+      {theme === "dark" ? (
+        <Sun className="w-5 h-5 text-[var(--color-gold)]" />
+      ) : (
+        <Moon className="w-5 h-5 text-[var(--color-gold)]" />
+      )}
     </button>
   );
 }
