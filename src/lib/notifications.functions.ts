@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const getPushPublicKey = createServerFn({ method: "GET" }).handler(async () => {
   return { publicKey: process.env.WEB_PUSH_PUBLIC_KEY ?? "" };
@@ -74,20 +75,37 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// قبل التعديل: كانت هذي الدالة مفتوحة بدون أي تحقق هوية، وتثق ببيانات (اسم العميل/رقم الضمان)
+// مبعوثة من المتصفح مباشرة — أي حد يقدر يستدعيها من برا ويبعث إشعار مزيف.
+// بعد التعديل: لازم تسجيل دخول، ونتحقق من الضمان نفسه في قاعدة البيانات ونتأكد إنه فعلاً
+// يخص المستخدم المسجّل قبل لا نرسل أي إشعار — البيانات المعروضة تجي من القاعدة مو من المتصفح.
 export const notifyWarrantyActivated = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
     z.object({
       warranty_number: z.string().trim().min(1).max(60),
-      customer_name: z.string().trim().min(1).max(120),
     }).parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ context, data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("warranties")
+      .select("warranty_number, customers(full_name, user_id)")
+      .eq("warranty_number", data.warranty_number)
+      .maybeSingle();
+
+    const customer = (row as any)?.customers;
+    if (error || !row || !customer || customer.user_id !== context.userId) {
+      // ما نفشل عملية المستخدم، بس ما نرسل إشعار لبيانات ما قدرنا نتحقق منها
+      return { ok: false };
+    }
+
     const { notifyAdmin } = await import("./push.server");
     await notifyAdmin({
       type: "warranty_activated",
       title: "تفعيل ضمان جديد",
-      body: `العميل: ${data.customer_name} — رقم الضمان: ${data.warranty_number}`,
-      ref_id: data.warranty_number,
+      body: `العميل: ${customer.full_name ?? "عميل"} — رقم الضمان: ${row.warranty_number}`,
+      ref_id: row.warranty_number,
     });
     return { ok: true };
   });
