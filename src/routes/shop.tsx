@@ -15,9 +15,15 @@ export const Route = createFileRoute("/shop")({
   head: () => ({
     meta: [
       { title: "المتجر — زين" },
-      { name: "description", content: "تسوق منتجات العناية والاكسسوارات والكهربائيات لسيارتك بأفضل الأسعار." },
+      {
+        name: "description",
+        content: "تسوق منتجات العناية والاكسسوارات والكهربائيات لسيارتك بأفضل الأسعار.",
+      },
       { property: "og:title", content: "المتجر — زين" },
-      { property: "og:description", content: "تسوق منتجات العناية والاكسسوارات والكهربائيات لسيارتك بأفضل الأسعار." },
+      {
+        property: "og:description",
+        content: "تسوق منتجات العناية والاكسسوارات والكهربائيات لسيارتك بأفضل الأسعار.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/shop" },
       { property: "og:type", content: "website" },
     ],
@@ -74,7 +80,9 @@ function ShopPage() {
           <button
             onClick={() => setActiveSlug(undefined)}
             className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition ${
-              !activeSlug ? "bg-[var(--color-gold)] border-[var(--color-gold)] text-[var(--color-ink)]" : "bg-white border-[var(--color-hairline)] text-[var(--color-ink-soft)]"
+              !activeSlug
+                ? "bg-[var(--color-gold)] border-[var(--color-gold)] text-[var(--color-ink)]"
+                : "bg-white border-[var(--color-hairline)] text-[var(--color-ink-soft)]"
             }`}
           >
             الكل
@@ -84,7 +92,9 @@ function ShopPage() {
               key={c.id}
               onClick={() => setActiveSlug(c.slug)}
               className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition ${
-                activeSlug === c.slug ? "bg-[var(--color-gold)] border-[var(--color-gold)] text-[var(--color-ink)]" : "bg-white border-[var(--color-hairline)] text-[var(--color-ink-soft)]"
+                activeSlug === c.slug
+                  ? "bg-[var(--color-gold)] border-[var(--color-gold)] text-[var(--color-ink)]"
+                  : "bg-white border-[var(--color-hairline)] text-[var(--color-ink-soft)]"
               }`}
             >
               {c.name}
@@ -99,7 +109,9 @@ function ShopPage() {
         </div>
 
         {filtered.length === 0 && (
-          <p className="text-center text-[var(--color-ink-soft)] py-12">لا توجد منتجات في هذا القسم بعد.</p>
+          <p className="text-center text-[var(--color-ink-soft)] py-12">
+            لا توجد منتجات في هذا القسم بعد.
+          </p>
         )}
       </div>
     </Shell>

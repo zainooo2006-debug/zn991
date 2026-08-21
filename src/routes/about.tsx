@@ -7,9 +7,17 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "من نحن — زين" },
-      { name: "description", content: "زين - مركز متكامل للعناية بالسيارات في صنعاء يقدم خدمات احترافية وقطع وإكسسوارات أصلية." },
+      {
+        name: "description",
+        content:
+          "زين - مركز متكامل للعناية بالسيارات في صنعاء يقدم خدمات احترافية وقطع وإكسسوارات أصلية.",
+      },
       { property: "og:title", content: "من نحن — زين" },
-      { property: "og:description", content: "زين - مركز متكامل للعناية بالسيارات في صنعاء يقدم خدمات احترافية وقطع وإكسسوارات أصلية." },
+      {
+        property: "og:description",
+        content:
+          "زين - مركز متكامل للعناية بالسيارات في صنعاء يقدم خدمات احترافية وقطع وإكسسوارات أصلية.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/about" },
       { property: "og:type", content: "website" },
     ],
@@ -26,9 +34,7 @@ function AboutPage() {
         <p className="text-[var(--color-ink-soft)] mt-4 leading-loose">
           <span className="font-bold text-[var(--color-gold)]">زين</span> {c.intro1}
         </p>
-        <p className="text-[var(--color-ink-soft)] mt-4 leading-loose">
-          {c.intro2}
-        </p>
+        <p className="text-[var(--color-ink-soft)] mt-4 leading-loose">{c.intro2}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-10">
           {[

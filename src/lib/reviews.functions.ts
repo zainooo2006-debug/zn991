@@ -12,7 +12,10 @@ export const listApprovedReviews = createServerFn({ method: "GET" }).handler(asy
     .order("is_featured", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(60);
-  if (error) { console.error("[reviews] list error:", error); throw new Error("تعذّر تحميل التقييمات"); }
+  if (error) {
+    console.error("[reviews] list error:", error);
+    throw new Error("تعذّر تحميل التقييمات");
+  }
   return data ?? [];
 });
 
@@ -39,7 +42,10 @@ export const submitCustomerReview = createServerFn({ method: "POST" })
       is_approved: false,
       is_featured: false,
     });
-    if (error) { console.error("[reviews] submit error:", error); throw new Error("تعذّر إرسال التقييم"); }
+    if (error) {
+      console.error("[reviews] submit error:", error);
+      throw new Error("تعذّر إرسال التقييم");
+    }
 
     try {
       const { notifyAdmin } = await import("./push.server");
@@ -78,72 +84,81 @@ export const uploadReviewImage = createServerFn({ method: "POST" })
       contentType: data.file.type,
       upsert: false,
     });
-    if (error) { console.error("[reviews] upload error:", error); throw new Error("تعذّر رفع الصورة"); }
+    if (error) {
+      console.error("[reviews] upload error:", error);
+      throw new Error("تعذّر رفع الصورة");
+    }
     const { data: pub } = supabaseAdmin.storage.from("media").getPublicUrl(path);
     return { url: pub.publicUrl };
   });
 
 /* ============ Admin ============ */
 
-import { createHmac, timingSafeEqual } from "crypto";
-
-function verifyAdmin(token: string) {
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) throw new Error("Server misconfigured");
-  if (!token?.includes(".")) throw new Error("غير مصرح");
-  const [body, sig] = token.split(".");
-  const expected = createHmac("sha256", secret).update(body).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("غير مصرح");
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as { exp?: number };
-  if (!payload.exp || Date.now() > payload.exp) throw new Error("انتهت الجلسة");
-}
+import { assertAdmin } from "./admin-auth.server";
 
 export const adminListCustomerReviews = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({
-    password: z.string(),
-    status: z.enum(["all", "pending", "approved"]).optional(),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string(),
+        status: z.enum(["all", "pending", "approved"]).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("customer_reviews")
-      .select("id, customer_name, city, rating, comment, images, is_approved, is_featured, created_at")
+      .select(
+        "id, customer_name, city, rating, comment, images, is_approved, is_featured, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(300);
     if (data.status === "pending") q = q.eq("is_approved", false);
     if (data.status === "approved") q = q.eq("is_approved", true);
     const { data: rows, error } = await q;
-    if (error) { console.error("[reviews] admin list error:", error); throw new Error("خطأ في التحميل"); }
+    if (error) {
+      console.error("[reviews] admin list error:", error);
+      throw new Error("خطأ في التحميل");
+    }
     return rows ?? [];
   });
 
 export const adminUpdateCustomerReview = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({
-    password: z.string(),
-    id: z.string().uuid(),
-    is_approved: z.boolean().optional(),
-    is_featured: z.boolean().optional(),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid(),
+        is_approved: z.boolean().optional(),
+        is_featured: z.boolean().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: { is_approved?: boolean; is_featured?: boolean } = {};
     if (typeof data.is_approved === "boolean") patch.is_approved = data.is_approved;
     if (typeof data.is_featured === "boolean") patch.is_featured = data.is_featured;
     const { error } = await supabaseAdmin.from("customer_reviews").update(patch).eq("id", data.id);
-    if (error) { console.error("[reviews] update error:", error); throw new Error("خطأ في التحديث"); }
+    if (error) {
+      console.error("[reviews] update error:", error);
+      throw new Error("خطأ في التحديث");
+    }
     return { ok: true };
   });
 
 export const adminDeleteCustomerReview = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("customer_reviews").delete().eq("id", data.id);
-    if (error) { console.error("[reviews] delete error:", error); throw new Error("خطأ في الحذف"); }
+    if (error) {
+      console.error("[reviews] delete error:", error);
+      throw new Error("خطأ في الحذف");
+    }
     return { ok: true };
   });

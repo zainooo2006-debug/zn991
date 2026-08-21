@@ -11,9 +11,15 @@ export const Route = createFileRoute("/offers")({
   head: () => ({
     meta: [
       { title: "العروض — زين" },
-      { name: "description", content: "بكجات وعروض حصرية على خدمات ومنتجات زين — استفد قبل انتهاء العرض." },
+      {
+        name: "description",
+        content: "بكجات وعروض حصرية على خدمات ومنتجات زين — استفد قبل انتهاء العرض.",
+      },
       { property: "og:title", content: "العروض — زين" },
-      { property: "og:description", content: "بكجات وعروض حصرية على خدمات ومنتجات زين — استفد قبل انتهاء العرض." },
+      {
+        property: "og:description",
+        content: "بكجات وعروض حصرية على خدمات ومنتجات زين — استفد قبل انتهاء العرض.",
+      },
       { property: "og:url", content: "https://zn991.lovable.app/offers" },
       { property: "og:type", content: "website" },
     ],
@@ -44,12 +50,18 @@ function OffersPage() {
               <p className="text-sm text-[var(--color-ink-soft)] mt-1">{p.description}</p>
               <ul className="mt-4 space-y-1.5 text-sm text-[var(--color-ink-soft)]">
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2"><span className="text-[var(--color-gold)]">✓</span> {f}</li>
+                  <li key={f} className="flex items-start gap-2">
+                    <span className="text-[var(--color-gold)]">✓</span> {f}
+                  </li>
                 ))}
               </ul>
               <div className="mt-4 flex items-baseline gap-2">
                 <span className="price text-2xl">{p.price}</span>
-                {p.old_price && <span className="text-[var(--color-ink-soft)] line-through text-sm">{p.old_price}</span>}
+                {p.old_price && (
+                  <span className="text-[var(--color-ink-soft)] line-through text-sm">
+                    {p.old_price}
+                  </span>
+                )}
               </div>
             </div>
           ))}
@@ -71,7 +83,11 @@ function Coupon({ code, desc }: { code: string; desc: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
-      onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1500); }}
+      onClick={() => {
+        navigator.clipboard.writeText(code);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
       className="card-clean p-5 flex items-center gap-3 text-right"
     >
       <Tag className="w-6 h-6 text-[var(--color-gold)]" />
@@ -101,7 +117,8 @@ function Countdown() {
       <Clock className="w-5 h-5 text-[var(--color-gold)]" />
       <span className="text-sm">العرض ينتهي خلال:</span>
       <div className="flex gap-2 mr-auto font-black text-[var(--color-gold)]">
-        <span>{d}ي</span>:<span>{String(h).padStart(2, "0")}</span>:<span>{String(m).padStart(2, "0")}</span>:<span>{String(s).padStart(2, "0")}</span>
+        <span>{d}ي</span>:<span>{String(h).padStart(2, "0")}</span>:
+        <span>{String(m).padStart(2, "0")}</span>:<span>{String(s).padStart(2, "0")}</span>
       </div>
     </div>
   );

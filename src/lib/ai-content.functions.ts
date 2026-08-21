@@ -1,25 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHmac, timingSafeEqual } from "crypto";
-
-function getSessionSecret(): string {
-  const s = process.env.ADMIN_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!s) throw new Error("Server misconfigured");
-  return s;
-}
-
-function assertAdmin(token: string | undefined | null) {
-  if (!token || typeof token !== "string" || !token.includes(".")) throw new Error("غير مصرح");
-  const [body, sig] = token.split(".");
-  const expected = createHmac("sha256", getSessionSecret()).update(body).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("غير مصرح");
-  let payload: { exp?: number };
-  try { payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")); }
-  catch { throw new Error("غير مصرح"); }
-  if (!payload.exp || Date.now() > payload.exp) throw new Error("انتهت الجلسة");
-}
+import { assertAdmin } from "./admin-auth.server";
 
 const Input = z.object({
   password: z.string(),
@@ -72,13 +53,20 @@ export const generateProductContent = createServerFn({ method: "POST" })
       throw new Error(`AI error [${res.status}]: ${body.slice(0, 200)}`);
     }
 
-    const json = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
+    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const text = json.choices?.[0]?.message?.content ?? "{}";
     let parsed: {
-      title?: string; description?: string; features?: string[];
-      marketing_post?: string; hashtags?: string[];
+      title?: string;
+      description?: string;
+      features?: string[];
+      marketing_post?: string;
+      hashtags?: string[];
     } = {};
-    try { parsed = JSON.parse(text); } catch { parsed = {}; }
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      parsed = {};
+    }
     return {
       title: parsed.title ?? "",
       description: parsed.description ?? "",
@@ -100,7 +88,10 @@ export const listProductsForContent = createServerFn({ method: "POST" })
       .limit(300);
     if (error) throw new Error(error.message);
     return (rows ?? []) as Array<{
-      id: string; name: string; description: string | null;
-      price: number | null; old_price: number | null;
+      id: string;
+      name: string;
+      description: string | null;
+      price: number | null;
+      old_price: number | null;
     }>;
   });

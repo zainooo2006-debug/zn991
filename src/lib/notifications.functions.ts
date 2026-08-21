@@ -8,11 +8,13 @@ export const getPushPublicKey = createServerFn({ method: "GET" }).handler(async 
 
 export const subscribePush = createServerFn({ method: "POST" })
   .inputValidator((d) =>
-    z.object({
-      password: z.string(),
-      endpoint: z.string().url().max(1000),
-      keys: z.object({ p256dh: z.string().min(1).max(500), auth: z.string().min(1).max(500) }),
-    }).parse(d),
+    z
+      .object({
+        password: z.string(),
+        endpoint: z.string().url().max(1000),
+        keys: z.object({ p256dh: z.string().min(1).max(500), auth: z.string().min(1).max(500) }),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { assertAdminToken } = await import("./push.server");
@@ -24,7 +26,10 @@ export const subscribePush = createServerFn({ method: "POST" })
         { endpoint: data.endpoint, p256dh: data.keys.p256dh, auth: data.keys.auth },
         { onConflict: "endpoint" },
       );
-    if (error) { console.error("[push] subscribe error:", error); throw new Error("تعذّر تفعيل الإشعارات"); }
+    if (error) {
+      console.error("[push] subscribe error:", error);
+      throw new Error("تعذّر تفعيل الإشعارات");
+    }
     return { ok: true };
   });
 
@@ -40,7 +45,10 @@ export const unsubscribePush = createServerFn({ method: "POST" })
       .from("push_subscriptions")
       .delete()
       .eq("endpoint", data.endpoint);
-    if (error) { console.error("[push] unsubscribe error:", error); throw new Error("تعذّر إلغاء الإشعارات"); }
+    if (error) {
+      console.error("[push] unsubscribe error:", error);
+      throw new Error("تعذّر إلغاء الإشعارات");
+    }
     return { ok: true };
   });
 
@@ -55,7 +63,10 @@ export const listNotifications = createServerFn({ method: "POST" })
       .select("id, type, title, body, ref_id, is_read, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) { console.error("[push] list error:", error); throw new Error("تعذّر تحميل الإشعارات"); }
+    if (error) {
+      console.error("[push] list error:", error);
+      throw new Error("تعذّر تحميل الإشعارات");
+    }
     const items = rows ?? [];
     return { items, unread: items.filter((r) => !r.is_read).length };
   });
@@ -71,7 +82,10 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
     let q = supabaseAdmin.from("notifications").update({ is_read: true }).eq("is_read", false);
     if (data.id) q = q.eq("id", data.id);
     const { error } = await q;
-    if (error) { console.error("[push] mark read error:", error); throw new Error("تعذّر تحديث الإشعارات"); }
+    if (error) {
+      console.error("[push] mark read error:", error);
+      throw new Error("تعذّر تحديث الإشعارات");
+    }
     return { ok: true };
   });
 
@@ -82,9 +96,11 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
 export const notifyWarrantyActivated = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      warranty_number: z.string().trim().min(1).max(60),
-    }).parse(d),
+    z
+      .object({
+        warranty_number: z.string().trim().min(1).max(60),
+      })
+      .parse(d),
   )
   .handler(async ({ context, data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

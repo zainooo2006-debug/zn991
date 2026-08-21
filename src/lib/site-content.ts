@@ -91,7 +91,14 @@ export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
 };
 
 const DEFAULT_HOME_ORDER: HomeSectionId[] = [
-  "quick_access", "categories", "services", "featured", "hot_deals", "best_sellers", "trust", "reviews",
+  "quick_access",
+  "categories",
+  "services",
+  "featured",
+  "hot_deals",
+  "best_sellers",
+  "trust",
+  "reviews",
 ];
 
 /** Appends any section id that exists in code but is missing from a previously-saved order (e.g. a section added after the admin last customized their layout). */

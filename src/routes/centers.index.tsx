@@ -9,9 +9,16 @@ export const Route = createFileRoute("/centers/")({
   head: () => ({
     meta: [
       { title: "مراكز التركيب المعتمدة — زين" },
-      { name: "description", content: "قائمة مراكز التركيب المعتمدة من زين لحماية الطلاء والتظليل في اليمن." },
+      {
+        name: "description",
+        content: "قائمة مراكز التركيب المعتمدة من زين لحماية الطلاء والتظليل في اليمن.",
+      },
       { property: "og:title", content: "مراكز التركيب المعتمدة — زين" },
-      { property: "og:description", content: "اعثر على أقرب مركز معتمد من زين للحصول على خدمات حماية الطلاء والتظليل بأعلى جودة." },
+      {
+        property: "og:description",
+        content:
+          "اعثر على أقرب مركز معتمد من زين للحصول على خدمات حماية الطلاء والتظليل بأعلى جودة.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -40,16 +47,24 @@ function CentersListPage() {
         </header>
 
         {isLoading ? (
-          <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-gold)]" /></div>
+          <div className="flex justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-[var(--color-gold)]" />
+          </div>
         ) : centers.length === 0 ? (
-          <div className="text-center py-16 text-[var(--color-ink-soft)]">لا توجد مراكز متاحة حالياً.</div>
+          <div className="text-center py-16 text-[var(--color-ink-soft)]">
+            لا توجد مراكز متاحة حالياً.
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {centers.map((c) => (
               <article key={c.id} className="card-clean p-5 flex flex-col">
                 <div className="flex items-start gap-3">
                   {c.logo_url ? (
-                    <img src={c.logo_url} alt={c.name} className="w-14 h-14 rounded-lg object-cover bg-[var(--color-hairline)]" />
+                    <img
+                      src={c.logo_url}
+                      alt={c.name}
+                      className="w-14 h-14 rounded-lg object-cover bg-[var(--color-hairline)]"
+                    />
                   ) : (
                     <div className="w-14 h-14 rounded-lg bg-[var(--color-gold-soft)] flex items-center justify-center">
                       <ShieldCheck className="w-6 h-6 text-[var(--color-gold)]" />
@@ -63,12 +78,19 @@ function CentersListPage() {
                   </div>
                 </div>
 
-                {c.address && <p className="text-sm text-[var(--color-ink-soft)] mt-3">{c.address}</p>}
+                {c.address && (
+                  <p className="text-sm text-[var(--color-ink-soft)] mt-3">{c.address}</p>
+                )}
 
                 {c.services && c.services.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-3">
                     {c.services.map((s) => (
-                      <span key={s} className="text-[11px] bg-[var(--color-surface)] text-[var(--color-ink)] px-2 py-0.5 rounded-full">{s}</span>
+                      <span
+                        key={s}
+                        className="text-[11px] bg-[var(--color-surface)] text-[var(--color-ink)] px-2 py-0.5 rounded-full"
+                      >
+                        {s}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -82,13 +104,21 @@ function CentersListPage() {
                     <ArrowLeft className="w-3.5 h-3.5" /> التفاصيل
                   </Link>
                   {c.phone && (
-                    <a href={`tel:${c.phone}`} className="flex-1 inline-flex items-center justify-center gap-1 bg-[var(--color-surface)] hover:bg-[var(--color-gold-soft)] text-[var(--color-ink)] px-3 py-2 rounded-lg text-xs font-bold" aria-label="اتصال">
+                    <a
+                      href={`tel:${c.phone}`}
+                      className="flex-1 inline-flex items-center justify-center gap-1 bg-[var(--color-surface)] hover:bg-[var(--color-gold-soft)] text-[var(--color-ink)] px-3 py-2 rounded-lg text-xs font-bold"
+                      aria-label="اتصال"
+                    >
                       <Phone className="w-3.5 h-3.5" /> اتصال
                     </a>
                   )}
                   {c.whatsapp && (
-                    <a href={`https://wa.me/${c.whatsapp.replace(/[^\d]/g, "")}`} target="_blank" rel="noreferrer"
-                      className="flex-1 inline-flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    <a
+                      href={`https://wa.me/${c.whatsapp.replace(/[^\d]/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg text-xs font-bold"
+                    >
                       <MessageCircle className="w-3.5 h-3.5" /> واتساب
                     </a>
                   )}

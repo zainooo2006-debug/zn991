@@ -63,7 +63,7 @@ function applyTheme(theme: ThemeJson | null | undefined, isDark: boolean) {
   };
 
   if (t.colors) {
-    const merged = { ...t.colors, ...(isDark ? t.colors_dark ?? {} : {}) };
+    const merged = { ...t.colors, ...(isDark ? (t.colors_dark ?? {}) : {}) };
     for (const [k, v] of Object.entries(merged)) {
       if (typeof v !== "string") continue;
       write(`--${k}`, v);
@@ -147,7 +147,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setIsDark(readIsDark());
     const onDarkChange = () => setIsDark(readIsDark());
     window.addEventListener(DARK_MODE_EVENT, onDarkChange);
-    const onStorage = (e: StorageEvent) => { if (e.key === DARK_STORAGE_KEY) onDarkChange(); };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === DARK_STORAGE_KEY) onDarkChange();
+    };
     window.addEventListener("storage", onStorage);
     return () => {
       window.removeEventListener(DARK_MODE_EVENT, onDarkChange);
@@ -169,7 +171,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       else if (d.kind === "reload") window.location.reload();
     };
     window.addEventListener("message", onMsg);
-    try { window.parent?.postMessage({ source: "zain-preview", kind: "ready" }, "*"); } catch {}
+    try {
+      window.parent?.postMessage({ source: "zain-preview", kind: "ready" }, "*");
+    } catch {}
     return () => window.removeEventListener("message", onMsg);
   }, []);
 

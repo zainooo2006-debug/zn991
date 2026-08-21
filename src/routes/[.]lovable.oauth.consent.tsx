@@ -10,9 +10,15 @@ type AuthDetails = {
 } | null;
 
 type SupabaseOAuth = {
-  getAuthorizationDetails: (id: string) => Promise<{ data: AuthDetails; error: { message: string } | null }>;
-  approveAuthorization: (id: string) => Promise<{ data: AuthDetails; error: { message: string } | null }>;
-  denyAuthorization: (id: string) => Promise<{ data: AuthDetails; error: { message: string } | null }>;
+  getAuthorizationDetails: (
+    id: string,
+  ) => Promise<{ data: AuthDetails; error: { message: string } | null }>;
+  approveAuthorization: (
+    id: string,
+  ) => Promise<{ data: AuthDetails; error: { message: string } | null }>;
+  denyAuthorization: (
+    id: string,
+  ) => Promise<{ data: AuthDetails; error: { message: string } | null }>;
 };
 
 function oauth(): SupabaseOAuth {
@@ -76,16 +82,20 @@ function Consent() {
 
   return (
     <main className="max-w-md mx-auto p-6">
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow p-6 space-y-4" dir="rtl">
-        <h1 className="text-xl font-bold">
-          ربط {clientName} بحسابك في زين
-        </h1>
+      <div
+        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow p-6 space-y-4"
+        dir="rtl"
+      >
+        <h1 className="text-xl font-bold">ربط {clientName} بحسابك في زين</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          سيتمكّن {clientName} من استدعاء أدوات هذا التطبيق نيابةً عنك أثناء تسجيل دخولك.
-          لن يتجاوز ذلك صلاحيات التطبيق أو سياسات الحماية.
+          سيتمكّن {clientName} من استدعاء أدوات هذا التطبيق نيابةً عنك أثناء تسجيل دخولك. لن يتجاوز
+          ذلك صلاحيات التطبيق أو سياسات الحماية.
         </p>
         {error && (
-          <div role="alert" className="text-sm p-3 rounded-lg bg-red-50 text-red-700 border border-red-200">
+          <div
+            role="alert"
+            className="text-sm p-3 rounded-lg bg-red-50 text-red-700 border border-red-200"
+          >
             {error}
           </div>
         )}

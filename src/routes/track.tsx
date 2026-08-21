@@ -39,8 +39,7 @@ function TrackPage() {
   const [orderId, setOrderId] = useState("");
 
   const mutation = useMutation({
-    mutationFn: (v: { phone: string; orderId: string }) =>
-      getOrdersByPhone({ data: v }),
+    mutationFn: (v: { phone: string; orderId: string }) => getOrdersByPhone({ data: v }),
   });
 
   const onSubmit = (e: React.FormEvent) => {
@@ -58,18 +57,13 @@ function TrackPage() {
   return (
     <Shell>
       <div className="max-w-3xl mx-auto px-4 py-8">
-        <h1 className="text-2xl md:text-3xl font-black mb-2">
-          تتبع الطلب
-        </h1>
+        <h1 className="text-2xl md:text-3xl font-black mb-2">تتبع الطلب</h1>
 
         <p className="text-[var(--color-ink-soft)] mb-6">
           أدخل رقم الطلب (أول 4 أحرف على الأقل) ورقم الهاتف المستخدم في الطلب.
         </p>
 
-        <form
-          onSubmit={onSubmit}
-          className="flex flex-col sm:flex-row gap-2 mb-8"
-        >
+        <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-2 mb-8">
           <input
             type="text"
             value={orderId}
@@ -92,11 +86,7 @@ function TrackPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            className="btn-gold"
-          >
+          <button type="submit" disabled={mutation.isPending} className="btn-gold">
             <Search className="w-4 h-4" />
             {mutation.isPending ? "جارٍ البحث..." : "بحث"}
           </button>
@@ -143,8 +133,7 @@ function TrackPage() {
 
                     <span
                       className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        STATUS_COLOR[o.status] ||
-                        "bg-gray-100 text-gray-700"
+                        STATUS_COLOR[o.status] || "bg-gray-100 text-gray-700"
                       }`}
                     >
                       {STATUS_LABEL[o.status] || o.status}
@@ -152,28 +141,21 @@ function TrackPage() {
                   </div>
 
                   <div className="mt-3 text-sm">
-                    <div className="text-[var(--color-ink-soft)] mb-1">
-                      المنتجات:
-                    </div>
+                    <div className="text-[var(--color-ink-soft)] mb-1">المنتجات:</div>
 
                     <ul className="list-disc pr-5 space-y-0.5">
                       {items.map((it, i) => (
                         <li key={i}>
-                          {it.name}{" "}
-                          {it.quantity ? `× ${it.quantity}` : ""}
+                          {it.name} {it.quantity ? `× ${it.quantity}` : ""}
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   <div className="mt-3 flex justify-between items-center border-t border-[var(--color-hairline)] pt-3">
-                    <span className="text-sm text-[var(--color-ink-soft)]">
-                      الإجمالي
-                    </span>
+                    <span className="text-sm text-[var(--color-ink-soft)]">الإجمالي</span>
 
-                    <span className="price">
-                      {Number(o.total).toLocaleString()} ر.ي
-                    </span>
+                    <span className="price">{Number(o.total).toLocaleString()} ر.ي</span>
                   </div>
                 </div>
               );

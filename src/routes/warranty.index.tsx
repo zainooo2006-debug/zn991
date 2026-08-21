@@ -58,10 +58,27 @@ function WarrantyHome() {
   );
 }
 
-function ActionCard({ to, icon, title, desc, color }: { to: string; icon: React.ReactNode; title: string; desc: string; color: string }) {
+function ActionCard({
+  to,
+  icon,
+  title,
+  desc,
+  color,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  color: string;
+}) {
   return (
-    <Link to={to} className="group block rounded-2xl bg-white dark:bg-slate-800 p-6 shadow hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700">
-      <div className={`w-14 h-14 rounded-xl ${color} text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+    <Link
+      to={to}
+      className="group block rounded-2xl bg-white dark:bg-slate-800 p-6 shadow hover:shadow-xl transition-all border border-slate-200 dark:border-slate-700"
+    >
+      <div
+        className={`w-14 h-14 rounded-xl ${color} text-white flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+      >
         {icon}
       </div>
       <h3 className="font-bold text-lg mb-1">{title}</h3>

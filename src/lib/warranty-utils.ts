@@ -30,6 +30,7 @@ export function computeStatus(expiry: string, current: WarrantyStatus): Warranty
 }
 
 export function verifyUrl(warrantyNumber: string): string {
-  if (typeof window === "undefined") return `/warranty/verify?n=${encodeURIComponent(warrantyNumber)}`;
+  if (typeof window === "undefined")
+    return `/warranty/verify?n=${encodeURIComponent(warrantyNumber)}`;
   return `${window.location.origin}/warranty/verify?n=${encodeURIComponent(warrantyNumber)}`;
 }

@@ -72,23 +72,21 @@ export const DEFAULT_THEME_JSON = {
 } as const;
 
 /** PUBLIC — returns active theme JSON. Fallback: DEFAULT_THEME_JSON. */
-export const getActiveWebsiteTheme = createServerFn({ method: "GET" }).handler(
-  async () => {
-    try {
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-      const { data } = await supabaseAdmin
-        .from("website_themes")
-        .select("id, name, theme_json, is_active")
-        .eq("is_active", true)
-        .limit(1)
-        .maybeSingle();
-      if (data?.theme_json) return { id: data.id, name: data.name, theme_json: data.theme_json };
-    } catch (e) {
-      console.error("[getActiveWebsiteTheme]", e);
-    }
-    return { id: null, name: "default", theme_json: DEFAULT_THEME_JSON };
-  },
-);
+export const getActiveWebsiteTheme = createServerFn({ method: "GET" }).handler(async () => {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("website_themes")
+      .select("id, name, theme_json, is_active")
+      .eq("is_active", true)
+      .limit(1)
+      .maybeSingle();
+    if (data?.theme_json) return { id: data.id, name: data.name, theme_json: data.theme_json };
+  } catch (e) {
+    console.error("[getActiveWebsiteTheme]", e);
+  }
+  return { id: null, name: "default", theme_json: DEFAULT_THEME_JSON };
+});
 
 /** ADMIN — set a theme active and deactivate all others. */
 export const setActiveWebsiteTheme = createServerFn({ method: "POST" })
@@ -102,9 +100,15 @@ export const setActiveWebsiteTheme = createServerFn({ method: "POST" })
     if (!a && !s) throw new Error("Admin only");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin: any = supabaseAdmin;
-    const { error: e1 } = await admin.from("website_themes").update({ is_active: false }).neq("id", data.id);
+    const { error: e1 } = await admin
+      .from("website_themes")
+      .update({ is_active: false })
+      .neq("id", data.id);
     if (e1) throw new Error(e1.message);
-    const { error: e2 } = await admin.from("website_themes").update({ is_active: true }).eq("id", data.id);
+    const { error: e2 } = await admin
+      .from("website_themes")
+      .update({ is_active: true })
+      .eq("id", data.id);
     if (e2) throw new Error(e2.message);
     return { ok: true };
   });
@@ -122,12 +126,16 @@ export const duplicateWebsiteTheme = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const admin: any = supabaseAdmin;
     const { data: src, error: e1 } = await admin
-      .from("website_themes").select("name, theme_json").eq("id", data.id).maybeSingle();
+      .from("website_themes")
+      .select("name, theme_json")
+      .eq("id", data.id)
+      .maybeSingle();
     if (e1 || !src) throw new Error(e1?.message ?? "Not found");
     const { data: row, error } = await admin
       .from("website_themes")
       .insert({ name: `${src.name} (نسخة)`, theme_json: src.theme_json, is_active: false })
-      .select().maybeSingle();
+      .select()
+      .maybeSingle();
     if (error) throw new Error(error.message);
     return row;
   });

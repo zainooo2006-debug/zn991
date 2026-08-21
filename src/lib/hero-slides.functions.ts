@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHmac, timingSafeEqual } from "crypto";
+import { assertAdmin } from "./admin-auth.server";
 
 /* ============ Public ============ */
 
@@ -12,29 +12,20 @@ export const listPublicHeroSlides = createServerFn({ method: "GET" }).handler(as
     .eq("is_active", true)
     .order("sort_order", { ascending: true })
     .order("created_at", { ascending: true });
-  if (error) { console.error("[hero] list error:", error); return []; }
+  if (error) {
+    console.error("[hero] list error:", error);
+    return [];
+  }
   return data ?? [];
 });
 
 /* ============ Admin ============ */
 
-function verifyAdmin(token: string) {
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) throw new Error("Server misconfigured");
-  if (!token?.includes(".")) throw new Error("غير مصرح");
-  const [body, sig] = token.split(".");
-  const expected = createHmac("sha256", secret).update(body).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("غير مصرح");
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as { exp?: number };
-  if (!payload.exp || Date.now() > payload.exp) throw new Error("انتهت الجلسة");
-}
-
 export const adminListHeroSlides = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("hero_slides")
@@ -53,16 +44,23 @@ const slideSchema = z.object({
 });
 
 export const adminSaveHeroSlide = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({
-    password: z.string(),
-    id: z.string().uuid().optional().nullable(),
-    values: slideSchema,
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid().optional().nullable(),
+        values: slideSchema,
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.id) {
-      const { error } = await supabaseAdmin.from("hero_slides").update(data.values).eq("id", data.id);
+      const { error } = await supabaseAdmin
+        .from("hero_slides")
+        .update(data.values)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
     } else {
       const { error } = await supabaseAdmin.from("hero_slides").insert(data.values);
@@ -72,14 +70,18 @@ export const adminSaveHeroSlide = createServerFn({ method: "POST" })
   });
 
 export const adminUpdateHeroSlideFlags = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({
-    password: z.string(),
-    id: z.string().uuid(),
-    is_active: z.boolean().optional(),
-    sort_order: z.number().int().optional(),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        password: z.string(),
+        id: z.string().uuid(),
+        is_active: z.boolean().optional(),
+        sort_order: z.number().int().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: { is_active?: boolean; sort_order?: number } = {};
     if (typeof data.is_active === "boolean") patch.is_active = data.is_active;
@@ -92,7 +94,7 @@ export const adminUpdateHeroSlideFlags = createServerFn({ method: "POST" })
 export const adminDeleteHeroSlide = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string(), id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("hero_slides").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -116,7 +118,7 @@ export const adminUploadHeroImage = createServerFn({ method: "POST" })
     return { password, file };
   })
   .handler(async ({ data }) => {
-    verifyAdmin(data.password);
+    assertAdmin(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const ext = data.file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `hero/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;

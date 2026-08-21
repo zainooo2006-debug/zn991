@@ -27,7 +27,11 @@ export function ProductCard({ p }: { p: ProductCardProduct }) {
   };
 
   return (
-    <Link to="/product/$id" params={{ id: p.id }} className="card-clean group flex flex-col relative">
+    <Link
+      to="/product/$id"
+      params={{ id: p.id }}
+      className="card-clean group flex flex-col relative"
+    >
       <div className="aspect-square bg-[var(--color-surface)] overflow-hidden">
         <img
           src={img}
@@ -63,7 +67,15 @@ export function ProductCard({ p }: { p: ProductCardProduct }) {
           onClick={add}
           className="mt-2 w-full bg-[var(--color-gold)] text-[var(--color-ink)] text-xs font-bold py-2 rounded-lg flex items-center justify-center gap-1 hover:opacity-90 transition"
         >
-          {added ? <><Check className="w-3 h-3" /> تمت الإضافة</> : <><ShoppingCart className="w-3 h-3" /> أضف للسلة</>}
+          {added ? (
+            <>
+              <Check className="w-3 h-3" /> تمت الإضافة
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="w-3 h-3" /> أضف للسلة
+            </>
+          )}
         </button>
       </div>
     </Link>

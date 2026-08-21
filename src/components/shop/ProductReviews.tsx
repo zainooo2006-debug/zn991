@@ -33,8 +33,14 @@ export function ProductReviews({ productId }: { productId: string }) {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim().length < 1) { setError("الرجاء إدخال الاسم"); return; }
-    if (rating < 1 || rating > 5) { setError("التقييم غير صالح"); return; }
+    if (name.trim().length < 1) {
+      setError("الرجاء إدخال الاسم");
+      return;
+    }
+    if (rating < 1 || rating > 5) {
+      setError("التقييم غير صالح");
+      return;
+    }
     mutation.mutate();
   };
 
@@ -48,16 +54,24 @@ export function ProductReviews({ productId }: { productId: string }) {
         <div className="flex items-center gap-3 mb-2">
           <div className="flex">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className={`w-5 h-5 ${i < Math.round(avg) ? "fill-[var(--color-gold)] text-[var(--color-gold)]" : "text-gray-300"}`} />
+              <Star
+                key={i}
+                className={`w-5 h-5 ${i < Math.round(avg) ? "fill-[var(--color-gold)] text-[var(--color-gold)]" : "text-gray-300"}`}
+              />
             ))}
           </div>
           <span className="text-sm text-[var(--color-ink-soft)]">
-            {reviews.length > 0 ? `${avg.toFixed(1)} من 5 — ${reviews.length} تقييم` : "لا توجد تقييمات بعد"}
+            {reviews.length > 0
+              ? `${avg.toFixed(1)} من 5 — ${reviews.length} تقييم`
+              : "لا توجد تقييمات بعد"}
           </span>
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="bg-white border border-[var(--color-hairline)] rounded-2xl p-5 mb-6 space-y-3">
+      <form
+        onSubmit={onSubmit}
+        className="bg-white border border-[var(--color-hairline)] rounded-2xl p-5 mb-6 space-y-3"
+      >
         <h3 className="font-bold">اكتب تقييمك</h3>
         <input
           type="text"
@@ -80,7 +94,9 @@ export function ProductReviews({ productId }: { productId: string }) {
                 onMouseLeave={() => setHover(0)}
                 aria-label={`${val} نجوم`}
               >
-                <Star className={`w-7 h-7 ${active ? "fill-[var(--color-gold)] text-[var(--color-gold)]" : "text-gray-300"}`} />
+                <Star
+                  className={`w-7 h-7 ${active ? "fill-[var(--color-gold)] text-[var(--color-gold)]" : "text-gray-300"}`}
+                />
               </button>
             );
           })}
@@ -106,7 +122,10 @@ export function ProductReviews({ productId }: { productId: string }) {
       ) : (
         <ul className="space-y-3">
           {reviews.map((r) => (
-            <li key={r.id} className="bg-white border border-[var(--color-hairline)] rounded-xl p-4">
+            <li
+              key={r.id}
+              className="bg-white border border-[var(--color-hairline)] rounded-xl p-4"
+            >
               <div className="flex justify-between items-center mb-1">
                 <span className="font-bold">{r.customer_name}</span>
                 <span className="text-xs text-[var(--color-ink-soft)]">
@@ -115,10 +134,15 @@ export function ProductReviews({ productId }: { productId: string }) {
               </div>
               <div className="flex mb-2">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`w-4 h-4 ${i < r.rating ? "fill-[var(--color-gold)] text-[var(--color-gold)]" : "text-gray-300"}`} />
+                  <Star
+                    key={i}
+                    className={`w-4 h-4 ${i < r.rating ? "fill-[var(--color-gold)] text-[var(--color-gold)]" : "text-gray-300"}`}
+                  />
                 ))}
               </div>
-              {r.comment && <p className="text-sm text-[var(--color-ink-soft)] leading-relaxed">{r.comment}</p>}
+              {r.comment && (
+                <p className="text-sm text-[var(--color-ink-soft)] leading-relaxed">{r.comment}</p>
+              )}
             </li>
           ))}
         </ul>

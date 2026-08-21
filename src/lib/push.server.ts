@@ -74,7 +74,10 @@ export async function notifyAdmin(input: NotifyInput): Promise<void> {
     const { data, error } = await supabaseAdmin
       .from("push_subscriptions")
       .select("id, endpoint, p256dh, auth");
-    if (error) { console.error("[push] list subs error:", error); return; }
+    if (error) {
+      console.error("[push] list subs error:", error);
+      return;
+    }
     subs = data ?? [];
   } catch (e) {
     console.error("[push] list subs failed:", e);
@@ -86,7 +89,15 @@ export async function notifyAdmin(input: NotifyInput): Promise<void> {
     subs.map(async (s) => {
       try {
         const payload = await buildPushPayload(
-          { data: { title: input.title, body: input.body, type: input.type, ref_id: input.ref_id ?? null }, options: { ttl: 3600 } },
+          {
+            data: {
+              title: input.title,
+              body: input.body,
+              type: input.type,
+              ref_id: input.ref_id ?? null,
+            },
+            options: { ttl: 3600 },
+          },
           { endpoint: s.endpoint, expirationTime: null, keys: { p256dh: s.p256dh, auth: s.auth } },
           keys,
         );
@@ -96,7 +107,8 @@ export async function notifyAdmin(input: NotifyInput): Promise<void> {
           body: payload.body as unknown as BodyInit,
         });
         if (res.status === 404 || res.status === 410) stale.push(s.endpoint);
-        else if (!res.ok) console.error("[push] send failed:", res.status, await res.text().catch(() => ""));
+        else if (!res.ok)
+          console.error("[push] send failed:", res.status, await res.text().catch(() => ""));
       } catch (e) {
         console.error("[push] send error:", e);
       }

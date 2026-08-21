@@ -86,7 +86,9 @@ export function HeroSlider() {
               src={s.url}
               alt={s.alt ?? ""}
               className={`w-full h-full object-cover ${
-                idx === i ? "scale-105 transition-transform duration-[6000ms] ease-out" : "scale-100"
+                idx === i
+                  ? "scale-105 transition-transform duration-[6000ms] ease-out"
+                  : "scale-100"
               }`}
               fetchPriority={idx === 0 ? "high" : "low"}
               loading={idx === 0 ? "eager" : "lazy"}

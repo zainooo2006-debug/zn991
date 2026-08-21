@@ -10,7 +10,6 @@ import { whatsappLink } from "@/lib/whatsapp";
 import { useCart } from "@/lib/cart";
 import { ProductReviews } from "@/components/shop/ProductReviews";
 
-
 const productQO = (id: string) =>
   queryOptions({ queryKey: ["product", id], queryFn: () => getProductById({ data: { id } }) });
 const productsQO = queryOptions({ queryKey: ["products"], queryFn: () => getProducts() });
@@ -18,14 +17,22 @@ const productsQO = queryOptions({ queryKey: ["products"], queryFn: () => getProd
 export const Route = createFileRoute("/product/$id")({
   head: ({ params, loaderData }) => {
     const data = loaderData as
-      | { name: string; description: string | null; images: string[]; price?: number | null; rating?: number | null }
+      | {
+          name: string;
+          description: string | null;
+          images: string[];
+          price?: number | null;
+          rating?: number | null;
+        }
       | undefined;
     const url = `https://zn991.lovable.app/product/${params.id}`;
     const title = data ? `${data.name} — زين` : "تفاصيل المنتج — زين";
     const desc = data?.description?.slice(0, 160) || "تفاصيل المنتج وخيارات الطلب.";
     const imgRaw = data?.images?.[0] ? resolveImage(data.images[0]) : null;
     const img = imgRaw
-      ? (imgRaw.startsWith("http") ? imgRaw : `https://zn991.lovable.app${imgRaw}`)
+      ? imgRaw.startsWith("http")
+        ? imgRaw
+        : `https://zn991.lovable.app${imgRaw}`
       : null;
     return {
       meta: [
@@ -35,7 +42,12 @@ export const Route = createFileRoute("/product/$id")({
         { property: "og:description", content: desc },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
-        ...(img ? [{ property: "og:image", content: img }, { name: "twitter:image", content: img }] : []),
+        ...(img
+          ? [
+              { property: "og:image", content: img },
+              { name: "twitter:image", content: img },
+            ]
+          : []),
       ],
       links: [{ rel: "canonical", href: url }],
       ...(data
@@ -98,12 +110,19 @@ function ProductPage() {
 
   if (!product) return null;
   const images = product.images.length > 0 ? product.images : ["placeholder"];
-  const similar = products.filter((p) => p.id !== product.id && p.category_id === product.category_id).slice(0, 4);
+  const similar = products
+    .filter((p) => p.id !== product.id && p.category_id === product.category_id)
+    .slice(0, 4);
 
   const waMsg = `مرحباً، أريد طلب المنتج: ${product.name} — السعر: ${product.price.toLocaleString()} ر.ي`;
 
   const addToCart = () => {
-    cart.add({ id: product.id, name: product.name, price: Number(product.price), image: resolveImage(images[0]) });
+    cart.add({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      image: resolveImage(images[0]),
+    });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -111,14 +130,21 @@ function ProductPage() {
   return (
     <Shell>
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <Link to="/shop" className="inline-flex items-center gap-1 text-sm text-[var(--color-ink-soft)] hover:text-[var(--color-gold)] mb-4">
+        <Link
+          to="/shop"
+          className="inline-flex items-center gap-1 text-sm text-[var(--color-ink-soft)] hover:text-[var(--color-gold)] mb-4"
+        >
           <ArrowRight className="w-4 h-4" /> العودة للمتجر
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <div className="aspect-square bg-[var(--color-surface)] rounded-2xl overflow-hidden border border-[var(--color-hairline)]">
-              <img src={resolveImage(images[activeIdx])} alt={product.name} className="w-full h-full object-cover" />
+              <img
+                src={resolveImage(images[activeIdx])}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
             </div>
             {images.length > 1 && (
               <div className="flex gap-2 mt-3">
@@ -150,29 +176,54 @@ function ProductPage() {
             <div className="flex items-baseline gap-3 mt-4">
               <span className="price text-3xl">{product.price.toLocaleString()} ر.ي</span>
               {product.old_price && (
-                <span className="text-[var(--color-ink-soft)] line-through">{product.old_price.toLocaleString()}</span>
+                <span className="text-[var(--color-ink-soft)] line-through">
+                  {product.old_price.toLocaleString()}
+                </span>
               )}
             </div>
 
-            <p className="text-[var(--color-ink-soft)] leading-relaxed mt-4">{product.description}</p>
+            <p className="text-[var(--color-ink-soft)] leading-relaxed mt-4">
+              {product.description}
+            </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <button onClick={addToCart} className="btn-gold">
-                {added ? <><Check className="w-4 h-4" /> تمت الإضافة</> : <><ShoppingCart className="w-4 h-4" /> أضف للسلة</>}
+                {added ? (
+                  <>
+                    <Check className="w-4 h-4" /> تمت الإضافة
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="w-4 h-4" /> أضف للسلة
+                  </>
+                )}
               </button>
-              <button onClick={() => { addToCart(); navigate({ to: "/checkout" }); }} className="btn-outline">
+              <button
+                onClick={() => {
+                  addToCart();
+                  navigate({ to: "/checkout" });
+                }}
+                className="btn-outline"
+              >
                 اشترِ الآن
               </button>
-              <a href={whatsappLink(waMsg)} target="_blank" rel="noopener noreferrer" className="btn-outline">
+              <a
+                href={whatsappLink(waMsg)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-outline"
+              >
                 <MessageCircle className="w-4 h-4 text-green-600" /> اطلب عبر واتساب
               </a>
               <Link
                 to="/assistant"
-                search={{
-                  id: product.id,
-                  name: product.name,
-                  image: resolveImage(images[0]),
-                } as never}
+                search={
+                  {
+                    id: product.id,
+                    name: product.name,
+                    image: resolveImage(images[0]),
+                  } as never
+                }
                 className="inline-flex items-center gap-2 bg-gradient-to-l from-amber-500 to-yellow-500 text-white font-bold px-4 py-2 rounded-full hover:shadow-md transition"
               >
                 <Sparkles className="w-4 h-4" /> تجربته على سيارتي بالذكاء الاصطناعي
@@ -193,7 +244,6 @@ function ProductPage() {
             </div>
           </div>
         )}
-
       </div>
     </Shell>
   );

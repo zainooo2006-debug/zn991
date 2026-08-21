@@ -2,9 +2,24 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Plus, Pencil, Trash2, Loader2, Save, X, Sparkles, Wand2, Copy, Check } from "lucide-react";
 import {
-  listKnowledge, saveKnowledge, toggleKnowledge, deleteKnowledge,
+  ArrowRight,
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  Save,
+  X,
+  Sparkles,
+  Wand2,
+  Copy,
+  Check,
+} from "lucide-react";
+import {
+  listKnowledge,
+  saveKnowledge,
+  toggleKnowledge,
+  deleteKnowledge,
   type KnowledgeItem,
 } from "@/lib/ai-knowledge.functions";
 import { generateProductContent, listProductsForContent } from "@/lib/ai-content.functions";
@@ -13,10 +28,7 @@ const TOKEN_KEY = "mycar_admin_token";
 
 export const Route = createFileRoute("/admin_/ai-training")({
   head: () => ({
-    meta: [
-      { title: "تدريب المساعد الذكي — زين" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تدريب المساعد الذكي — زين" }, { name: "robots", content: "noindex" }],
   }),
   component: AiTrainingPage,
 });
@@ -37,10 +49,11 @@ function AiTrainingPage() {
       <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
         <div className="max-w-md w-full bg-white rounded-2xl border border-slate-200 p-8 text-center">
           <h1 className="text-xl font-bold mb-2">مطلوب تسجيل الدخول</h1>
-          <p className="text-sm text-slate-600 mb-4">
-            الرجاء تسجيل الدخول من لوحة الإدارة أولاً.
-          </p>
-          <Link to="/admin" className="inline-block bg-amber-500 text-white px-6 py-2 rounded-full font-bold">
+          <p className="text-sm text-slate-600 mb-4">الرجاء تسجيل الدخول من لوحة الإدارة أولاً.</p>
+          <Link
+            to="/admin"
+            className="inline-block bg-amber-500 text-white px-6 py-2 rounded-full font-bold"
+          >
             الذهاب إلى لوحة الإدارة
           </Link>
         </div>
@@ -92,7 +105,9 @@ function TrainingUI() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!draft.content.trim()) return;
-    setBusy(true); setErr(null); setMsg(null);
+    setBusy(true);
+    setErr(null);
+    setMsg(null);
     try {
       await save({
         data: {
@@ -154,13 +169,20 @@ function TrainingUI() {
         <ContentGenerator />
 
         {/* Form */}
-        <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4">
+        <form
+          onSubmit={submit}
+          className="bg-white rounded-2xl border border-slate-200 p-5 space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-lg">
               {draft.id ? "تعديل معلومة" : "إضافة معلومة جديدة"}
             </h2>
             {draft.id && (
-              <button type="button" onClick={reset} className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={reset}
+                className="text-sm text-slate-500 hover:text-slate-800 flex items-center gap-1"
+              >
                 <X className="w-4 h-4" /> إلغاء التعديل
               </button>
             )}
@@ -204,8 +226,16 @@ function TrainingUI() {
             مفعّل — سيستخدمها المساعد في المحادثات
           </label>
 
-          {msg && <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">{msg}</div>}
-          {err && <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{err}</div>}
+          {msg && (
+            <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3">
+              {msg}
+            </div>
+          )}
+          {err && (
+            <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+              {err}
+            </div>
+          )}
 
           <div className="flex gap-2">
             <button
@@ -213,7 +243,13 @@ function TrainingUI() {
               disabled={busy || !draft.content.trim()}
               className="flex items-center gap-2 bg-gradient-to-l from-amber-500 to-yellow-500 text-white font-bold px-6 py-2.5 rounded-full disabled:opacity-50 hover:shadow-md transition"
             >
-              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : draft.id ? <Save className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+              {busy ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : draft.id ? (
+                <Save className="w-4 h-4" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
               {draft.id ? "حفظ التعديلات" : "إضافة"}
             </button>
           </div>
@@ -230,15 +266,22 @@ function TrainingUI() {
           ) : error ? (
             <div className="text-sm text-red-600">{(error as Error).message}</div>
           ) : !data || data.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-6">لا توجد معلومات محفوظة بعد. ابدأ بإضافة أول معلومة عن المتجر.</p>
+            <p className="text-sm text-slate-500 text-center py-6">
+              لا توجد معلومات محفوظة بعد. ابدأ بإضافة أول معلومة عن المتجر.
+            </p>
           ) : (
             <ul className="space-y-3">
               {data.map((item) => (
-                <li key={item.id} className={`border rounded-xl p-4 ${item.is_active ? "border-slate-200 bg-white" : "border-slate-200 bg-slate-50 opacity-70"}`}>
+                <li
+                  key={item.id}
+                  className={`border rounded-xl p-4 ${item.is_active ? "border-slate-200 bg-white" : "border-slate-200 bg-slate-50 opacity-70"}`}
+                >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-sm truncate">
-                        {item.title || <span className="text-slate-400 font-normal">بدون عنوان</span>}
+                        {item.title || (
+                          <span className="text-slate-400 font-normal">بدون عنوان</span>
+                        )}
                       </h3>
                       <p className="text-[11px] text-slate-400 mt-0.5">
                         آخر تعديل: {new Date(item.updated_at).toLocaleString("ar")}
@@ -251,15 +294,25 @@ function TrainingUI() {
                       >
                         {item.is_active ? "مفعّل" : "متوقف"}
                       </button>
-                      <button onClick={() => edit(item)} className="p-1.5 rounded-full hover:bg-slate-100 text-slate-600" aria-label="تعديل">
+                      <button
+                        onClick={() => edit(item)}
+                        className="p-1.5 rounded-full hover:bg-slate-100 text-slate-600"
+                        aria-label="تعديل"
+                      >
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button onClick={() => onDelete(item)} className="p-1.5 rounded-full hover:bg-red-50 text-red-600" aria-label="حذف">
+                      <button
+                        onClick={() => onDelete(item)}
+                        className="p-1.5 rounded-full hover:bg-red-50 text-red-600"
+                        aria-label="حذف"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-slate-700 whitespace-pre-wrap line-clamp-6">{item.content}</p>
+                  <p className="text-sm text-slate-700 whitespace-pre-wrap line-clamp-6">
+                    {item.content}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -271,8 +324,11 @@ function TrainingUI() {
 }
 
 type GenResult = {
-  title: string; description: string; features: string[];
-  marketing_post: string; hashtags: string[];
+  title: string;
+  description: string;
+  features: string[];
+  marketing_post: string;
+  hashtags: string[];
 };
 
 function ContentGenerator() {
@@ -295,22 +351,30 @@ function ContentGenerator() {
     const parts = [
       `المنتج: ${p.name}`,
       p.description ? `الوصف الحالي: ${p.description}` : null,
-      p.price != null ? `السعر: ${p.price} ر.ي${p.old_price ? ` (بدلاً من ${p.old_price})` : ""}` : null,
+      p.price != null
+        ? `السعر: ${p.price} ر.ي${p.old_price ? ` (بدلاً من ${p.old_price})` : ""}`
+        : null,
       "المطلوب: توليد منشور تسويقي جذاب ومزايا محدثة.",
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
     setBrief(parts);
   }
 
   async function run(e: React.FormEvent) {
     e.preventDefault();
     if (!brief.trim()) return;
-    setBusy(true); setErr(null); setOut(null);
+    setBusy(true);
+    setErr(null);
+    setOut(null);
     try {
       const r = await gen({ data: { password: getToken(), brief: brief.trim(), kind: "both" } });
       setOut(r as GenResult);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "خطأ");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function copy(k: string, text: string) {
@@ -318,7 +382,9 @@ function ContentGenerator() {
       await navigator.clipboard.writeText(text);
       setCopied(k);
       setTimeout(() => setCopied(null), 1500);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
@@ -326,7 +392,6 @@ function ContentGenerator() {
       <div className="flex items-center gap-2 mb-4">
         <Wand2 className="w-5 h-5 text-amber-600" />
         <h2 className="font-bold text-lg">مولّد محتوى المنتجات والتسويق</h2>
-
       </div>
       <p className="text-sm text-slate-500 mb-3">
         اختر منتجًا موجودًا من المتجر لتعبئة الوصف تلقائيًا، أو اكتب فكرة قصيرة يدويًا.
@@ -334,7 +399,9 @@ function ContentGenerator() {
 
       {products && products.length > 0 && (
         <div className="mb-3">
-          <label className="block text-xs font-bold text-slate-600 mb-1">اختر منتجًا من المتجر (اختياري):</label>
+          <label className="block text-xs font-bold text-slate-600 mb-1">
+            اختر منتجًا من المتجر (اختياري):
+          </label>
           <select
             onChange={(e) => e.target.value && pickProduct(e.target.value)}
             className="w-full border-2 border-slate-200 focus:border-amber-500 outline-none rounded-xl px-3 py-2 text-sm bg-white"
@@ -342,12 +409,14 @@ function ContentGenerator() {
           >
             <option value="">— بدون —</option>
             {products.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}{p.price != null ? ` — ${p.price} ر.ي` : ""}</option>
+              <option key={p.id} value={p.id}>
+                {p.name}
+                {p.price != null ? ` — ${p.price} ر.ي` : ""}
+              </option>
             ))}
           </select>
         </div>
       )}
-
 
       <form onSubmit={run} className="space-y-3">
         <textarea
@@ -368,7 +437,11 @@ function ContentGenerator() {
         </button>
       </form>
 
-      {err && <div className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">{err}</div>}
+      {err && (
+        <div className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3">
+          {err}
+        </div>
+      )}
 
       {out && (
         <div className="mt-5 space-y-4">
@@ -376,31 +449,57 @@ function ContentGenerator() {
             [
               { k: "title", label: "العنوان", value: out.title, multi: false },
               { k: "description", label: "الوصف", value: out.description, multi: true },
-              { k: "features", label: "المزايا", value: (out.features || []).map((f, i) => `${i + 1}. ${f}`).join("\n"), multi: true },
-              { k: "marketing_post", label: "منشور تسويقي", value: out.marketing_post, multi: true },
-              { k: "hashtags", label: "الهاشتاقات", value: (out.hashtags || []).join(" "), multi: false },
+              {
+                k: "features",
+                label: "المزايا",
+                value: (out.features || []).map((f, i) => `${i + 1}. ${f}`).join("\n"),
+                multi: true,
+              },
+              {
+                k: "marketing_post",
+                label: "منشور تسويقي",
+                value: out.marketing_post,
+                multi: true,
+              },
+              {
+                k: "hashtags",
+                label: "الهاشتاقات",
+                value: (out.hashtags || []).join(" "),
+                multi: false,
+              },
             ] as const
-          ).map((f) => f.value ? (
-            <div key={f.k} className="border border-slate-200 rounded-xl p-3 bg-slate-50">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-bold text-slate-600">{f.label}</span>
-                <button
-                  onClick={() => copy(f.k, f.value)}
-                  className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white border border-slate-200 hover:bg-slate-100"
-                >
-                  {copied === f.k ? <><Check className="w-3 h-3 text-green-600" /> تم النسخ</> : <><Copy className="w-3 h-3" /> نسخ</>}
-                </button>
+          ).map((f) =>
+            f.value ? (
+              <div key={f.k} className="border border-slate-200 rounded-xl p-3 bg-slate-50">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-bold text-slate-600">{f.label}</span>
+                  <button
+                    onClick={() => copy(f.k, f.value)}
+                    className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-white border border-slate-200 hover:bg-slate-100"
+                  >
+                    {copied === f.k ? (
+                      <>
+                        <Check className="w-3 h-3 text-green-600" /> تم النسخ
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3 h-3" /> نسخ
+                      </>
+                    )}
+                  </button>
+                </div>
+                {f.multi ? (
+                  <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">
+                    {f.value}
+                  </p>
+                ) : (
+                  <p className="text-sm text-slate-800 font-medium">{f.value}</p>
+                )}
               </div>
-              {f.multi ? (
-                <p className="text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">{f.value}</p>
-              ) : (
-                <p className="text-sm text-slate-800 font-medium">{f.value}</p>
-              )}
-            </div>
-          ) : null)}
+            ) : null,
+          )}
         </div>
       )}
     </section>
   );
 }
-

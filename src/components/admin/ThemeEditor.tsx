@@ -2,11 +2,23 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Trash2, Save, Loader2, Star, Copy, Download, Upload, Palette, Check, Sparkles,
+  Plus,
+  Trash2,
+  Save,
+  Loader2,
+  Star,
+  Copy,
+  Download,
+  Upload,
+  Palette,
+  Check,
+  Sparkles,
 } from "lucide-react";
 import { wbList, wbUpsert, wbDelete } from "@/lib/website-builder.functions";
 import {
-  DEFAULT_THEME_JSON, setActiveWebsiteTheme, duplicateWebsiteTheme,
+  DEFAULT_THEME_JSON,
+  setActiveWebsiteTheme,
+  duplicateWebsiteTheme,
 } from "@/lib/theme-engine.functions";
 import type { LivePayload } from "./LivePreview";
 
@@ -80,7 +92,9 @@ const OCCASION_PRESETS: { key: string; label: string; build: () => any }[] = [
 ];
 
 /** Try to render any color string in a native color input; fall back to text. */
-function isHex(v: string) { return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v); }
+function isHex(v: string) {
+  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v);
+}
 
 export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) => void }) {
   const list = useServerFn(wbList);
@@ -91,7 +105,10 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
   const qc = useQueryClient();
 
   const key = ["wb", "website_themes"];
-  const q = useQuery({ queryKey: key, queryFn: () => list({ data: { table: "website_themes" as any } }) });
+  const q = useQuery({
+    queryKey: key,
+    queryFn: () => list({ data: { table: "website_themes" as any } }),
+  });
   const themes: ThemeRow[] = (q.data as any) ?? [];
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -126,32 +143,45 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
   const currentActive = themes.find((t) => t.is_active);
 
   const createNew = async () => {
-    const row: any = await upsert({ data: {
-      table: "website_themes" as any,
-      values: { name: `Theme ${themes.length + 1}`, theme_json: DEFAULT_THEME_JSON, is_active: themes.length === 0 },
-    }});
+    const row: any = await upsert({
+      data: {
+        table: "website_themes" as any,
+        values: {
+          name: `Theme ${themes.length + 1}`,
+          theme_json: DEFAULT_THEME_JSON,
+          is_active: themes.length === 0,
+        },
+      },
+    });
     await qc.invalidateQueries({ queryKey: key });
     setSelectedId(row?.id ?? null);
   };
 
-  const createFromPreset = async (preset: typeof OCCASION_PRESETS[number]) => {
-    const row: any = await upsert({ data: {
-      table: "website_themes" as any,
-      values: { name: preset.label, theme_json: preset.build(), is_active: false },
-    }});
+  const createFromPreset = async (preset: (typeof OCCASION_PRESETS)[number]) => {
+    const row: any = await upsert({
+      data: {
+        table: "website_themes" as any,
+        values: { name: preset.label, theme_json: preset.build(), is_active: false },
+      },
+    });
     await qc.invalidateQueries({ queryKey: key });
     setSelectedId(row?.id ?? null);
-    setMsg(`تم إنشاء هوية "${preset.label}" — عدّل الألوان/الصور ثم اضغط "تفعيل على الموقع" عند الجاهزية.`);
+    setMsg(
+      `تم إنشاء هوية "${preset.label}" — عدّل الألوان/الصور ثم اضغط "تفعيل على الموقع" عند الجاهزية.`,
+    );
   };
 
   const save = async () => {
     if (!selectedId) return;
-    setSaving(true); setMsg(null);
+    setSaving(true);
+    setMsg(null);
     try {
-      await upsert({ data: {
-        table: "website_themes" as any,
-        values: { id: selectedId, name, theme_json: draft },
-      }});
+      await upsert({
+        data: {
+          table: "website_themes" as any,
+          values: { id: selectedId, name, theme_json: draft },
+        },
+      });
       await qc.invalidateQueries({ queryKey: key });
       await qc.invalidateQueries({ queryKey: ["active-website-theme"] });
       setMsg("تم الحفظ ✓");
@@ -159,20 +189,26 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
       onLiveChange({ kind: "theme", json: draft });
     } catch (e) {
       setMsg((e as Error).message);
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const activate = async () => {
     if (!selectedId) return;
-    setSaving(true); setMsg(null);
+    setSaving(true);
+    setMsg(null);
     try {
       await setActive({ data: { id: selectedId } });
       await qc.invalidateQueries({ queryKey: key });
       await qc.invalidateQueries({ queryKey: ["active-website-theme"] });
       setMsg("تم تفعيل هذا المظهر على الموقع ✓");
       onLiveChange({ kind: "reload" });
-    } catch (e) { setMsg((e as Error).message); }
-    finally { setSaving(false); }
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const duplicate = async () => {
@@ -186,16 +222,21 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
     if (!selectedId) return;
     if (!confirm("حذف هذا المظهر؟")) return;
     await del({ data: { table: "website_themes" as any, id: selectedId } });
-    setSelectedId(null); setDraft(null);
+    setSelectedId(null);
+    setDraft(null);
     qc.invalidateQueries({ queryKey: key });
   };
 
   const exportJson = () => {
     if (!draft) return;
-    const blob = new Blob([JSON.stringify({ name, theme_json: draft }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ name, theme_json: draft }, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `theme-${(name || "theme").replace(/\s+/g, "-")}.json`; a.click();
+    a.href = url;
+    a.download = `theme-${(name || "theme").replace(/\s+/g, "-")}.json`;
+    a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -204,14 +245,18 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
       const parsed = JSON.parse(await file.text());
       const tj = parsed.theme_json ?? parsed;
       const nm = parsed.name ?? `Imported ${Date.now()}`;
-      const row: any = await upsert({ data: {
-        table: "website_themes" as any,
-        values: { name: nm, theme_json: mergeDefaults(tj), is_active: false },
-      }});
+      const row: any = await upsert({
+        data: {
+          table: "website_themes" as any,
+          values: { name: nm, theme_json: mergeDefaults(tj), is_active: false },
+        },
+      });
       await qc.invalidateQueries({ queryKey: key });
       if (row?.id) setSelectedId(row.id);
       setMsg("تم الاستيراد ✓");
-    } catch (e) { alert((e as Error).message); }
+    } catch (e) {
+      alert((e as Error).message);
+    }
   };
 
   const patch = (path: string[], value: string) => {
@@ -256,20 +301,29 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
           <div className="flex gap-2 flex-wrap">
             <label className="btn-outline cursor-pointer">
               <Upload className="w-4 h-4" /> استيراد
-              <input type="file" accept="application/json" className="hidden"
-                onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])} />
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])}
+              />
             </label>
-            <button onClick={createNew} className="btn-primary"><Plus className="w-4 h-4" /> جديد</button>
+            <button onClick={createNew} className="btn-primary">
+              <Plus className="w-4 h-4" /> جديد
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           {themes.map((t) => (
-            <button key={t.id} onClick={() => setSelectedId(t.id)}
+            <button
+              key={t.id}
+              onClick={() => setSelectedId(t.id)}
               className={`text-right p-3 rounded-lg border transition ${
                 selectedId === t.id
                   ? "border-[var(--color-gold)] bg-[var(--color-gold-soft)]"
                   : "border-[var(--color-border)] bg-[var(--color-bg)] hover:border-[var(--color-gold)]"
-              }`}>
+              }`}
+            >
               <div className="flex items-center justify-between gap-2">
                 <div className="font-bold truncate">{t.name}</div>
                 {t.is_active && (
@@ -280,8 +334,11 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
               </div>
               <div className="flex gap-1 mt-2">
                 {["primary", "background", "gold", "ink", "accent"].map((k) => (
-                  <span key={k} className="w-4 h-4 rounded-full border border-black/10"
-                    style={{ background: t.theme_json?.colors?.[k] ?? "#ccc" }} />
+                  <span
+                    key={k}
+                    className="w-4 h-4 rounded-full border border-black/10"
+                    style={{ background: t.theme_json?.colors?.[k] ?? "#ccc" }}
+                  />
                 ))}
               </div>
             </button>
@@ -300,19 +357,33 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
           <div className="flex flex-wrap items-end gap-2">
             <label className="flex-1 min-w-[200px]">
               <div className="text-xs font-bold mb-1">اسم المظهر</div>
-              <input value={name} onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]" />
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)]"
+              />
             </label>
             <div className="flex gap-2 flex-wrap">
               <button onClick={save} disabled={saving} className="btn-primary">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} حفظ
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}{" "}
+                حفظ
               </button>
               <button onClick={activate} disabled={saving} className="btn-gold">
                 <Star className="w-4 h-4" /> تفعيل على الموقع
               </button>
-              <button onClick={duplicate} className="btn-outline"><Copy className="w-4 h-4" /> تكرار</button>
-              <button onClick={exportJson} className="btn-outline"><Download className="w-4 h-4" /> تصدير</button>
-              <button onClick={remove} className="btn-outline text-red-500"><Trash2 className="w-4 h-4" /></button>
+              <button onClick={duplicate} className="btn-outline">
+                <Copy className="w-4 h-4" /> تكرار
+              </button>
+              <button onClick={exportJson} className="btn-outline">
+                <Download className="w-4 h-4" /> تصدير
+              </button>
+              <button onClick={remove} className="btn-outline text-red-500">
+                <Trash2 className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -329,13 +400,24 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
                 const v = draft.colors?.[k] ?? "";
                 return (
                   <div key={k} className="flex items-center gap-2">
-                    <input type="color" value={isHex(v) ? v : "#ffffff"} disabled={!isHex(v)}
+                    <input
+                      type="color"
+                      value={isHex(v) ? v : "#ffffff"}
+                      disabled={!isHex(v)}
                       onChange={(e) => patch(["colors", k], e.target.value)}
-                      className="w-10 h-10 rounded border border-[var(--color-border)] shrink-0" />
+                      className="w-10 h-10 rounded border border-[var(--color-border)] shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold">{label} <span className="text-[var(--color-ink-soft)] font-normal">({k})</span></div>
-                      <input value={v} onChange={(e) => patch(["colors", k], e.target.value)} dir="ltr"
-                        className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                      <div className="text-xs font-bold">
+                        {label}{" "}
+                        <span className="text-[var(--color-ink-soft)] font-normal">({k})</span>
+                      </div>
+                      <input
+                        value={v}
+                        onChange={(e) => patch(["colors", k], e.target.value)}
+                        dir="ltr"
+                        className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                      />
                     </div>
                   </div>
                 );
@@ -347,11 +429,17 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
             {(["sans", "heading"] as const).map((k) => (
               <div key={k} className="mb-2">
                 <div className="text-xs font-bold mb-1">{k}</div>
-                <input value={draft.fonts?.[k] ?? ""} onChange={(e) => patch(["fonts", k], e.target.value)}
-                  list={`fonts-${k}`} dir="ltr"
-                  className="w-full px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-xs font-mono" />
+                <input
+                  value={draft.fonts?.[k] ?? ""}
+                  onChange={(e) => patch(["fonts", k], e.target.value)}
+                  list={`fonts-${k}`}
+                  dir="ltr"
+                  className="w-full px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] text-xs font-mono"
+                />
                 <datalist id={`fonts-${k}`}>
-                  {FONT_PRESETS.map((f) => <option key={f} value={f} />)}
+                  {FONT_PRESETS.map((f) => (
+                    <option key={f} value={f} />
+                  ))}
                 </datalist>
               </div>
             ))}
@@ -362,8 +450,12 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
               {RADIUS_KEYS.map((k) => (
                 <label key={k}>
                   <div className="text-xs font-bold mb-1">{k}</div>
-                  <input value={draft.radius?.[k] ?? ""} onChange={(e) => patch(["radius", k], e.target.value)} dir="ltr"
-                    className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                  <input
+                    value={draft.radius?.[k] ?? ""}
+                    onChange={(e) => patch(["radius", k], e.target.value)}
+                    dir="ltr"
+                    className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                  />
                 </label>
               ))}
             </div>
@@ -374,8 +466,12 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
               {SPACING_KEYS.map((k) => (
                 <label key={k}>
                   <div className="text-xs font-bold mb-1">{k}</div>
-                  <input value={draft.spacing?.[k] ?? ""} onChange={(e) => patch(["spacing", k], e.target.value)} dir="ltr"
-                    className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                  <input
+                    value={draft.spacing?.[k] ?? ""}
+                    onChange={(e) => patch(["spacing", k], e.target.value)}
+                    dir="ltr"
+                    className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                  />
                 </label>
               ))}
             </div>
@@ -386,8 +482,12 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
               {SHADOW_KEYS.map((k) => (
                 <label key={k}>
                   <div className="text-xs font-bold mb-1">shadow-{k}</div>
-                  <input value={draft.shadows?.[k] ?? ""} onChange={(e) => patch(["shadows", k], e.target.value)} dir="ltr"
-                    className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                  <input
+                    value={draft.shadows?.[k] ?? ""}
+                    onChange={(e) => patch(["shadows", k], e.target.value)}
+                    dir="ltr"
+                    className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                  />
                 </label>
               ))}
             </div>
@@ -401,8 +501,14 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
                 { label: "متوسط", v: "0.75rem" },
                 { label: "حاد", v: "0.125rem" },
               ].map((s) => (
-                <button key={s.v} type="button" onClick={() => patch(["buttons", "primary-radius"], s.v)}
-                  className="btn-outline text-xs">{s.label}</button>
+                <button
+                  key={s.v}
+                  type="button"
+                  onClick={() => patch(["buttons", "primary-radius"], s.v)}
+                  className="btn-outline text-xs"
+                >
+                  {s.label}
+                </button>
               ))}
             </div>
             {[
@@ -411,29 +517,48 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
               { k: "primary-radius", label: "زاوية الزر (radius)" },
             ].map(({ k, label }) => (
               <div key={k} className="mb-2">
-                <div className="text-xs font-bold mb-1">{label} <span className="text-[var(--color-ink-soft)] font-normal">({k})</span></div>
-                <input value={draft.buttons?.[k] ?? ""} onChange={(e) => patch(["buttons", k], e.target.value)} dir="ltr"
-                  className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                <div className="text-xs font-bold mb-1">
+                  {label} <span className="text-[var(--color-ink-soft)] font-normal">({k})</span>
+                </div>
+                <input
+                  value={draft.buttons?.[k] ?? ""}
+                  onChange={(e) => patch(["buttons", k], e.target.value)}
+                  dir="ltr"
+                  className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                />
               </div>
             ))}
           </Section>
 
           <Section title="ألوان الوضع الليلي (اختياري)">
             <p className="text-xs text-[var(--color-ink-soft)] mb-3">
-              اتركها فارغة لأي لون تريد أن يبقى كما هو في الوضع الليلي. عبّي فقط الألوان التي تحتاج قيمة مختلفة في الوضع الليلي.
+              اتركها فارغة لأي لون تريد أن يبقى كما هو في الوضع الليلي. عبّي فقط الألوان التي تحتاج
+              قيمة مختلفة في الوضع الليلي.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {COLOR_KEYS.map(({ k, label }) => {
                 const v = draft.colors_dark?.[k] ?? "";
                 return (
                   <div key={k} className="flex items-center gap-2">
-                    <input type="color" value={isHex(v) ? v : "#000000"} disabled={!isHex(v)}
+                    <input
+                      type="color"
+                      value={isHex(v) ? v : "#000000"}
+                      disabled={!isHex(v)}
                       onChange={(e) => patch(["colors_dark", k], e.target.value)}
-                      className="w-10 h-10 rounded border border-[var(--color-border)] shrink-0" />
+                      className="w-10 h-10 rounded border border-[var(--color-border)] shrink-0"
+                    />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold">{label} <span className="text-[var(--color-ink-soft)] font-normal">({k})</span></div>
-                      <input value={v} placeholder="نفس لون النهار" onChange={(e) => patch(["colors_dark", k], e.target.value)} dir="ltr"
-                        className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                      <div className="text-xs font-bold">
+                        {label}{" "}
+                        <span className="text-[var(--color-ink-soft)] font-normal">({k})</span>
+                      </div>
+                      <input
+                        value={v}
+                        placeholder="نفس لون النهار"
+                        onChange={(e) => patch(["colors_dark", k], e.target.value)}
+                        dir="ltr"
+                        className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                      />
                     </div>
                   </div>
                 );
@@ -444,8 +569,11 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
           <Section title="الخلفية">
             <div className="mb-3">
               <div className="text-xs font-bold mb-1">نوع الخلفية</div>
-              <select value={draft.background?.type ?? "color"} onChange={(e) => patch(["background", "type"], e.target.value)}
-                className="w-full px-2 py-1.5 text-xs rounded bg-[var(--color-bg)] border border-[var(--color-border)]">
+              <select
+                value={draft.background?.type ?? "color"}
+                onChange={(e) => patch(["background", "type"], e.target.value)}
+                className="w-full px-2 py-1.5 text-xs rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+              >
                 <option value="color">لون ثابت</option>
                 <option value="gradient">تدرج لوني (CSS gradient)</option>
                 <option value="image">صورة</option>
@@ -453,23 +581,47 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
             </div>
             <div className="mb-3">
               <div className="text-xs font-bold mb-1">
-                {draft.background?.type === "image" ? "رابط الصورة" : draft.background?.type === "gradient" ? "قيمة CSS gradient" : "قيمة اللون (hex)"}
+                {draft.background?.type === "image"
+                  ? "رابط الصورة"
+                  : draft.background?.type === "gradient"
+                    ? "قيمة CSS gradient"
+                    : "قيمة اللون (hex)"}
               </div>
-              <input value={draft.background?.value ?? ""} onChange={(e) => patch(["background", "value"], e.target.value)} dir="ltr"
-                placeholder={draft.background?.type === "gradient" ? "linear-gradient(135deg, #0E6E4E, #123326)" : draft.background?.type === "image" ? "https://..." : "#FAF7EE"}
-                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+              <input
+                value={draft.background?.value ?? ""}
+                onChange={(e) => patch(["background", "value"], e.target.value)}
+                dir="ltr"
+                placeholder={
+                  draft.background?.type === "gradient"
+                    ? "linear-gradient(135deg, #0E6E4E, #123326)"
+                    : draft.background?.type === "image"
+                      ? "https://..."
+                      : "#FAF7EE"
+                }
+                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+              />
               {draft.background?.type === "image" && (
                 <p className="text-[10px] text-[var(--color-ink-soft)] mt-1">
-                  ارفع الصورة من أي حقل صورة في لوحة التحكم أولاً (مثل صورة منتج أو خدمة)، ثم الصق رابطها هنا.
+                  ارفع الصورة من أي حقل صورة في لوحة التحكم أولاً (مثل صورة منتج أو خدمة)، ثم الصق
+                  رابطها هنا.
                 </p>
               )}
             </div>
             {draft.background?.type === "image" && (
               <div>
-                <div className="text-xs font-bold mb-1">تعتيم فوق الصورة (0 = بدون، 1 = أسود كامل)</div>
-                <input type="number" min={0} max={1} step={0.05} value={draft.background?.overlay_opacity ?? "0"}
-                  onChange={(e) => patch(["background", "overlay_opacity"], e.target.value)} dir="ltr"
-                  className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                <div className="text-xs font-bold mb-1">
+                  تعتيم فوق الصورة (0 = بدون، 1 = أسود كامل)
+                </div>
+                <input
+                  type="number"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={draft.background?.overlay_opacity ?? "0"}
+                  onChange={(e) => patch(["background", "overlay_opacity"], e.target.value)}
+                  dir="ltr"
+                  className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+                />
               </div>
             )}
           </Section>
@@ -477,17 +629,28 @@ export function ThemeEditor({ onLiveChange }: { onLiveChange: (p: LivePayload) =
           <Section title="الشعار والزخارف">
             <div className="mb-3">
               <div className="text-xs font-bold mb-1">شعار مخصص لهذه الهوية (اختياري)</div>
-              <input value={draft.logo_url ?? ""} onChange={(e) => patch(["logo_url"], e.target.value)} dir="ltr"
+              <input
+                value={draft.logo_url ?? ""}
+                onChange={(e) => patch(["logo_url"], e.target.value)}
+                dir="ltr"
                 placeholder="https://... — اتركه فارغاً لاستخدام الشعار الافتراضي"
-                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+              />
             </div>
             <div>
-              <div className="text-xs font-bold mb-1">صورة زخرفية فوق الموقع (اختياري، مثل نقوش أو هلال زاوية)</div>
-              <input value={draft.decorative_url ?? ""} onChange={(e) => patch(["decorative_url"], e.target.value)} dir="ltr"
+              <div className="text-xs font-bold mb-1">
+                صورة زخرفية فوق الموقع (اختياري، مثل نقوش أو هلال زاوية)
+              </div>
+              <input
+                value={draft.decorative_url ?? ""}
+                onChange={(e) => patch(["decorative_url"], e.target.value)}
+                dir="ltr"
                 placeholder="https://..."
-                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]" />
+                className="w-full px-2 py-1 text-xs font-mono rounded bg-[var(--color-bg)] border border-[var(--color-border)]"
+              />
               <p className="text-[10px] text-[var(--color-ink-soft)] mt-1">
-                يفضّل صورة PNG بخلفية شفافة، بحجم معقول حتى لا تُبطئ تحميل الموقع لزوار الإنترنت الضعيف.
+                يفضّل صورة PNG بخلفية شفافة، بحجم معقول حتى لا تُبطئ تحميل الموقع لزوار الإنترنت
+                الضعيف.
               </p>
             </div>
           </Section>
@@ -505,8 +668,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   const [open, setOpen] = useState(true);
   return (
     <div className="border border-[var(--color-border)] rounded-lg">
-      <button onClick={() => setOpen((v) => !v)}
-        className="w-full text-right px-3 py-2 font-bold text-sm bg-[var(--color-bg)] rounded-t-lg">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full text-right px-3 py-2 font-bold text-sm bg-[var(--color-bg)] rounded-t-lg"
+      >
         {open ? "▼" : "◀"} {title}
       </button>
       {open && <div className="p-3">{children}</div>}
@@ -518,15 +683,27 @@ function RawJsonEditor({ value, onChange }: { value: any; onChange: (v: any) => 
   const [text, setText] = useState(() => JSON.stringify(value, null, 2));
   const [err, setErr] = useState<string | null>(null);
   const stringified = useMemo(() => JSON.stringify(value, null, 2), [value]);
-  useEffect(() => { setText(stringified); }, [stringified]);
+  useEffect(() => {
+    setText(stringified);
+  }, [stringified]);
   return (
     <div>
-      <textarea value={text} onChange={(e) => {
-        setText(e.target.value);
-        try { onChange(JSON.parse(e.target.value)); setErr(null); }
-        catch (ex) { setErr((ex as Error).message); }
-      }} rows={12} spellCheck={false} dir="ltr"
-        className="w-full px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] font-mono text-xs" />
+      <textarea
+        value={text}
+        onChange={(e) => {
+          setText(e.target.value);
+          try {
+            onChange(JSON.parse(e.target.value));
+            setErr(null);
+          } catch (ex) {
+            setErr((ex as Error).message);
+          }
+        }}
+        rows={12}
+        spellCheck={false}
+        dir="ltr"
+        className="w-full px-3 py-2 rounded-lg bg-[var(--color-bg)] border border-[var(--color-border)] font-mono text-xs"
+      />
       {err && <div className="text-xs mt-1 text-red-500">{err}</div>}
     </div>
   );

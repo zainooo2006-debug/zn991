@@ -9,9 +9,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
-  );
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
 
 // ===== إشعارات المتصفح (Web Push) =====
@@ -27,13 +25,17 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: self.location.origin + "/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
-      badge: self.location.origin + "/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
+      icon:
+        self.location.origin +
+        "/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
+      badge:
+        self.location.origin +
+        "/__l5e/assets-v1/8a480b10-0c8e-47b8-b89b-bde1e2cd54c8/zain-logo.png",
       dir: "rtl",
       lang: "ar",
       tag: payload.ref_id || undefined,
       data: { url: "/admin", type: payload.type || null, ref_id: payload.ref_id || null },
-    })
+    }),
   );
 });
 
@@ -46,6 +48,6 @@ self.addEventListener("notificationclick", (event) => {
         if (client.url.includes("/admin") && "focus" in client) return client.focus();
       }
       return self.clients.openWindow(url);
-    })
+    }),
   );
 });
