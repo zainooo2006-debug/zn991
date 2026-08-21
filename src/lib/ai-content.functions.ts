@@ -1,34 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createHmac, timingSafeEqual } from "crypto";
-
-function getSessionSecret(): string {
-  const s = process.env.ADMIN_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!s) throw new Error("Server misconfigured");
-  return s;
-}
-
-function assertAdmin(token: string | undefined | null) {
-  if (!token || typeof token !== "string" || !token.includes(".")) throw new Error("غير مصرح");
-  const [body, sig] = token.split(".");
-  const expected = createHmac("sha256", getSessionSecret()).update(body).digest("hex");
-  const a = Buffer.from(sig, "hex");
-  const b = Buffer.from(expected, "hex");
-  if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("غير مصرح");
-  let payload: { exp?: number };
-  try {
-    payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-  } catch {
-    throw new Error("غير مصرح");
-  }
-  if (!payload.exp || Date.now() > payload.exp) throw new Error("انتهت الجلسة");
-}
+import { assertAdmin } from "./admin-auth.server";
 
 const Input = z.object({
   password: z.string(),
   brief: z.string().trim().min(3).max(2000),
   kind: z.enum(["product", "marketing", "both"]).default("both"),
 });
+
 
 export const generateProductContent = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
