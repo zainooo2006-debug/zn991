@@ -82,22 +82,6 @@ export const deletePushCampaign = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-/* ============ Public: click tracking (called by the service worker when a
-   customer taps a campaign notification) ============ */
-
-export const trackCampaignClick = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ campaign_id: z.string().uuid() }).parse(d))
-  .handler(async ({ data }) => {
-    const { data: row } = await supabaseAdmin
-      .from("push_campaigns")
-      .select("click_count")
-      .eq("id", data.campaign_id)
-      .maybeSingle();
-    if (!row) return { ok: false };
-    const { error } = await supabaseAdmin
-      .from("push_campaigns")
-      .update({ click_count: (row.click_count ?? 0) + 1 })
-      .eq("id", data.campaign_id);
-    if (error) console.error("[push-campaigns] click tracking error:", error);
-    return { ok: true };
-  });
+// ملاحظة: تتبع النقر على الإشعار مو هنا — الـ Service Worker ما يقدر يستدعي
+// TanStack server functions مباشرة، فتتبع النقر يمر عبر مسار HTTP عادي:
+// src/routes/api/track-click.ts
