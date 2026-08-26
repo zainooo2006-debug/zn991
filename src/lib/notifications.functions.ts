@@ -52,6 +52,60 @@ export const unsubscribePush = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Customer-facing push subscribe/unsubscribe — intentionally public (no admin
+// password), since most customers check out as guests. The endpoint+keys pair
+// is an opaque, unguessable capability issued by the browser's PushManager,
+// so no additional auth is needed to register it. Always stored with
+// subscriber_type "customer" so these devices never receive admin-only
+// alerts (see notifyAdmin in push.server.ts).
+export const subscribeCustomerPush = createServerFn({ method: "POST" })
+  .inputValidator((d) =>
+    z
+      .object({
+        endpoint: z.string().url().max(1000),
+        keys: z.object({ p256dh: z.string().min(1).max(500), auth: z.string().min(1).max(500) }),
+        device_type: z.enum(["android", "ios", "desktop", "unknown"]).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("push_subscriptions").upsert(
+      {
+        endpoint: data.endpoint,
+        p256dh: data.keys.p256dh,
+        auth: data.keys.auth,
+        subscriber_type: "customer",
+        device_type: data.device_type ?? "unknown",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "endpoint" },
+    );
+    if (error) {
+      console.error("[push] customer subscribe error:", error);
+      throw new Error("تعذّر تفعيل الإشعارات");
+    }
+    return { ok: true };
+  });
+
+export const unsubscribeCustomerPush = createServerFn({ method: "POST" })
+  .inputValidator((d) => z.object({ endpoint: z.string().url().max(1000) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Scoped to subscriber_type "customer" so this endpoint can never be used
+    // to remove an admin device's subscription.
+    const { error } = await supabaseAdmin
+      .from("push_subscriptions")
+      .delete()
+      .eq("endpoint", data.endpoint)
+      .eq("subscriber_type", "customer");
+    if (error) {
+      console.error("[push] customer unsubscribe error:", error);
+      throw new Error("تعذّر إلغاء الإشعارات");
+    }
+    return { ok: true };
+  });
+
 export const listNotifications = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string() }).parse(d))
   .handler(async ({ data }) => {
