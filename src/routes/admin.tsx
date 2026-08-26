@@ -27,6 +27,7 @@ import { ReviewsPanel } from "@/components/admin/ReviewsPanel";
 import { CustomerReviewsPanel } from "@/components/admin/CustomerReviewsPanel";
 import { InstallationCentersPanel } from "@/components/admin/InstallationCentersPanel";
 import { HeroSlidesPanel } from "@/components/admin/HeroSlidesPanel";
+import { PushCampaignsPanel } from "@/components/admin/PushCampaignsPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -50,6 +51,7 @@ type Tab =
   | "customer-reviews"
   | "centers"
   | "hero"
+  | "push-campaigns"
   | "w-overview"
   | "w-warranties"
   | "w-customers"
@@ -142,6 +144,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         { id: "customer-reviews", label: "آراء العملاء" },
         { id: "centers", label: "مراكز التركيب" },
         { id: "hero", label: "إدارة السلايدر" },
+        { id: "push-campaigns", label: "إشعارات العملاء 🔔" },
         { id: "home-builder", label: "بناء الرئيسية 🧩" },
         { id: "site-pages", label: "صفحات الموقع" },
         { id: "content", label: "المحتوى (متقدم)" },
@@ -219,6 +222,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {tab === "customer-reviews" && <CustomerReviewsPanel />}
           {tab === "centers" && <InstallationCentersPanel />}
           {tab === "hero" && <HeroSlidesPanel />}
+          {tab === "push-campaigns" && <PushCampaignsPanel />}
           {tab === "home-builder" && <HomeBuilderPanel />}
           {tab === "site-pages" && <SitePagesPanel />}
           {tab === "content" && <ContentPanel />}
