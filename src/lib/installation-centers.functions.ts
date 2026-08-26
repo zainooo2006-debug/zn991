@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "./admin-auth.server";
+import { supabasePublic } from "./public-backend.server";
 
 /* ============ Public: list approved active centers ============ */
 
 export const listPublicCenters = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("installation_centers")
     .select(
       "id, name, city, address, phone, whatsapp, google_maps_url, logo_url, images, services, sort_order",
@@ -25,8 +25,7 @@ export const listPublicCenters = createServerFn({ method: "GET" }).handler(async
 export const getPublicCenterById = createServerFn({ method: "GET" })
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await supabasePublic
       .from("installation_centers")
       .select(
         "id, name, city, address, phone, whatsapp, google_maps_url, logo_url, images, services, sort_order",

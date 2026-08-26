@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { supabasePublic } from "./public-backend.server";
 
 /**
  * Theme Engine — public read for the active website theme,
@@ -74,8 +75,7 @@ export const DEFAULT_THEME_JSON = {
 /** PUBLIC — returns active theme JSON. Fallback: DEFAULT_THEME_JSON. */
 export const getActiveWebsiteTheme = createServerFn({ method: "GET" }).handler(async () => {
   try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data } = await supabaseAdmin
+    const { data } = await supabasePublic
       .from("website_themes")
       .select("id, name, theme_json, is_active")
       .eq("is_active", true)

@@ -5,14 +5,7 @@ import { Plus, Pencil, Trash2, X, Sparkles } from "lucide-react";
 import { getProducts, getCategories } from "@/lib/catalog.functions";
 import { saveProduct, adminDelete } from "@/lib/admin.functions";
 import { generateProductContent } from "@/lib/ai-content.functions";
-import {
-  getPwd,
-  ImageUploader,
-  Modal,
-  Input,
-  Textarea,
-  Select,
-} from "@/components/admin/shared";
+import { getPwd, ImageUploader, Modal, Input, Textarea, Select } from "@/components/admin/shared";
 
 /* ===================== Products ===================== */
 type ProductRow = {

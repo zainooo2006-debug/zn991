@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { supabasePublic } from "./public-backend.server";
 
 /* ============ Public: list approved reviews ============ */
 
 export const listApprovedReviews = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("customer_reviews")
     .select("id, customer_name, city, rating, comment, images, is_featured, created_at")
     .eq("is_approved", true)
@@ -32,8 +32,7 @@ const submitSchema = z.object({
 export const submitCustomerReview = createServerFn({ method: "POST" })
   .inputValidator((d) => submitSchema.parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("customer_reviews").insert({
+    const { error } = await supabasePublic.from("customer_reviews").insert({
       customer_name: data.customer_name,
       city: data.city || null,
       rating: data.rating,

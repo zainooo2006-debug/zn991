@@ -1,13 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { supabasePublic } from "./public-backend.server";
 
 const schema = z.object({ num: z.string().trim().min(3).max(64) });
 
 export const verifyWarranty = createServerFn({ method: "POST" })
   .inputValidator((input) => schema.parse(input))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows, error } = await supabaseAdmin.rpc("verify_warranty_public", {
+    const { data: rows, error } = await supabasePublic.rpc("verify_warranty_public", {
       _num: data.num,
     });
     if (error) {

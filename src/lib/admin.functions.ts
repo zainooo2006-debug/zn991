@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { supabasePublic } from "./public-backend.server";
 import { assertAdmin, verifyAdminPassword, signToken, base64ToBytes } from "./admin-auth.server";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
@@ -45,7 +46,7 @@ export const createOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Server-trusted prices — fetch from DB, never trust client-supplied prices.
     const productIds = data.items.map((i) => i.id);
-    const { data: dbProducts, error: pErr } = await supabaseAdmin
+    const { data: dbProducts, error: pErr } = await supabasePublic
       .from("products")
       .select("id, name, price, images")
       .in("id", productIds);
@@ -68,22 +69,20 @@ export const createOrder = createServerFn({ method: "POST" })
     });
     const subtotal = trustedItems.reduce((s, i) => s + i.price * i.qty, 0);
 
-    const { data: row, error } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        customer_name: data.customer_name,
-        phone: data.phone,
-        address: data.address ?? null,
-        items: trustedItems,
-        subtotal,
-        total: subtotal,
-        wallet_id: data.wallet_id ?? null,
-        wallet_name: data.wallet_name ?? null,
-        payment_ref: data.payment_ref ?? null,
-        notes: data.notes ?? null,
-      })
-      .select("id")
-      .single();
+    const orderId = crypto.randomUUID();
+    const { error } = await supabasePublic.from("orders").insert({
+      id: orderId,
+      customer_name: data.customer_name,
+      phone: data.phone,
+      address: data.address ?? null,
+      items: trustedItems,
+      subtotal,
+      total: subtotal,
+      wallet_id: data.wallet_id ?? null,
+      wallet_name: data.wallet_name ?? null,
+      payment_ref: data.payment_ref ?? null,
+      notes: data.notes ?? null,
+    });
     if (error) {
       console.error("[createOrder] DB error:", error);
       throw new Error("تعذّر إنشاء الطلب، الرجاء المحاولة لاحقاً");
@@ -96,13 +95,13 @@ export const createOrder = createServerFn({ method: "POST" })
         type: "order",
         title: "طلب جديد",
         body: `العميل: ${data.customer_name} — ${count} منتج — الإجمالي: ${subtotal.toLocaleString("ar-EG")}`,
-        ref_id: row!.id,
+        ref_id: orderId,
       });
     } catch (e) {
       console.error("[createOrder] notify failed:", e);
     }
 
-    return { id: row!.id };
+    return { id: orderId };
   });
 
 export const listOrders = createServerFn({ method: "POST" })
