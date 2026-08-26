@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { supabasePublic } from "./public-backend.server";
 
 const ContentPart = z.union([
   z.object({ type: z.literal("text"), text: z.string() }),
@@ -35,8 +36,7 @@ const SYSTEM_PROMPT = `أنت المساعد الذكي الرسمي لمتجر 
 
 async function buildKnowledgeBlock(): Promise<string> {
   try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: rows } = await supabaseAdmin
+    const { data: rows } = await supabasePublic
       .from("ai_knowledge_base")
       .select("title, content")
       .eq("is_active", true)
@@ -57,15 +57,14 @@ async function buildKnowledgeBlock(): Promise<string> {
 
 async function buildCatalogBlock(): Promise<string> {
   try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: cats }, { data: prods }, { data: services }] = await Promise.all([
-      supabaseAdmin.from("categories").select("id, name").order("sort_order"),
-      supabaseAdmin
+      supabasePublic.from("categories").select("id, name").order("sort_order"),
+      supabasePublic
         .from("products")
         .select("id, name, description, price, old_price, is_bestseller, is_featured, category_id")
         .order("created_at", { ascending: false })
         .limit(120),
-      supabaseAdmin.from("service_categories").select("name, short_desc").order("sort_order"),
+      supabasePublic.from("service_categories").select("name, short_desc").order("sort_order"),
     ]);
 
     const catMap = new Map((cats ?? []).map((c) => [c.id, c.name]));

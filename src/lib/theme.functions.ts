@@ -1,11 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { supabasePublic } from "./public-backend.server";
 import type { Json } from "@/integrations/supabase/types";
 import { assertAdmin } from "./admin-auth.server";
 
 export const getSiteTheme = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("site_settings")
     .select("active_theme_json, default_theme_json")
     .limit(1)
@@ -31,6 +31,7 @@ export const saveTheme = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: existing, error: selErr } = await supabaseAdmin
       .from("site_settings")
       .select("id")
@@ -67,6 +68,7 @@ export const restoreDefaultTheme = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string() }).parse(d))
   .handler(async ({ data }) => {
     assertAdmin(data.password);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: existing, error: selErr } = await supabaseAdmin
       .from("site_settings")
       .select("id, default_theme_json")

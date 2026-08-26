@@ -1,8 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { z } from "zod";
+import { supabasePublic } from "./public-backend.server";
 
 export const getCategories = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("categories")
     .select("id, slug, name, icon, sort_order")
     .order("sort_order");
@@ -14,7 +15,7 @@ export const getCategories = createServerFn({ method: "GET" }).handler(async () 
 });
 
 export const getServiceCategories = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("service_categories")
     .select("id, slug, name, short_desc, long_desc, image_url, sort_order")
     .order("sort_order");
@@ -28,7 +29,7 @@ export const getServiceCategories = createServerFn({ method: "GET" }).handler(as
 export const getServiceBySlug = createServerFn({ method: "GET" })
   .inputValidator((d: { slug: string }) => d)
   .handler(async ({ data }) => {
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await supabasePublic
       .from("service_categories")
       .select("id, slug, name, short_desc, long_desc, image_url")
       .eq("slug", data.slug)
@@ -41,7 +42,7 @@ export const getServiceBySlug = createServerFn({ method: "GET" })
   });
 
 export const getProducts = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("products")
     .select(
       "id, name, description, price, old_price, images, rating, is_bestseller, is_featured, category_id",
@@ -55,7 +56,7 @@ export const getProducts = createServerFn({ method: "GET" }).handler(async () =>
 });
 
 export const getFeaturedProducts = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("products")
     .select("id, name, price, old_price, images, rating")
     .eq("is_featured", true)
@@ -71,7 +72,7 @@ export const getFeaturedProducts = createServerFn({ method: "GET" }).handler(asy
 export const getProductById = createServerFn({ method: "GET" })
   .inputValidator((d: { id: string }) => d)
   .handler(async ({ data }) => {
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await supabasePublic
       .from("products")
       .select("id, name, description, price, old_price, images, video_url, rating, category_id")
       .eq("id", data.id)
@@ -84,7 +85,7 @@ export const getProductById = createServerFn({ method: "GET" })
   });
 
 export const getPackages = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("packages")
     .select("id, slug, name, description, price, old_price, features, badge, sort_order")
     .order("sort_order");
@@ -96,7 +97,7 @@ export const getPackages = createServerFn({ method: "GET" }).handler(async () =>
 });
 
 export const getWallets = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("wallets")
     .select("id, name, account_number, sort_order")
     .order("sort_order");
@@ -110,7 +111,7 @@ export const getWallets = createServerFn({ method: "GET" }).handler(async () => 
 type Json = string | number | boolean | null | Json[] | { [k: string]: Json };
 
 export const getSiteContent = createServerFn({ method: "GET" }).handler(async () => {
-  const { data, error } = await supabaseAdmin.from("site_content").select("key, value");
+  const { data, error } = await supabasePublic.from("site_content").select("key, value");
   if (error) {
     console.error("[server] DB error:", error);
     throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
@@ -118,12 +119,10 @@ export const getSiteContent = createServerFn({ method: "GET" }).handler(async ()
   return (data ?? []) as Array<{ key: string; value: Json }>;
 });
 
-import { z } from "zod";
-
 export const getProductReviews = createServerFn({ method: "GET" })
   .inputValidator((d: { productId: string }) => d)
   .handler(async ({ data }) => {
-    const { data: rows, error } = await supabaseAdmin
+    const { data: rows, error } = await supabasePublic
       .from("product_reviews")
       .select("id, customer_name, rating, comment, created_at")
       .eq("product_id", data.productId)
@@ -146,7 +145,7 @@ const reviewSchema = z.object({
 export const submitProductReview = createServerFn({ method: "POST" })
   .inputValidator((input) => reviewSchema.parse(input))
   .handler(async ({ data }) => {
-    const { error } = await supabaseAdmin.from("product_reviews").insert({
+    const { error } = await supabasePublic.from("product_reviews").insert({
       product_id: data.productId,
       customer_name: data.customerName,
       rating: data.rating,
@@ -167,6 +166,7 @@ const phoneSchema = z.object({
 export const getOrdersByPhone = createServerFn({ method: "POST" })
   .inputValidator((input) => phoneSchema.parse(input))
   .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Require BOTH a full phone number AND an order ID prefix to prevent
     // enumeration of other customers' orders via phone-only lookup.
     const normalized = data.phone.replace(/\D/g, "");

@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertAdmin } from "./admin-auth.server";
+import { supabasePublic } from "./public-backend.server";
 
 /* ============ Public ============ */
 
 export const listPublicHeroSlides = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublic
     .from("hero_slides")
     .select("id, image_url, alt_text, sort_order")
     .eq("is_active", true)
