@@ -247,11 +247,14 @@ export const adminMutate = createServerFn({ method: "POST" })
           (await supabaseAdmin.from("customers").delete().eq("id", data.id)).error?.message ?? null
         );
       case "simple_insert":
+        // بيانات مرجعية على مستوى الشركة: للأدمن فقط (مثل simple_delete).
+        if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
         return (
           (await supabaseAdmin.from(data.table).insert(data.values as never)).error?.message ?? null
         );
       case "simple_update":
+        if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
         return (
           (
@@ -262,6 +265,7 @@ export const adminMutate = createServerFn({ method: "POST" })
           ).error?.message ?? null
         );
       case "simple_toggle":
+        if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
         return (
           (
@@ -271,6 +275,7 @@ export const adminMutate = createServerFn({ method: "POST" })
               .eq("id", data.id)
           ).error?.message ?? null
         );
+
       case "simple_delete":
         if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
