@@ -284,3 +284,22 @@ export const adminMutate = createServerFn({ method: "POST" })
         );
     }
   });
+
+// توليد رقم الضمان صار من السيرفر فقط بعد التحقق من تسجيل الدخول،
+// وتم سحب صلاحية تنفيذ الدالة من المستخدمين المسجّلين في القاعدة.
+export const generateWarrantyNumber = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { branch_id?: string | null }) => ({
+    branch_id: input?.branch_id ?? null,
+  }))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: num, error } = await supabaseAdmin.rpc("generate_warranty_number", {
+      _branch_id: data.branch_id,
+    } as never);
+    if (error) {
+      console.error("[generateWarrantyNumber]", error);
+      throw new Error("تعذّر توليد رقم الضمان");
+    }
+    return { warranty_number: (num as unknown as string) ?? "" };
+  });
