@@ -5,6 +5,7 @@ import { useWarrantyAuth } from "@/lib/warranty-auth";
 import { Loader2, PlusCircle, Car } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { notifyWarrantyActivated } from "@/lib/notifications.functions";
+import { generateWarrantyNumber } from "@/lib/warranty-admin.functions";
 
 export const Route = createFileRoute("/warranty/activate")({
   component: ActivatePage,
@@ -47,6 +48,7 @@ function ActivatePage() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ t: "err" | "ok"; m: string } | null>(null);
   const notifyActivated = useServerFn(notifyWarrantyActivated);
+  const genWarrantyNumber = useServerFn(generateWarrantyNumber);
 
   useEffect(() => {
     if (loading) return;
@@ -132,13 +134,8 @@ function ActivatePage() {
 
       let num = warrantyNumber.trim();
       if (!num) {
-        const r = await (
-          supabase.rpc as unknown as (
-            n: string,
-          ) => Promise<{ data: string | null; error: { message: string } | null }>
-        )("generate_warranty_number");
-        if (r.error) throw r.error;
-        num = r.data ?? "";
+        const r = await genWarrantyNumber({ data: { branch_id: branchId || null } });
+        num = r.warranty_number;
       }
 
       const months = selectedFilm?.warranty_months ?? 12;
@@ -158,9 +155,7 @@ function ActivatePage() {
       } as never);
       if (error) throw error;
       // إشعار المسؤول — fire and forget، لا يوقف تدفق المستخدم لو فشل
-      void notifyActivated({
-        data: { warranty_number: num, customer_name: customerName.trim() || "عميل" },
-      }).catch(() => {});
+      void notifyActivated({ data: { warranty_number: num } }).catch(() => {});
       setMsg({ t: "ok", m: `تم تسجيل الضمان: ${num} — بانتظار موافقة المسؤول` });
       setTimeout(() => navigate({ to: "/warranty/dashboard" }), 1000);
     } catch (e) {

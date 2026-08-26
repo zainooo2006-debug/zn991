@@ -247,11 +247,14 @@ export const adminMutate = createServerFn({ method: "POST" })
           (await supabaseAdmin.from("customers").delete().eq("id", data.id)).error?.message ?? null
         );
       case "simple_insert":
+        // بيانات مرجعية على مستوى الشركة: للأدمن فقط (مثل simple_delete).
+        if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
         return (
           (await supabaseAdmin.from(data.table).insert(data.values as never)).error?.message ?? null
         );
       case "simple_update":
+        if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
         return (
           (
@@ -262,6 +265,7 @@ export const adminMutate = createServerFn({ method: "POST" })
           ).error?.message ?? null
         );
       case "simple_toggle":
+        if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
         return (
           (
@@ -271,6 +275,7 @@ export const adminMutate = createServerFn({ method: "POST" })
               .eq("id", data.id)
           ).error?.message ?? null
         );
+
       case "simple_delete":
         if (!isAdmin) throw new Error("Admin only");
         if (!allowedTables.includes(data.table)) throw new Error("Bad table");
@@ -278,4 +283,23 @@ export const adminMutate = createServerFn({ method: "POST" })
           (await supabaseAdmin.from(data.table).delete().eq("id", data.id)).error?.message ?? null
         );
     }
+  });
+
+// توليد رقم الضمان صار من السيرفر فقط بعد التحقق من تسجيل الدخول،
+// وتم سحب صلاحية تنفيذ الدالة من المستخدمين المسجّلين في القاعدة.
+export const generateWarrantyNumber = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { branch_id?: string | null }) => ({
+    branch_id: input?.branch_id ?? null,
+  }))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: num, error } = await supabaseAdmin.rpc("generate_warranty_number", {
+      _branch_id: data.branch_id,
+    } as never);
+    if (error) {
+      console.error("[generateWarrantyNumber]", error);
+      throw new Error("تعذّر توليد رقم الضمان");
+    }
+    return { warranty_number: (num as unknown as string) ?? "" };
   });
