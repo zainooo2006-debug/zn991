@@ -66,11 +66,29 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+async function shouldRetryReadRequest(request: Request, response: Response): Promise<boolean> {
+  if (request.method !== "GET" && request.method !== "HEAD") return false;
+  if (response.status < 500) return false;
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) return false;
+
+  return isCatastrophicSsrErrorBody(await response.clone().text(), response.status);
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      let response = await handler.fetch(request, env, ctx);
+
+      // During a Vite route-manifest/HMR refresh, a read request can briefly match
+      // a server route before its handler is available. TanStack turns that race
+      // into a generic no-response 500. Retrying safe reads once lets the refreshed
+      // route module settle without ever replaying mutations or server functions.
+      if (await shouldRetryReadRequest(request, response)) {
+        response = await handler.fetch(request, env, ctx);
+      }
+
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);
