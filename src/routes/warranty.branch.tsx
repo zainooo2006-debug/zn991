@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { generateWarrantyNumber } from "@/lib/warranty-admin.functions";
 import { useWarrantyAuth } from "@/lib/warranty-auth";
 import {
   statusLabel,
@@ -252,13 +254,8 @@ function NewWarrantyForm({
         .single();
       if (ins.error) throw ins.error;
 
-      const r = await (
-        supabase.rpc as unknown as (
-          n: string,
-        ) => Promise<{ data: string | null; error: { message: string } | null }>
-      )("generate_warranty_number");
-      if (r.error) throw r.error;
-      const num = r.data ?? "";
+      const r = await genWarrantyNumber({ data: { branch_id: branchId } });
+      const num = r.warranty_number;
 
       const months = films.find((x) => x.id === filmId)?.warranty_months ?? 12;
       const exp = new Date(activationDate);
