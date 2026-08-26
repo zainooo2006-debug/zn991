@@ -208,7 +208,9 @@ function NewWarrantyForm({
   branchId: string | null;
   onDone: () => Promise<void>;
 }) {
+  const genWarrantyNumber = useServerFn(generateWarrantyNumber);
   const [open, setOpen] = useState(false);
+
   const [brands, setBrands] = useState<Brand[]>([]);
   const [films, setFilms] = useState<Film[]>([]);
   const [customerName, setCustomerName] = useState("");
