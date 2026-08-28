@@ -70,7 +70,10 @@ export const createOrder = createServerFn({ method: "POST" })
     const subtotal = trustedItems.reduce((s, i) => s + i.price * i.qty, 0);
 
     const orderId = crypto.randomUUID();
-    const { error } = await supabasePublic.from("orders").insert({
+    // Orders are inserted via the service-role client — public INSERT access
+    // to orders was intentionally dropped (see migration 20260524021716),
+    // so the anon client can no longer create rows here.
+    const { error } = await supabaseAdmin.from("orders").insert({
       id: orderId,
       customer_name: data.customer_name,
       phone: data.phone,
