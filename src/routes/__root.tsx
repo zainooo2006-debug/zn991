@@ -137,7 +137,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 import { CartProvider } from "@/lib/cart";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { useEffect } from "react";
-
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
@@ -149,6 +149,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <AnalyticsTracker />
       <ThemeProvider>
         <CartProvider>
           <Outlet />
