@@ -28,10 +28,14 @@ import { CustomerReviewsPanel } from "@/components/admin/CustomerReviewsPanel";
 import { InstallationCentersPanel } from "@/components/admin/InstallationCentersPanel";
 import { HeroSlidesPanel } from "@/components/admin/HeroSlidesPanel";
 import { PushCampaignsPanel } from "@/components/admin/PushCampaignsPanel";
+import { AnalyticsDashboardPanel } from "@/components/admin/AnalyticsDashboardPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [{ title: "لوحة التحكم — زين" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "لوحة التحكم — زين" },
+      { name: "robots", content: "noindex" },
+    ],
     links: [{ rel: "manifest", href: "/admin-manifest.json" }],
   }),
   component: AdminPage,
@@ -59,7 +63,8 @@ type Tab =
   | "w-films"
   | "w-branches"
   | "w-users"
-  | "theme";
+  | "theme"
+  | "analytics";
 
 function AdminPage() {
   const login = useServerFn(adminLogin);
@@ -78,6 +83,7 @@ function AdminPage() {
     e.preventDefault();
     setBusy(true);
     setError("");
+
     try {
       const { token } = await login({ data: { password } });
       sessionStorage.setItem(TOKEN_KEY, token);
@@ -102,8 +108,15 @@ function AdminPage() {
         <div className="max-w-md mx-auto px-4 py-16">
           <div className="card-clean p-8 text-center">
             <Lock className="w-10 h-10 text-[var(--color-gold)] mx-auto" />
-            <h1 className="text-2xl font-black mt-4">لوحة التحكم</h1>
-            <p className="text-sm text-[var(--color-ink-soft)] mt-1">أدخل كلمة المرور للمتابعة</p>
+
+            <h1 className="text-2xl font-black mt-4">
+              لوحة التحكم
+            </h1>
+
+            <p className="text-sm text-[var(--color-ink-soft)] mt-1">
+              أدخل كلمة المرور للمتابعة
+            </p>
+
             <form onSubmit={submit} className="mt-6 space-y-3">
               <input
                 type="password"
@@ -113,8 +126,18 @@ function AdminPage() {
                 className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
                 disabled={busy}
               />
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              <button type="submit" disabled={busy} className="btn-gold w-full">
+
+              {error && (
+                <p className="text-sm text-red-600">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={busy}
+                className="btn-gold w-full"
+              >
                 {busy ? "جاري التحقق..." : "دخول"}
               </button>
             </form>
@@ -130,7 +153,10 @@ function AdminPage() {
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [tab, setTab] = useState<Tab>("orders");
 
-  const groups: { title: string; tabs: { id: Tab; label: string }[] }[] = [
+  const groups: {
+    title: string;
+    tabs: { id: Tab; label: string }[];
+  }[] = [
     {
       title: "المتجر",
       tabs: [
@@ -163,8 +189,16 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       ],
     },
     {
+      title: "التحليلات",
+      tabs: [
+        { id: "analytics", label: "📊 التحليلات" },
+      ],
+    },
+    {
       title: "المظهر",
-      tabs: [{ id: "theme", label: "إدارة المظهر" }],
+      tabs: [
+        { id: "theme", label: "إدارة المظهر" },
+      ],
     },
   ];
 
@@ -173,26 +207,50 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black">لوحة التحكم</h1>
-            <p className="text-sm text-[var(--color-ink-soft)]">إدارة المتجر والضمانات</p>
+            <h1 className="text-2xl md:text-3xl font-black">
+              لوحة التحكم
+            </h1>
+
+            <p className="text-sm text-[var(--color-ink-soft)]">
+              إدارة المتجر والضمانات
+            </p>
           </div>
+
           <div className="flex items-center gap-2">
             <NotificationBell token={getPwd()} />
-            <a href="/admin/website-builder" className="btn-outline">
-              <Sparkles className="w-4 h-4" /> Website Builder
+
+            <a
+              href="/admin/website-builder"
+              className="btn-outline"
+            >
+              <Sparkles className="w-4 h-4" />
+              Website Builder
             </a>
-            <a href="/admin/ai-training" className="btn-outline">
-              <Sparkles className="w-4 h-4" /> تدريب المساعد
+
+            <a
+              href="/admin/ai-training"
+              className="btn-outline"
+            >
+              <Sparkles className="w-4 h-4" />
+              تدريب المساعد
             </a>
-            <button onClick={onLogout} className="btn-outline">
-              <LogOut className="w-4 h-4" /> خروج
+
+            <button
+              onClick={onLogout}
+              className="btn-outline"
+            >
+              <LogOut className="w-4 h-4" />
+              خروج
             </button>
           </div>
         </div>
 
         {groups.map((g) => (
           <div key={g.title} className="mt-4">
-            <div className="text-xs font-bold text-[var(--color-ink-soft)] mb-2">{g.title}</div>
+            <div className="text-xs font-bold text-[var(--color-ink-soft)] mb-2">
+              {g.title}
+            </div>
+
             <div className="flex gap-2 overflow-x-auto pb-2">
               {g.tabs.map((t) => (
                 <button
@@ -226,9 +284,11 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {tab === "home-builder" && <HomeBuilderPanel />}
           {tab === "site-pages" && <SitePagesPanel />}
           {tab === "content" && <ContentPanel />}
+
           {tab === "w-overview" && <WarrantyOverview />}
           {tab === "w-warranties" && <WarrantiesTab />}
           {tab === "w-customers" && <WarrantyCustomersTab />}
+
           {tab === "w-brands" && (
             <WarrantySimpleCrud
               table="warranty_brands"
@@ -239,17 +299,23 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               ]}
             />
           )}
+
           {tab === "w-films" && (
             <WarrantySimpleCrud
               table="film_types"
               title="أنواع اللاصق"
               fields={[
                 { k: "name", l: "الاسم" },
-                { k: "warranty_months", l: "مدة الضمان (شهر)", type: "number" },
+                {
+                  k: "warranty_months",
+                  l: "مدة الضمان (شهر)",
+                  type: "number",
+                },
                 { k: "description", l: "الوصف" },
               ]}
             />
           )}
+
           {tab === "w-branches" && (
             <WarrantySimpleCrud
               table="branches"
@@ -261,7 +327,11 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               ]}
             />
           )}
+
           {tab === "w-users" && <WarrantyUsersTab />}
+
+          {tab === "analytics" && <AnalyticsDashboardPanel />}
+
           {tab === "theme" && <ThemeManagerPanel />}
         </div>
       </div>
