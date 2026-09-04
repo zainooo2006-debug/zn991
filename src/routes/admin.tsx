@@ -32,10 +32,7 @@ import { AnalyticsDashboardPanel } from "@/components/admin/AnalyticsDashboardPa
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    meta: [
-      { title: "لوحة التحكم — زين" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "لوحة التحكم — زين" }, { name: "robots", content: "noindex" }],
     links: [{ rel: "manifest", href: "/admin-manifest.json" }],
   }),
   component: AdminPage,
@@ -109,13 +106,9 @@ function AdminPage() {
           <div className="card-clean p-8 text-center">
             <Lock className="w-10 h-10 text-[var(--color-gold)] mx-auto" />
 
-            <h1 className="text-2xl font-black mt-4">
-              لوحة التحكم
-            </h1>
+            <h1 className="text-2xl font-black mt-4">لوحة التحكم</h1>
 
-            <p className="text-sm text-[var(--color-ink-soft)] mt-1">
-              أدخل كلمة المرور للمتابعة
-            </p>
+            <p className="text-sm text-[var(--color-ink-soft)] mt-1">أدخل كلمة المرور للمتابعة</p>
 
             <form onSubmit={submit} className="mt-6 space-y-3">
               <input
@@ -127,17 +120,9 @@ function AdminPage() {
                 disabled={busy}
               />
 
-              {error && (
-                <p className="text-sm text-red-600">
-                  {error}
-                </p>
-              )}
+              {error && <p className="text-sm text-red-600">{error}</p>}
 
-              <button
-                type="submit"
-                disabled={busy}
-                className="btn-gold w-full"
-              >
+              <button type="submit" disabled={busy} className="btn-gold w-full">
                 {busy ? "جاري التحقق..." : "دخول"}
               </button>
             </form>
@@ -190,15 +175,11 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     },
     {
       title: "التحليلات",
-      tabs: [
-        { id: "analytics", label: "📊 التحليلات" },
-      ],
+      tabs: [{ id: "analytics", label: "📊 التحليلات" }],
     },
     {
       title: "المظهر",
-      tabs: [
-        { id: "theme", label: "إدارة المظهر" },
-      ],
+      tabs: [{ id: "theme", label: "إدارة المظهر" }],
     },
   ];
 
@@ -207,38 +188,25 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black">
-              لوحة التحكم
-            </h1>
+            <h1 className="text-2xl md:text-3xl font-black">لوحة التحكم</h1>
 
-            <p className="text-sm text-[var(--color-ink-soft)]">
-              إدارة المتجر والضمانات
-            </p>
+            <p className="text-sm text-[var(--color-ink-soft)]">إدارة المتجر والضمانات</p>
           </div>
 
           <div className="flex items-center gap-2">
             <NotificationBell token={getPwd()} />
 
-            <a
-              href="/admin/website-builder"
-              className="btn-outline"
-            >
+            <a href="/admin/website-builder" className="btn-outline">
               <Sparkles className="w-4 h-4" />
               Website Builder
             </a>
 
-            <a
-              href="/admin/ai-training"
-              className="btn-outline"
-            >
+            <a href="/admin/ai-training" className="btn-outline">
               <Sparkles className="w-4 h-4" />
               تدريب المساعد
             </a>
 
-            <button
-              onClick={onLogout}
-              className="btn-outline"
-            >
+            <button onClick={onLogout} className="btn-outline">
               <LogOut className="w-4 h-4" />
               خروج
             </button>
@@ -247,9 +215,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
         {groups.map((g) => (
           <div key={g.title} className="mt-4">
-            <div className="text-xs font-bold text-[var(--color-ink-soft)] mb-2">
-              {g.title}
-            </div>
+            <div className="text-xs font-bold text-[var(--color-ink-soft)] mb-2">{g.title}</div>
 
             <div className="flex gap-2 overflow-x-auto pb-2">
               {g.tabs.map((t) => (

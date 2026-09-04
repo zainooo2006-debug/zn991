@@ -29,6 +29,7 @@ import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as AdminAiTrainingRouteImport } from './routes/admin_.ai-training'
 import { Route as AdminWebsiteBuilderRouteImport } from './routes/admin_.website-builder'
+import { Route as ApiTrackClickRouteImport } from './routes/api/track-click'
 import { Route as CentersIndexRouteImport } from './routes/centers.index'
 import { Route as CentersIdRouteImport } from './routes/centers.$id'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
@@ -148,6 +149,11 @@ const AdminWebsiteBuilderRoute = AdminWebsiteBuilderRouteImport.update({
   path: '/admin/website-builder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrackClickRoute = ApiTrackClickRouteImport.update({
+  id: '/api/track-click',
+  path: '/api/track-click',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CentersIndexRoute = CentersIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/ai-training': typeof AdminAiTrainingRoute
   '/admin/website-builder': typeof AdminWebsiteBuilderRoute
+  '/api/track-click': typeof ApiTrackClickRoute
   '/centers/$id': typeof CentersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -287,6 +294,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/ai-training': typeof AdminAiTrainingRoute
   '/admin/website-builder': typeof AdminWebsiteBuilderRoute
+  '/api/track-click': typeof ApiTrackClickRoute
   '/centers/$id': typeof CentersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin_/ai-training': typeof AdminAiTrainingRoute
   '/admin_/website-builder': typeof AdminWebsiteBuilderRoute
+  '/api/track-click': typeof ApiTrackClickRoute
   '/centers/$id': typeof CentersIdRoute
   '/product/$id': typeof ProductIdRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/ai-training'
     | '/admin/website-builder'
+    | '/api/track-click'
     | '/centers/$id'
     | '/product/$id'
     | '/services/$slug'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/ai-training'
     | '/admin/website-builder'
+    | '/api/track-click'
     | '/centers/$id'
     | '/product/$id'
     | '/services/$slug'
@@ -440,6 +451,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin_/ai-training'
     | '/admin_/website-builder'
+    | '/api/track-click'
     | '/centers/$id'
     | '/product/$id'
     | '/services/$slug'
@@ -479,6 +491,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AdminAiTrainingRoute: typeof AdminAiTrainingRoute
   AdminWebsiteBuilderRoute: typeof AdminWebsiteBuilderRoute
+  ApiTrackClickRoute: typeof ApiTrackClickRoute
   ProductIdRoute: typeof ProductIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
@@ -625,6 +638,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/website-builder'
       fullPath: '/admin/website-builder'
       preLoaderRoute: typeof AdminWebsiteBuilderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/track-click': {
+      id: '/api/track-click'
+      path: '/api/track-click'
+      fullPath: '/api/track-click'
+      preLoaderRoute: typeof ApiTrackClickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/centers/': {
@@ -817,6 +837,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AdminAiTrainingRoute: AdminAiTrainingRoute,
   AdminWebsiteBuilderRoute: AdminWebsiteBuilderRoute,
+  ApiTrackClickRoute: ApiTrackClickRoute,
   ProductIdRoute: ProductIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,

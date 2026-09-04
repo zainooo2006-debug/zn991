@@ -16,9 +16,7 @@ import {
 import { getAnalyticsDashboard } from "@/lib/analytics-dashboard.functions";
 import { getPwd } from "./shared";
 
-type DashboardData = Awaited<
-  ReturnType<ReturnType<typeof getAnalyticsDashboard>>
->;
+type DashboardData = Awaited<ReturnType<typeof getAnalyticsDashboard>>;
 
 export function AnalyticsDashboardPanel() {
   const getDashboard = useServerFn(getAnalyticsDashboard);
@@ -153,9 +151,7 @@ export function AnalyticsDashboardPanel() {
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 className="text-2xl font-black">ZAIN Analytics</h2>
-          <p className="text-sm text-[var(--color-ink-soft)] mt-1">
-            آخر {data.range.days} يوم
-          </p>
+          <p className="text-sm text-[var(--color-ink-soft)] mt-1">آخر {data.range.days} يوم</p>
         </div>
 
         <button onClick={() => void load()} className="btn-outline">
@@ -170,9 +166,7 @@ export function AnalyticsDashboardPanel() {
           return (
             <div key={card.label} className="card-clean p-4">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm text-[var(--color-ink-soft)]">
-                  {card.label}
-                </span>
+                <span className="text-sm text-[var(--color-ink-soft)]">{card.label}</span>
                 <Icon className="w-5 h-5 text-[var(--color-gold)]" />
               </div>
 
@@ -192,9 +186,7 @@ export function AnalyticsDashboardPanel() {
             return (
               <div key={card.label} className="card-clean p-4">
                 <Icon className="w-5 h-5 text-[var(--color-gold)]" />
-                <p className="text-sm mt-3 text-[var(--color-ink-soft)]">
-                  {card.label}
-                </p>
+                <p className="text-sm mt-3 text-[var(--color-ink-soft)]">{card.label}</p>
                 <p className="text-xl font-black mt-1">{card.value}</p>
               </div>
             );
@@ -208,18 +200,13 @@ export function AnalyticsDashboardPanel() {
 
           <div className="space-y-3">
             {data.devices.length === 0 ? (
-              <p className="text-sm text-[var(--color-ink-soft)]">
-                لا توجد بيانات
-              </p>
+              <p className="text-sm text-[var(--color-ink-soft)]">لا توجد بيانات</p>
             ) : (
               data.devices.map((item) => {
                 const Icon = deviceIcons[item.name] ?? Globe2;
 
                 return (
-                  <div
-                    key={item.name}
-                    className="flex items-center justify-between gap-3"
-                  >
+                  <div key={item.name} className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Icon className="w-4 h-4" />
                       <span>{item.name}</span>
@@ -238,15 +225,10 @@ export function AnalyticsDashboardPanel() {
 
           <div className="space-y-3">
             {data.sources.length === 0 ? (
-              <p className="text-sm text-[var(--color-ink-soft)]">
-                لا توجد بيانات
-              </p>
+              <p className="text-sm text-[var(--color-ink-soft)]">لا توجد بيانات</p>
             ) : (
               data.sources.slice(0, 10).map((item) => (
-                <div
-                  key={item.name}
-                  className="flex items-center justify-between gap-3"
-                >
+                <div key={item.name} className="flex items-center justify-between gap-3">
                   <span>{item.name}</span>
                   <strong>{item.count}</strong>
                 </div>
@@ -260,9 +242,7 @@ export function AnalyticsDashboardPanel() {
 
           <div className="space-y-3">
             {data.pages.length === 0 ? (
-              <p className="text-sm text-[var(--color-ink-soft)]">
-                لا توجد بيانات
-              </p>
+              <p className="text-sm text-[var(--color-ink-soft)]">لا توجد بيانات</p>
             ) : (
               data.pages.slice(0, 10).map((item) => (
                 <div key={item.name} className="space-y-1">
@@ -277,10 +257,7 @@ export function AnalyticsDashboardPanel() {
                     <div
                       className="h-full bg-[var(--color-gold)]"
                       style={{
-                        width: `${Math.max(
-                          4,
-                          (item.count / data.pages[0].count) * 100,
-                        )}%`,
+                        width: `${Math.max(4, (item.count / data.pages[0].count) * 100)}%`,
                       }}
                     />
                   </div>
@@ -292,4 +269,4 @@ export function AnalyticsDashboardPanel() {
       </div>
     </div>
   );
-                               }
+}

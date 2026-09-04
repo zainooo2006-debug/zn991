@@ -45,11 +45,7 @@ function getPeriodStart(period: "today" | "week" | "month") {
   return now.toISOString();
 }
 
-async function getEventCount(
-  eventName: string,
-  startDate: string,
-  endDate: string,
-) {
+async function getEventCount(eventName: string, startDate: string, endDate: string) {
   const { count, error } = await supabaseAdmin
     .from("analytics_events")
     .select("id", {
@@ -72,18 +68,10 @@ function uniqueValues(
   rows: AnalyticsRow[],
   getter: (row: AnalyticsRow) => string | null | undefined,
 ) {
-  return new Set(
-    rows
-      .map(getter)
-      .filter((value): value is string => Boolean(value)),
-  ).size;
+  return new Set(rows.map(getter).filter((value): value is string => Boolean(value))).size;
 }
 
-function filterRowsByDate(
-  rows: AnalyticsRow[],
-  startDate: string,
-  endDate: string,
-) {
+function filterRowsByDate(rows: AnalyticsRow[], startDate: string, endDate: string) {
   const start = new Date(startDate).getTime();
   const end = new Date(endDate).getTime();
 
@@ -114,19 +102,14 @@ export const getAnalyticsDashboard = createServerFn({ method: "POST" })
     const monthStart = getPeriodStart("month");
     const rangeStart = getStartDate(data.days);
 
-    const [
-      addToCart,
-      checkoutStarted,
-      ordersCompleted,
-      assistantOpened,
-      assistantMessages,
-    ] = await Promise.all([
-      getEventCount("add_to_cart", rangeStart, now),
-      getEventCount("checkout_started", rangeStart, now),
-      getEventCount("order_completed", rangeStart, now),
-      getEventCount("assistant_opened", rangeStart, now),
-      getEventCount("assistant_message", rangeStart, now),
-    ]);
+    const [addToCart, checkoutStarted, ordersCompleted, assistantOpened, assistantMessages] =
+      await Promise.all([
+        getEventCount("add_to_cart", rangeStart, now),
+        getEventCount("checkout_started", rangeStart, now),
+        getEventCount("order_completed", rangeStart, now),
+        getEventCount("assistant_opened", rangeStart, now),
+        getEventCount("assistant_message", rangeStart, now),
+      ]);
 
     const { data: events, error: eventsError } = await supabaseAdmin
       .from("analytics_events")
@@ -149,21 +132,13 @@ export const getAnalyticsDashboard = createServerFn({ method: "POST" })
     const weekRows = filterRowsByDate(rows, weekStart, now);
     const monthRows = filterRowsByDate(rows, monthStart, now);
 
-    const todayPageViews = todayRows.filter(
-      (row) => row.event_name === "page_view",
-    ).length;
+    const todayPageViews = todayRows.filter((row) => row.event_name === "page_view").length;
 
-    const weekPageViews = weekRows.filter(
-      (row) => row.event_name === "page_view",
-    ).length;
+    const weekPageViews = weekRows.filter((row) => row.event_name === "page_view").length;
 
-    const monthPageViews = monthRows.filter(
-      (row) => row.event_name === "page_view",
-    ).length;
+    const monthPageViews = monthRows.filter((row) => row.event_name === "page_view").length;
 
-    const rangePageViews = rows.filter(
-      (row) => row.event_name === "page_view",
-    ).length;
+    const rangePageViews = rows.filter((row) => row.event_name === "page_view").length;
 
     const todayVisitors = uniqueValues(
       todayRows.filter((row) => row.event_name === "page_view"),
@@ -185,10 +160,7 @@ export const getAnalyticsDashboard = createServerFn({ method: "POST" })
       (row) => row.visitor_id,
     );
 
-    const uniqueUsers = uniqueValues(
-      rows,
-      (row) => row.user_id,
-    );
+    const uniqueUsers = uniqueValues(rows, (row) => row.user_id);
 
     const devices: Record<string, Set<string>> = {};
     const sources: Record<string, Set<string>> = {};
@@ -204,10 +176,7 @@ export const getAnalyticsDashboard = createServerFn({ method: "POST" })
           devices[row.device_type] = new Set<string>();
         }
 
-        const visitorKey =
-          row.visitor_id ??
-          row.user_id ??
-          `anonymous-${row.created_at}`;
+        const visitorKey = row.visitor_id ?? row.user_id ?? `anonymous-${row.created_at}`;
 
         devices[row.device_type].add(visitorKey);
       }
@@ -217,10 +186,7 @@ export const getAnalyticsDashboard = createServerFn({ method: "POST" })
           sources[row.source] = new Set<string>();
         }
 
-        const sourceKey =
-          row.visitor_id ??
-          row.user_id ??
-          `anonymous-${row.created_at}`;
+        const sourceKey = row.visitor_id ?? row.user_id ?? `anonymous-${row.created_at}`;
 
         sources[row.source].add(sourceKey);
       }
@@ -245,9 +211,7 @@ export const getAnalyticsDashboard = createServerFn({ method: "POST" })
       .sort((a, b) => b.count - a.count);
 
     const conversionRate =
-      addToCart > 0
-        ? Number(((ordersCompleted / addToCart) * 100).toFixed(2))
-        : 0;
+      addToCart > 0 ? Number(((ordersCompleted / addToCart) * 100).toFixed(2)) : 0;
 
     return {
       range: {

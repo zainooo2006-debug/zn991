@@ -4,7 +4,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17";
+    PostgrestVersion: "14.5";
   };
   public: {
     Tables: {
@@ -37,6 +37,56 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      analytics_events: {
+        Row: {
+          created_at: string;
+          device_type: string | null;
+          event_name: string;
+          id: string;
+          metadata: Json;
+          page: string | null;
+          product_id: string | null;
+          session_id: string | null;
+          source: string | null;
+          user_id: string | null;
+          visitor_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          device_type?: string | null;
+          event_name: string;
+          id?: string;
+          metadata?: Json;
+          page?: string | null;
+          product_id?: string | null;
+          session_id?: string | null;
+          source?: string | null;
+          user_id?: string | null;
+          visitor_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          device_type?: string | null;
+          event_name?: string;
+          id?: string;
+          metadata?: Json;
+          page?: string | null;
+          product_id?: string | null;
+          session_id?: string | null;
+          source?: string | null;
+          user_id?: string | null;
+          visitor_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "analytics_events_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       branches: {
         Row: {
@@ -74,6 +124,33 @@ export type Database = {
           sort_order?: number;
           updated_at?: string;
           warranty_prefix?: string | null;
+        };
+        Relationships: [];
+      };
+      car_makes: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          sort_order: number;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          sort_order?: number;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          sort_order?: number;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -122,7 +199,7 @@ export type Database = {
             foreignKeyName: "cars_brand_id_fkey";
             columns: ["brand_id"];
             isOneToOne: false;
-            referencedRelation: "warranty_brands";
+            referencedRelation: "car_makes";
             referencedColumns: ["id"];
           },
           {
@@ -569,27 +646,78 @@ export type Database = {
           },
         ];
       };
+      push_campaigns: {
+        Row: {
+          body: string;
+          click_count: number;
+          created_at: string;
+          id: string;
+          image_url: string | null;
+          link_url: string | null;
+          sent_at: string | null;
+          sent_count: number;
+          target: string;
+          title: string;
+        };
+        Insert: {
+          body: string;
+          click_count?: number;
+          created_at?: string;
+          id?: string;
+          image_url?: string | null;
+          link_url?: string | null;
+          sent_at?: string | null;
+          sent_count?: number;
+          target?: string;
+          title: string;
+        };
+        Update: {
+          body?: string;
+          click_count?: number;
+          created_at?: string;
+          id?: string;
+          image_url?: string | null;
+          link_url?: string | null;
+          sent_at?: string | null;
+          sent_count?: number;
+          target?: string;
+          title?: string;
+        };
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
           auth: string;
           created_at: string;
+          device_type: string | null;
           endpoint: string;
           id: string;
           p256dh: string;
+          subscriber_type: string;
+          updated_at: string;
+          user_id: string | null;
         };
         Insert: {
           auth: string;
           created_at?: string;
+          device_type?: string | null;
           endpoint: string;
           id?: string;
           p256dh: string;
+          subscriber_type?: string;
+          updated_at?: string;
+          user_id?: string | null;
         };
         Update: {
           auth?: string;
           created_at?: string;
+          device_type?: string | null;
           endpoint?: string;
           id?: string;
           p256dh?: string;
+          subscriber_type?: string;
+          updated_at?: string;
+          user_id?: string | null;
         };
         Relationships: [];
       };
