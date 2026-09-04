@@ -133,6 +133,33 @@ export type Database = {
         }
         Relationships: []
       }
+      car_makes: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cars: {
         Row: {
           brand_id: string | null
@@ -178,7 +205,7 @@ export type Database = {
             foreignKeyName: "cars_brand_id_fkey"
             columns: ["brand_id"]
             isOneToOne: false
-            referencedRelation: "warranty_brands"
+            referencedRelation: "car_makes"
             referencedColumns: ["id"]
           },
           {
