@@ -7,7 +7,16 @@ import {
   sendPushCampaign,
   deletePushCampaign,
 } from "@/lib/push-campaigns.functions";
-import { getPwd, Modal, Input, Textarea, Select, ImageUploader, Loading, Empty } from "@/components/admin/shared";
+import {
+  getPwd,
+  Modal,
+  Input,
+  Textarea,
+  Select,
+  ImageUploader,
+  Loading,
+  Empty,
+} from "@/components/admin/shared";
 
 /* ===================== Push Campaigns (customer notifications) ===================== */
 export function PushCampaignsPanel() {
@@ -15,10 +24,7 @@ export function PushCampaignsPanel() {
   const send = useServerFn(sendPushCampaign);
   const del = useServerFn(deletePushCampaign);
   const qc = useQueryClient();
-  const {
-    data: campaigns = [],
-    isLoading,
-  } = useQuery({
+  const { data: campaigns = [], isLoading } = useQuery({
     queryKey: ["admin-push-campaigns"],
     queryFn: () => fetchCampaigns({ data: { password: getPwd() } }).then((r) => r.items),
   });

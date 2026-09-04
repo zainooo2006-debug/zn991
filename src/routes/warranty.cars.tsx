@@ -67,7 +67,11 @@ function CarsPage() {
         .select("*, car_makes(name)")
         .eq("customer_id", c.data.id)
         .order("created_at", { ascending: false }),
-      supabase.from("car_makes" as never).select("id, name").eq("is_active", true).order("sort_order"),
+      supabase
+        .from("car_makes" as never)
+        .select("id, name")
+        .eq("is_active", true)
+        .order("sort_order"),
     ]);
     const carsAny = carsRes as unknown as {
       data: CarRow[] | null;
