@@ -16,7 +16,7 @@ import {
 import { getAnalyticsDashboard } from "@/lib/analytics-dashboard.functions";
 import { getPwd } from "./shared";
 
-type DashboardData = Awaited<ReturnType<ReturnType<typeof getAnalyticsDashboard>>>;
+type DashboardData = Awaited<ReturnType<typeof getAnalyticsDashboard>>;
 
 export function AnalyticsDashboardPanel() {
   const getDashboard = useServerFn(getAnalyticsDashboard);

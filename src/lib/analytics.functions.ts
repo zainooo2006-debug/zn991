@@ -27,7 +27,7 @@ export const trackAnalyticsEvent = createServerFn({ method: "POST" })
       product_id: data.product_id ?? null,
       device_type: data.device_type ?? "unknown",
       source: data.source ?? null,
-      metadata: data.metadata ?? {},
+      metadata: (data.metadata ?? {}) as never,
     });
 
     if (error) {

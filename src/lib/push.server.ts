@@ -69,7 +69,7 @@ async function sendToSubscriptions(
     subs.map(async (s) => {
       try {
         const payload = await buildPushPayload(
-          { data: dataPayload, options: { ttl: 3600 } },
+          { data: dataPayload as never, options: { ttl: 3600 } },
           { endpoint: s.endpoint, expirationTime: null, keys: { p256dh: s.p256dh, auth: s.auth } },
           keys,
         );
