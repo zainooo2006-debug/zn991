@@ -19,7 +19,7 @@ type CarRow = {
   color: string | null;
   vin: string | null;
   notes: string | null;
-  warranty_brands?: { name: string } | null;
+  car_makes?: { name: string } | null;
 };
 
 type FormState = {
@@ -64,10 +64,10 @@ function CarsPage() {
     const [carsRes, brandsRes] = await Promise.all([
       supabase
         .from("cars" as never)
-        .select("*, warranty_brands(name)")
+        .select("*, car_makes(name)")
         .eq("customer_id", c.data.id)
         .order("created_at", { ascending: false }),
-      supabase.from("warranty_brands").select("id, name").eq("is_active", true).order("sort_order"),
+      supabase.from("car_makes" as never).select("id, name").eq("is_active", true).order("sort_order"),
     ]);
     const carsAny = carsRes as unknown as {
       data: CarRow[] | null;
@@ -231,7 +231,7 @@ function CarsPage() {
               <div className="flex items-start justify-between mb-3">
                 <div className="min-w-0">
                   <div className="font-bold truncate">
-                    {r.warranty_brands?.name ?? "—"} {r.model ? `· ${r.model}` : ""}
+                    {r.car_makes?.name ?? "—"} {r.model ? `· ${r.model}` : ""}
                   </div>
                   <div className="text-xs text-slate-500">
                     {r.year ?? ""} {r.color ? `· ${r.color}` : ""}
