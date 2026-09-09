@@ -194,8 +194,8 @@ function VerifyPage() {
             </div>
 
             <div className="bg-slate-50 p-4 text-center text-xs text-slate-600 border-t border-slate-200">
-              هذه الشهادة صادرة عن مؤسسة زين للعناية وزينة السيارات - صنعاء، اليمن. لأي استفسار:
-              782222919
+              هذه الشهادة صادرة من موقع زين اصل الحماية - صنعاء، اليمن. لأي استفسار:
+              780687704
             </div>
           </div>
         </>
