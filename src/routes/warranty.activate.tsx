@@ -24,7 +24,9 @@ type CarRow = {
 };
 
 function ActivatePage() {
-  const { user, loading } = useWarrantyAuth();
+  const { user, loading, isAdmin, isStaff } = useWarrantyAuth();
+  // أدمن/موظف يسوي الضمان لعميل غيره برقم جواله، لا يربطه بحسابه الشخصي
+  const staffMode = isAdmin || isStaff;
   const navigate = useNavigate();
   const preselectCar =
     typeof window !== "undefined"
@@ -57,7 +59,7 @@ function ActivatePage() {
       return;
     }
     (async () => {
-      const [b, f, br, c] = await Promise.all([
+      const [b, f, br] = await Promise.all([
         supabase
           .from("warranty_brands")
           .select("id, name")
@@ -69,15 +71,20 @@ function ActivatePage() {
           .eq("is_active", true)
           .order("sort_order"),
         supabase.from("branches").select("id, name").eq("is_active", true).order("sort_order"),
-        supabase
-          .from("customers")
-          .select("id, full_name, phone")
-          .eq("user_id", user.id)
-          .maybeSingle(),
       ]);
       setBrands((b.data as Brand[]) ?? []);
       setFilms((f.data as Film[]) ?? []);
       setBranches((br.data as Branch[]) ?? []);
+
+      // في وضع الأدمن/الموظف: النموذج يبدأ فاضي دائمًا — العميل يتحدد
+      // برقم جواله وقت الحفظ، لا يوجد "عميل مرتبط بحسابي" هنا.
+      if (staffMode) return;
+
+      const c = await supabase
+        .from("customers")
+        .select("id, full_name, phone")
+        .eq("user_id", user.id)
+        .maybeSingle();
       if (c.data) {
         setCustomerId(c.data.id);
         setCustomerName(c.data.full_name ?? "");
@@ -94,7 +101,7 @@ function ActivatePage() {
         }
       }
     })();
-  }, [user, loading, navigate, preselectCar]);
+  }, [user, loading, navigate, preselectCar, staffMode]);
 
   // When car changes, prefill brand + vin
   useEffect(() => {
@@ -114,21 +121,54 @@ function ActivatePage() {
     try {
       if (!customerName.trim() || !customerPhone.trim())
         throw new Error("الاسم ورقم الجوال مطلوبان");
-      let cid = customerId;
-      if (cid) {
-        await supabase
+
+      let cid: string | null = null;
+
+      if (staffMode) {
+        // وضع الأدمن/الموظف: نحدد العميل الحقيقي برقم جواله، لا بحساب الأدمن.
+        const phone = customerPhone.trim();
+        const existing = await supabase
           .from("customers")
-          .update({ full_name: customerName.trim(), phone: customerPhone.trim() })
-          .eq("id", cid);
-      } else if (user) {
-        const ins = await supabase
-          .from("customers")
-          .insert({ user_id: user.id, full_name: customerName.trim(), phone: customerPhone.trim() })
           .select("id")
-          .single();
-        if (ins.error) throw ins.error;
-        cid = ins.data.id;
-        setCustomerId(cid);
+          .eq("phone", phone)
+          .limit(1)
+          .maybeSingle();
+        if (existing.data) {
+          cid = existing.data.id;
+          await supabase
+            .from("customers")
+            .update({ full_name: customerName.trim() })
+            .eq("id", cid);
+        } else {
+          const ins = await supabase
+            .from("customers")
+            .insert({ full_name: customerName.trim(), phone, user_id: null })
+            .select("id")
+            .single();
+          if (ins.error) throw ins.error;
+          cid = ins.data.id;
+        }
+      } else {
+        cid = customerId;
+        if (cid) {
+          await supabase
+            .from("customers")
+            .update({ full_name: customerName.trim(), phone: customerPhone.trim() })
+            .eq("id", cid);
+        } else if (user) {
+          const ins = await supabase
+            .from("customers")
+            .insert({
+              user_id: user.id,
+              full_name: customerName.trim(),
+              phone: customerPhone.trim(),
+            })
+            .select("id")
+            .single();
+          if (ins.error) throw ins.error;
+          cid = ins.data.id;
+          setCustomerId(cid);
+        }
       }
       if (!cid) throw new Error("تعذر إنشاء سجل العميل");
 
@@ -178,9 +218,13 @@ function ActivatePage() {
         <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
           <PlusCircle className="w-6 h-6 text-amber-500" /> تفعيل ضمان جديد
         </h1>
-        <p className="text-sm text-slate-500 mb-5">اختر سيارة موجودة أو أدخل البيانات يدويًا.</p>
+        <p className="text-sm text-slate-500 mb-5">
+          {staffMode
+            ? "أدخل اسم ورقم جوال العميل — إذا كان مسجلاً من قبل سيتم ربط الضمان بحسابه تلقائيًا."
+            : "اختر سيارة موجودة أو أدخل البيانات يدويًا."}
+        </p>
 
-        {cars.length > 0 && (
+        {!staffMode && cars.length > 0 && (
           <div className="mb-5 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50">
             <label className="block">
               <div className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-1">
@@ -211,7 +255,7 @@ function ActivatePage() {
           </div>
         )}
 
-        {cars.length === 0 && (
+        {!staffMode && cars.length === 0 && (
           <div className="mb-5 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50 text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
             💡{" "}
             <Link to="/warranty/cars" className="text-amber-600 hover:underline font-bold">
