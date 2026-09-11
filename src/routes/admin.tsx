@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Shell } from "@/components/layout/Shell";
 import { NotificationBell } from "@/components/admin/NotificationBell";
-import { Lock, LogOut, Sparkles } from "lucide-react";
+import { Lock, LogOut, Sparkles, Eye, EyeOff } from "lucide-react";
 import { adminLogin } from "@/lib/admin.functions";
 import {
   WarrantyOverview,
@@ -69,6 +69,7 @@ function AdminPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined" && sessionStorage.getItem(TOKEN_KEY)) {
@@ -111,14 +112,25 @@ function AdminPage() {
             <p className="text-sm text-[var(--color-ink-soft)] mt-1">أدخل كلمة المرور للمتابعة</p>
 
             <form onSubmit={submit} className="mt-6 space-y-3">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="كلمة المرور"
-                className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 outline-none focus:border-[var(--color-gold)]"
-                disabled={busy}
-              />
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="كلمة المرور"
+                  className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 pl-10 outline-none focus:border-[var(--color-gold)]"
+                  disabled={busy}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute inset-y-0 left-2 flex items-center text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]"
+                  aria-label={showPw ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                  tabIndex={-1}
+                >
+                  {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
 
               {error && <p className="text-sm text-red-600">{error}</p>}
 
