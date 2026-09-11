@@ -64,7 +64,8 @@ const seoContentQO = queryOptions({
 
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => {
-    const seo = (loaderData?.seoMeta ?? CONTENT_DEFAULTS.seo_meta) as SeoMetaContent;
+    const seo = ((loaderData as { seoMeta?: SeoMetaContent } | undefined)?.seoMeta ??
+      CONTENT_DEFAULTS.seo_meta) as SeoMetaContent;
     return {
       meta: [
         { title: "ZAIN — زين أصل الحماية" },
