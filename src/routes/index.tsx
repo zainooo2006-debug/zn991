@@ -100,7 +100,7 @@ export const Route = createFileRoute("/")({
     ],
     };
   },
-  loader: async ({ context }) => {
+  loader: async ({ context }): Promise<{ seoMeta: SeoMetaContent }> => {
     context.queryClient.ensureQueryData(catsQO);
     context.queryClient.ensureQueryData(productsQO);
     context.queryClient.ensureQueryData(packagesQO);
