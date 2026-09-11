@@ -49,7 +49,8 @@ export type HomeSectionId =
   | "hot_deals"
   | "best_sellers"
   | "trust"
-  | "reviews";
+  | "reviews"
+  | "google_reviews";
 
 export type HomeSectionsConfig = {
   order: HomeSectionId[];
@@ -79,6 +80,28 @@ export type FeaturedSliderContent = {
   speedSeconds: number;
 };
 
+/** One manually-entered Google Maps review shown in the homepage slider. */
+export type GoogleReviewItem = {
+  id: string;
+  name: string;
+  rating: number;
+  text: string;
+};
+
+export type GoogleReviewsContent = {
+  enabled: boolean;
+  autoplay: boolean;
+  /** Seconds between automatic slide movements. */
+  speedSeconds: number;
+  items: GoogleReviewItem[];
+};
+
+/** Global SEO metadata for the homepage (keywords + description shown in search results). */
+export type SeoMetaContent = {
+  keywords: string;
+  description: string;
+};
+
 export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
   quick_access: "أزرار المراكز والضمانات",
   categories: "دائرة الأقسام",
@@ -88,6 +111,7 @@ export const HOME_SECTION_LABELS: Record<HomeSectionId, string> = {
   best_sellers: "الأكثر مبيعاً",
   trust: "شريط الثقة (ضمان/توصيل/تقييم)",
   reviews: "آراء العملاء",
+  google_reviews: "تقييمات جوجل ماب (سلايدر)",
 };
 
 const DEFAULT_HOME_ORDER: HomeSectionId[] = [
@@ -99,6 +123,7 @@ const DEFAULT_HOME_ORDER: HomeSectionId[] = [
   "best_sellers",
   "trust",
   "reviews",
+  "google_reviews",
 ];
 
 /** Appends any section id that exists in code but is missing from a previously-saved order (e.g. a section added after the admin last customized their layout). */
@@ -161,6 +186,19 @@ export const CONTENT_DEFAULTS = {
     autoplay: true,
     speedSeconds: 3,
   } as FeaturedSliderContent,
+
+  google_reviews: {
+    enabled: false,
+    autoplay: true,
+    speedSeconds: 4,
+    items: [],
+  } as GoogleReviewsContent,
+
+  seo_meta: {
+    keywords: "PPF, حماية طلاء السيارات, نانو سيراميك, عزل حراري, تنجيد سيارات, زين أصل الحماية",
+    description:
+      "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة لسيارتك.",
+  } as SeoMetaContent,
 };
 
 export type ContentKey = keyof typeof CONTENT_DEFAULTS;
