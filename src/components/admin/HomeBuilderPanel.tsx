@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { getSiteContent } from "@/lib/catalog.functions";
 import { saveContent } from "@/lib/admin.functions";
 import {
@@ -12,6 +12,8 @@ import {
   type HomeBannerContent,
   type HomeSectionId,
   type FeaturedSliderContent,
+  type GoogleReviewsContent,
+  type SeoMetaContent,
 } from "@/lib/site-content";
 import { getPwd, ImageUploader, Input } from "@/components/admin/shared";
 
@@ -40,6 +42,10 @@ export function HomeBuilderPanel() {
   const [sliderSettings, setSliderSettings] = useState<FeaturedSliderContent>(
     CONTENT_DEFAULTS.featured_slider,
   );
+  const [googleReviews, setGoogleReviews] = useState<GoogleReviewsContent>(
+    CONTENT_DEFAULTS.google_reviews,
+  );
+  const [seoMeta, setSeoMeta] = useState<SeoMetaContent>(CONTENT_DEFAULTS.seo_meta);
   const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
@@ -48,9 +54,30 @@ export function HomeBuilderPanel() {
       setSections({ ...saved, order: withMissingSections(saved.order) });
       setBanner(getValue("home_banner"));
       setSliderSettings(getValue("featured_slider"));
+      setGoogleReviews(getValue("google_reviews"));
+      setSeoMeta(getValue("seo_meta"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
+
+  const addReviewItem = () => {
+    setGoogleReviews((g) => ({
+      ...g,
+      items: [
+        ...g.items,
+        { id: crypto.randomUUID(), name: "", rating: 5, text: "" },
+      ],
+    }));
+  };
+  const updateReviewItem = (id: string, patch: Partial<GoogleReviewsContent["items"][number]>) => {
+    setGoogleReviews((g) => ({
+      ...g,
+      items: g.items.map((it) => (it.id === id ? { ...it, ...patch } : it)),
+    }));
+  };
+  const removeReviewItem = (id: string) => {
+    setGoogleReviews((g) => ({ ...g, items: g.items.filter((it) => it.id !== id) }));
+  };
 
   const saveKey = async (key: keyof typeof CONTENT_DEFAULTS, value: unknown) => {
     await save({ data: { password: getPwd(), key, value } });
@@ -317,6 +344,146 @@ export function HomeBuilderPanel() {
         </div>
         <button className="btn-gold" onClick={() => saveKey("featured_slider", sliderSettings)}>
           حفظ إعدادات السلايدر
+        </button>
+      </div>
+
+      <div className="card-clean p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-lg">تقييمات جوجل ماب (سلايدر)</h3>
+          <label className="flex items-center gap-2 text-sm font-bold cursor-pointer">
+            <input
+              type="checkbox"
+              checked={googleReviews.enabled}
+              onChange={(e) => setGoogleReviews({ ...googleReviews, enabled: e.target.checked })}
+            />
+            مفعّل
+          </label>
+        </div>
+        <p className="text-xs text-[var(--color-ink-soft)]">
+          انسخ التقييمات الحقيقية من صفحة نشاطك على خرائط جوجل (الاسم، عدد النجوم، والنص) وأضفها
+          هنا — تظهر في سلايدر متحرك بالصفحة الرئيسية، وترتيبه يُتحكم به من قائمة "ترتيب وإظهار
+          أقسام الرئيسية" بالأعلى.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label className="flex items-center gap-2 text-sm font-bold cursor-pointer">
+            <input
+              type="checkbox"
+              checked={googleReviews.autoplay}
+              onChange={(e) => setGoogleReviews({ ...googleReviews, autoplay: e.target.checked })}
+            />
+            تحريك تلقائي
+          </label>
+          <label className="block">
+            <span className="text-sm font-bold block mb-1">سرعة التبديل (ثواني)</span>
+            <input
+              type="number"
+              min={1}
+              max={20}
+              value={googleReviews.speedSeconds}
+              onChange={(e) =>
+                setGoogleReviews({
+                  ...googleReviews,
+                  speedSeconds: Math.max(1, Number(e.target.value) || 1),
+                })
+              }
+              className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm"
+              dir="ltr"
+            />
+          </label>
+        </div>
+
+        <div className="space-y-3">
+          {googleReviews.items.map((it, idx) => (
+            <div
+              key={it.id}
+              className="border border-[var(--color-hairline)] rounded-lg p-3 space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[var(--color-ink-soft)]">
+                  تقييم #{idx + 1}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeReviewItem(it.id)}
+                  className="text-red-600 hover:opacity-70"
+                  aria-label="حذف التقييم"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Input
+                  label="اسم العميل"
+                  value={it.name}
+                  onChange={(v) => updateReviewItem(it.id, { name: v })}
+                />
+                <label className="block">
+                  <span className="text-sm font-bold block mb-1">عدد النجوم</span>
+                  <select
+                    value={it.rating}
+                    onChange={(e) => updateReviewItem(it.id, { rating: Number(e.target.value) })}
+                    className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm"
+                  >
+                    {[5, 4, 3, 2, 1].map((n) => (
+                      <option key={n} value={n}>
+                        {n} نجوم
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <label className="block">
+                <span className="text-sm font-bold block mb-1">نص التقييم</span>
+                <textarea
+                  rows={3}
+                  value={it.text}
+                  onChange={(e) => updateReviewItem(it.id, { text: e.target.value })}
+                  className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm"
+                />
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <button type="button" onClick={addReviewItem} className="btn-outline">
+          <Plus className="w-4 h-4" /> إضافة تقييم
+        </button>
+
+        <div>
+          <button className="btn-gold" onClick={() => saveKey("google_reviews", googleReviews)}>
+            حفظ تقييمات جوجل
+          </button>
+        </div>
+      </div>
+
+      <div className="card-clean p-4 space-y-3">
+        <h3 className="font-bold text-lg">الكلمات المفتاحية (SEO)</h3>
+        <p className="text-xs text-[var(--color-ink-soft)]">
+          كلمات وعبارات يبحث بها الناس على جوجل — كل ما كانت دقيقة ومرتبطة بمنتجاتك (مثل أسماء
+          براندات أفلام الحماية) كل ما زادت فرصة ظهور موقعك في نتائج البحث. افصل بينها بفاصلة.
+        </p>
+        <label className="block">
+          <span className="text-sm font-bold block mb-1">الكلمات المفتاحية</span>
+          <textarea
+            rows={3}
+            value={seoMeta.keywords}
+            onChange={(e) => setSeoMeta({ ...seoMeta, keywords: e.target.value })}
+            placeholder="PPF, نانو سيراميك, XPEL, 3M, حماية طلاء السيارات صنعاء..."
+            className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm font-bold block mb-1">وصف الموقع (يظهر في نتائج البحث)</span>
+          <textarea
+            rows={2}
+            value={seoMeta.description}
+            onChange={(e) => setSeoMeta({ ...seoMeta, description: e.target.value })}
+            className="w-full border border-[var(--color-hairline)] rounded-lg px-3 py-2 text-sm"
+          />
+        </label>
+        <button className="btn-gold" onClick={() => saveKey("seo_meta", seoMeta)}>
+          حفظ إعدادات SEO
         </button>
       </div>
     </div>
