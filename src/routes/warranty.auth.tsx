@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useWarrantyAuth } from "@/lib/warranty-auth";
-import { Mail, Phone, Lock, User, Loader2 } from "lucide-react";
+import { Mail, Phone, Lock, User, Loader2, Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/warranty/auth")({
   validateSearch: (s: Record<string, unknown>): { next?: string } => {
@@ -30,6 +30,7 @@ function AuthPage() {
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ t: "err" | "ok"; m: string } | null>(null);
+  const [showPw, setShowPw] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
@@ -141,14 +142,23 @@ function AuthPage() {
           {mode !== "reset" && (
             <Field icon={<Lock className="w-4 h-4" />} label="كلمة المرور">
               <input
-                type="password"
+                type={showPw ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-transparent outline-none"
+                className="flex-1 min-w-0 bg-transparent outline-none"
                 placeholder="••••••••"
               />
+              <button
+                type="button"
+                onClick={() => setShowPw((v) => !v)}
+                className="shrink-0 text-slate-400 hover:text-slate-600"
+                aria-label={showPw ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+                tabIndex={-1}
+              >
+                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </Field>
           )}
 
