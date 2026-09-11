@@ -21,14 +21,22 @@ import { FeaturedSlider } from "@/components/home/FeaturedSlider";
 import { HeroSlider } from "@/components/home/HeroSlider";
 import { SeasonalBanner } from "@/components/home/SeasonalBanner";
 import { CustomerReviewsSection } from "@/components/home/CustomerReviewsSection";
+import { GoogleReviewsSlider } from "@/components/home/GoogleReviewsSlider";
 import {
   getCategories,
   getProducts,
   getPackages,
   getFeaturedProducts,
   getServiceCategories,
+  getSiteContent,
 } from "@/lib/catalog.functions";
-import { useSiteContentValue, withMissingSections, type HomeSectionId } from "@/lib/site-content";
+import {
+  useSiteContentValue,
+  withMissingSections,
+  CONTENT_DEFAULTS,
+  type HomeSectionId,
+  type SeoMetaContent,
+} from "@/lib/site-content";
 import { resolveImage } from "@/lib/asset-map";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -49,23 +57,24 @@ const featuredQO = queryOptions({
   queryFn: () => getFeaturedProducts(),
 });
 const servicesQO = queryOptions({ queryKey: ["services"], queryFn: () => getServiceCategories() });
+const seoContentQO = queryOptions({
+  queryKey: ["site-content-all", "seo_meta"],
+  queryFn: () => getSiteContent(),
+});
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "ZAIN — زين أصل الحماية" },
-      {
-        name: "description",
-        content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة لسيارتك.",
-      },
-      { property: "og:title", content: "ZAIN — زين أصل الحماية" },
-      {
-        property: "og:description",
-        content: "زين أصل الحماية — نانو سيراميك، PPF، عزل حراري، تنجيد وإكسسوارات فاخرة.",
-      },
-      { property: "og:url", content: "https://zn991.lovable.app/" },
-      { property: "og:type", content: "website" },
-    ],
+  head: ({ loaderData }) => {
+    const seo = (loaderData?.seoMeta ?? CONTENT_DEFAULTS.seo_meta) as SeoMetaContent;
+    return {
+      meta: [
+        { title: "ZAIN — زين أصل الحماية" },
+        { name: "description", content: seo.description },
+        ...(seo.keywords ? [{ name: "keywords", content: seo.keywords }] : []),
+        { property: "og:title", content: "ZAIN — زين أصل الحماية" },
+        { property: "og:description", content: seo.description },
+        { property: "og:url", content: "https://zn991.lovable.app/" },
+        { property: "og:type", content: "website" },
+      ],
     links: [{ rel: "canonical", href: "https://zn991.lovable.app/" }],
     scripts: [
       {
@@ -89,13 +98,21 @@ export const Route = createFileRoute("/")({
         }),
       },
     ],
-  }),
-  loader: ({ context }) => {
+    };
+  },
+  loader: async ({ context }) => {
     context.queryClient.ensureQueryData(catsQO);
     context.queryClient.ensureQueryData(productsQO);
     context.queryClient.ensureQueryData(packagesQO);
     context.queryClient.ensureQueryData(featuredQO);
     context.queryClient.ensureQueryData(servicesQO);
+    const rows = await context.queryClient.ensureQueryData(seoContentQO);
+    const row = rows.find((r) => r.key === "seo_meta");
+    const seoMeta = {
+      ...CONTENT_DEFAULTS.seo_meta,
+      ...((row?.value as Record<string, string> | undefined) ?? {}),
+    };
+    return { seoMeta };
   },
   component: HomePage,
 });
@@ -272,6 +289,7 @@ function HomePage() {
       </section>
     ),
     reviews: <CustomerReviewsSection key="reviews" />,
+    google_reviews: <GoogleReviewsSlider key="google_reviews" />,
   };
 
   const orderedIds = withMissingSections(
@@ -286,6 +304,7 @@ function HomePage() {
           "best_sellers",
           "trust",
           "reviews",
+          "google_reviews",
         ] as HomeSectionId[]),
   );
   const hiddenSet = new Set(sectionsConfig.hidden);
