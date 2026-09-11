@@ -121,9 +121,10 @@ export const adminOverviewStats = createServerFn({ method: "POST" })
 
 export const adminListSimple = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { table: "warranty_brands" | "film_types" | "branches" }) => {
-    if (!["warranty_brands", "film_types", "branches"].includes(input.table))
-      throw new Error("Bad table");
+  .inputValidator(
+    (input: { table: "warranty_brands" | "film_types" | "branches" | "car_makes" }) => {
+      if (!["warranty_brands", "film_types", "branches", "car_makes"].includes(input.table))
+        throw new Error("Bad table");
     return input;
   })
   .handler(async ({ context, data }) => {
