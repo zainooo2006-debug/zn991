@@ -64,7 +64,8 @@ const seoContentQO = queryOptions({
 
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => {
-    const seo = (loaderData?.seoMeta ?? CONTENT_DEFAULTS.seo_meta) as SeoMetaContent;
+    const seo = ((loaderData as { seoMeta?: SeoMetaContent } | undefined)?.seoMeta ??
+      CONTENT_DEFAULTS.seo_meta) as SeoMetaContent;
     return {
       meta: [
         { title: "ZAIN — زين أصل الحماية" },
@@ -100,7 +101,7 @@ export const Route = createFileRoute("/")({
     ],
     };
   },
-  loader: async ({ context }) => {
+  loader: async ({ context }): Promise<{ seoMeta: SeoMetaContent }> => {
     context.queryClient.ensureQueryData(catsQO);
     context.queryClient.ensureQueryData(productsQO);
     context.queryClient.ensureQueryData(packagesQO);

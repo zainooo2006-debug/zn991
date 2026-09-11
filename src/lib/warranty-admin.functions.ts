@@ -121,9 +121,10 @@ export const adminOverviewStats = createServerFn({ method: "POST" })
 
 export const adminListSimple = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { table: "warranty_brands" | "film_types" | "branches" }) => {
-    if (!["warranty_brands", "film_types", "branches"].includes(input.table))
-      throw new Error("Bad table");
+  .inputValidator(
+    (input: { table: "warranty_brands" | "film_types" | "branches" | "car_makes" }) => {
+      if (!["warranty_brands", "film_types", "branches", "car_makes"].includes(input.table))
+        throw new Error("Bad table");
     return input;
   })
   .handler(async ({ context, data }) => {
@@ -147,22 +148,22 @@ type MutOp =
   | { op: "customer_delete"; id: string }
   | {
       op: "simple_insert";
-      table: "warranty_brands" | "film_types" | "branches";
+      table: "warranty_brands" | "film_types" | "branches" | "car_makes";
       values: Record<string, unknown>;
     }
   | {
       op: "simple_update";
-      table: "warranty_brands" | "film_types" | "branches";
+      table: "warranty_brands" | "film_types" | "branches" | "car_makes";
       id: string;
       values: Record<string, unknown>;
     }
   | {
       op: "simple_toggle";
-      table: "warranty_brands" | "film_types" | "branches";
+      table: "warranty_brands" | "film_types" | "branches" | "car_makes";
       id: string;
       is_active: boolean;
     }
-  | { op: "simple_delete"; table: "warranty_brands" | "film_types" | "branches"; id: string };
+  | { op: "simple_delete"; table: "warranty_brands" | "film_types" | "branches" | "car_makes"; id: string };
 
 export const adminMutate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -170,7 +171,7 @@ export const adminMutate = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { isAdmin, branchId } = await assertStaff(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const allowedTables = ["warranty_brands", "film_types", "branches"] as const;
+    const allowedTables = ["warranty_brands", "film_types", "branches", "car_makes"] as const;
 
     // موظف الفرع (branch_staff) ما يقدر يعدّل ضمان أو عميل إلا لو مرتبط بفرعه هو.
     async function assertWarrantyInScope(id: string) {

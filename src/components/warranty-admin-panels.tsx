@@ -473,7 +473,7 @@ export function WarrantyCustomersTab() {
 
 /* ================= Generic Simple CRUD ================= */
 type Field = { k: string; l: string; type?: "text" | "number" };
-type SimpleTable = "warranty_brands" | "film_types" | "branches";
+type SimpleTable = "warranty_brands" | "film_types" | "branches" | "car_makes";
 export function WarrantySimpleCrud({
   table,
   title,

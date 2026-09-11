@@ -57,6 +57,7 @@ type Tab =
   | "w-warranties"
   | "w-customers"
   | "w-brands"
+  | "w-car-makes"
   | "w-films"
   | "w-branches"
   | "w-users"
@@ -180,6 +181,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         { id: "w-warranties", label: "الضمانات" },
         { id: "w-customers", label: "عملاء الضمان" },
         { id: "w-brands", label: "الماركات" },
+        { id: "w-car-makes", label: "ماركات السيارات" },
         { id: "w-films", label: "أنواع اللاصق" },
         { id: "w-branches", label: "الفروع" },
         { id: "w-users", label: "المستخدمون والصلاحيات" },
@@ -274,6 +276,17 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               fields={[
                 { k: "name", l: "الاسم" },
                 { k: "logo_url", l: "رابط الشعار" },
+              ]}
+            />
+          )}
+
+          {tab === "w-car-makes" && (
+            <WarrantySimpleCrud
+              table="car_makes"
+              title="ماركات السيارات"
+              fields={[
+                { k: "name", l: "الاسم" },
+                { k: "sort_order", l: "الترتيب", type: "number" },
               ]}
             />
           )}
