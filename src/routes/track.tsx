@@ -4,6 +4,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Search, Package, Phone } from "lucide-react";
 import { Shell } from "@/components/layout/Shell";
 import { getOrdersByPhone } from "@/lib/catalog.functions";
+import { getOrderTimelines } from "@/lib/billing.functions";
+import { ORDER_STATUS_META, normalizeOrderStatus } from "@/lib/order-status";
 
 export const Route = createFileRoute("/track")({
   head: () => ({
@@ -18,28 +20,25 @@ export const Route = createFileRoute("/track")({
   component: TrackPage,
 });
 
-const STATUS_LABEL: Record<string, string> = {
-  new: "جديد",
-  processing: "قيد التجهيز",
-  shipped: "تم الشحن",
-  delivered: "تم التسليم",
-  cancelled: "ملغي",
-};
-
-const STATUS_COLOR: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700",
-  processing: "bg-yellow-100 text-yellow-700",
-  shipped: "bg-purple-100 text-purple-700",
-  delivered: "bg-green-100 text-green-700",
-  cancelled: "bg-red-100 text-red-700",
-};
-
 function TrackPage() {
   const [phone, setPhone] = useState("");
   const [orderId, setOrderId] = useState("");
 
   const mutation = useMutation({
-    mutationFn: (v: { phone: string; orderId: string }) => getOrdersByPhone({ data: v }),
+    mutationFn: async (v: { phone: string; orderId: string }) => {
+      const orders = await getOrdersByPhone({ data: v });
+      let timelines: Record<string, Array<{ to_status: string; created_at: string }>> = {};
+      if (orders.length > 0) {
+        try {
+          timelines = await getOrderTimelines({
+            data: { phone: v.phone, orderIds: orders.map((o) => o.id) },
+          });
+        } catch {
+          // The timeline is optional; the order list must still show.
+        }
+      }
+      return { orders, timelines };
+    },
   });
 
   const onSubmit = (e: React.FormEvent) => {
@@ -98,21 +97,25 @@ function TrackPage() {
           </div>
         )}
 
-        {mutation.data && mutation.data.length === 0 && (
+        {mutation.data && mutation.data.orders.length === 0 && (
           <div className="rounded-xl bg-[var(--color-surface)] border border-[var(--color-hairline)] p-6 text-center text-[var(--color-ink-soft)]">
             لا توجد طلبات مرتبطة بهذا الرقم.
           </div>
         )}
 
-        {mutation.data && mutation.data.length > 0 && (
+        {mutation.data && mutation.data.orders.length > 0 && (
           <div className="space-y-4">
-            {mutation.data.map((o) => {
+            {mutation.data.orders.map((o) => {
               const items = Array.isArray(o.items)
                 ? (o.items as Array<{
                     name: string;
+                    qty?: number;
                     quantity?: number;
                   }>)
                 : [];
+              const status = normalizeOrderStatus(o.status);
+              const meta = ORDER_STATUS_META[status];
+              const timeline = mutation.data?.timelines[o.id] ?? [];
 
               return (
                 <div
@@ -131,12 +134,8 @@ function TrackPage() {
                       </div>
                     </div>
 
-                    <span
-                      className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        STATUS_COLOR[o.status] || "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {STATUS_LABEL[o.status] || o.status}
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${meta.badge}`}>
+                      {meta.label}
                     </span>
                   </div>
 
@@ -146,11 +145,29 @@ function TrackPage() {
                     <ul className="list-disc pr-5 space-y-0.5">
                       {items.map((it, i) => (
                         <li key={i}>
-                          {it.name} {it.quantity ? `× ${it.quantity}` : ""}
+                          {it.name} {it.qty || it.quantity ? `× ${it.qty ?? it.quantity}` : ""}
                         </li>
                       ))}
                     </ul>
                   </div>
+
+                  {timeline.length > 0 && (
+                    <div className="mt-3 text-sm">
+                      <div className="text-[var(--color-ink-soft)] mb-1">مراحل الطلب:</div>
+                      <ol className="space-y-1 border-r-2 border-[var(--color-hairline)] pr-3">
+                        {timeline.map((t, i) => (
+                          <li key={i} className="flex justify-between gap-2 text-xs">
+                            <span className="font-bold">
+                              {ORDER_STATUS_META[normalizeOrderStatus(t.to_status)].short}
+                            </span>
+                            <span className="text-[var(--color-ink-soft)]">
+                              {new Date(t.created_at).toLocaleString("ar-EG")}
+                            </span>
+                          </li>
+                        ))}
+                      </ol>
+                    </div>
+                  )}
 
                   <div className="mt-3 flex justify-between items-center border-t border-[var(--color-hairline)] pt-3">
                     <span className="text-sm text-[var(--color-ink-soft)]">الإجمالي</span>
