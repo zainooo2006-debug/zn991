@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { Shell } from "@/components/layout/Shell";
@@ -7,6 +7,7 @@ import { useCart } from "@/lib/cart";
 import { getWallets } from "@/lib/catalog.functions";
 import { createOrder } from "@/lib/admin.functions";
 import { whatsappLink } from "@/lib/whatsapp";
+import { getSessionId, getVisitorId, trackClientEvent } from "@/lib/analytics-client";
 import { Button } from "@/components/ui/button";
 import {
   Check,
@@ -62,6 +63,14 @@ function CheckoutPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const startedTracked = useRef(false);
+
+  // Analytics: customer reached checkout with items in the cart (once per visit to this page).
+  useEffect(() => {
+    if (startedTracked.current || count === 0) return;
+    startedTracked.current = true;
+    trackClientEvent("checkout_started", { metadata: { items_count: count, total } });
+  }, [count, total]);
 
   useEffect(() => {
     if (count === 0 && typeof window !== "undefined") {
@@ -94,9 +103,26 @@ function CheckoutPage() {
 
     setSubmitting(true);
 
+    // One key per checkout attempt. If the customer taps twice or the network
+    // retries, the server returns the same order instead of creating another.
+    const IDEM_KEY = "zain_checkout_idem";
+    let idemKey = "";
+    try {
+      idemKey = sessionStorage.getItem(IDEM_KEY) || "";
+      if (!idemKey) {
+        idemKey = crypto.randomUUID();
+        sessionStorage.setItem(IDEM_KEY, idemKey);
+      }
+    } catch {
+      idemKey = crypto.randomUUID();
+    }
+
     try {
       await submitOrder({
         data: {
+          idempotency_key: idemKey,
+          visitor_id: getVisitorId(),
+          session_id: getSessionId(),
           customer_name: name.trim(),
           phone: phone.trim(),
           address: address.trim() || null,
@@ -135,6 +161,11 @@ function CheckoutPage() {
         .join("\n");
 
       const destination = whatsappLink(lines);
+      try {
+        sessionStorage.removeItem(IDEM_KEY);
+      } catch {
+        /* ignore */
+      }
       clear();
       window.location.assign(destination);
     } catch (err) {
