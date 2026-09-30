@@ -1,5 +1,5 @@
-import { forwardRef, useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import { QRCodeCanvas, QRCodeSVG } from "qrcode.react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { Download, Link2, Loader2, MessageCircle, Printer, X } from "lucide-react";
@@ -258,7 +258,7 @@ export const BillingDocument = forwardRef<HTMLDivElement, { data: DocData }>(
                   borderRadius: 8,
                 }}
               >
-                <QRCodeSVG value={data.url} size={96} />
+                <QrImage value={data.url} size={96} />
               </div>
               <div style={{ fontSize: 11, color: C.soft, marginTop: 4 }}>امسح لعرض المستند</div>
             </div>
@@ -323,6 +323,45 @@ export const BillingDocument = forwardRef<HTMLDivElement, { data: DocData }>(
     );
   },
 );
+
+/**
+ * The QR is drawn on a hidden canvas and shown as a plain PNG <img>.
+ * html2canvas (used for the PDF) drops inline SVG QR codes on some browsers,
+ * but always draws <img> data URLs. Until the PNG is ready, the SVG shows.
+ */
+function QrImage({ value, size }: { value: string; size: number }) {
+  const holder = useRef<HTMLDivElement>(null);
+  const [src, setSrc] = useState("");
+
+  useEffect(() => {
+    const canvas = holder.current?.querySelector("canvas");
+    if (!canvas) return;
+    try {
+      setSrc(canvas.toDataURL("image/png"));
+    } catch {
+      /* keep the SVG fallback */
+    }
+  }, [value, size]);
+
+  return (
+    <>
+      <div ref={holder} style={{ display: "none" }} aria-hidden="true">
+        <QRCodeCanvas value={value} size={size * 3} level="M" />
+      </div>
+      {src ? (
+        <img
+          src={src}
+          width={size}
+          height={size}
+          alt="QR"
+          style={{ display: "block", width: size, height: size }}
+        />
+      ) : (
+        <QRCodeSVG value={value} size={size} />
+      )}
+    </>
+  );
+}
 
 function th(align: "right" | "center", width?: number): React.CSSProperties {
   return {
