@@ -5,6 +5,7 @@ import { supabasePublic } from "./public-backend.server";
 import { assertAdmin, verifyAdminPassword, signToken, base64ToBytes } from "./admin-auth.server";
 import { ORDER_STATUS_VALUES } from "./order-status";
 import { recordOrderStatus } from "./order-history.server";
+import { enforceRateLimit } from "./rate-limit.server";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
 
@@ -13,6 +14,13 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ password: z.string().min(1).max(200) }).parse(d))
   .handler(async ({ data }) => {
+    // Brute-force protection: 8 attempts per 15 minutes per IP.
+    await enforceRateLimit(
+      "admin-login",
+      8,
+      900,
+      "محاولات كثيرة، انتظر 15 دقيقة ثم حاول من جديد",
+    );
     if (!verifyAdminPassword(data.password)) {
       throw new Error("كلمة المرور غير صحيحة");
     }
@@ -42,10 +50,32 @@ export const createOrder = createServerFn({ method: "POST" })
         wallet_name: z.string().max(100).optional().nullable(),
         payment_ref: z.string().trim().max(100).optional().nullable(),
         notes: z.string().trim().max(1000).optional().nullable(),
+        idempotency_key: z.string().trim().min(8).max(100).optional().nullable(),
+        visitor_id: z.string().max(100).optional().nullable(),
+        session_id: z.string().max(100).optional().nullable(),
       })
       .parse(d),
   )
   .handler(async ({ data }) => {
+    // Already created with this key? Return it (double tap / network retry).
+    if (data.idempotency_key) {
+      const { data: existing } = await supabaseAdmin
+        .from("orders")
+        .select("id")
+        .eq("idempotency_key", data.idempotency_key)
+        .maybeSingle();
+      if (existing) return { id: existing.id as string, duplicate: true };
+    }
+
+    // Spam protection: 10 orders per 10 minutes per IP.
+    await enforceRateLimit(
+      "create-order",
+      10,
+      600,
+      "تم إرسال طلبات كثيرة، حاول بعد قليل",
+      { skipUnknownIp: true },
+    );
+
     // Server-trusted prices — fetch from DB, never trust client-supplied prices.
     const productIds = data.items.map((i) => i.id);
     const { data: dbProducts, error: pErr } = await supabasePublic
@@ -75,7 +105,7 @@ export const createOrder = createServerFn({ method: "POST" })
     // Orders are inserted via the service-role client — public INSERT access
     // to orders was intentionally dropped (see migration 20260524021716),
     // so the anon client can no longer create rows here.
-    const { error } = await supabaseAdmin.from("orders").insert({
+    const orderRow = {
       id: orderId,
       customer_name: data.customer_name,
       phone: data.phone,
@@ -87,8 +117,19 @@ export const createOrder = createServerFn({ method: "POST" })
       wallet_name: data.wallet_name ?? null,
       payment_ref: data.payment_ref ?? null,
       notes: data.notes ?? null,
-    });
+      idempotency_key: data.idempotency_key ?? null,
+    };
+    const { error } = await supabaseAdmin.from("orders").insert(orderRow);
     if (error) {
+      // Two identical requests raced: the other one won. Return its order.
+      if ((error as { code?: string }).code === "23505" && data.idempotency_key) {
+        const { data: winner } = await supabaseAdmin
+          .from("orders")
+          .select("id")
+          .eq("idempotency_key", data.idempotency_key)
+          .maybeSingle();
+        if (winner) return { id: winner.id as string, duplicate: true };
+      }
       console.error("[createOrder] DB error:", error);
       throw new Error("تعذّر إنشاء الطلب، الرجاء المحاولة لاحقاً");
     }
@@ -108,7 +149,27 @@ export const createOrder = createServerFn({ method: "POST" })
       console.error("[createOrder] notify failed:", e);
     }
 
-    return { id: orderId };
+    // Analytics: order_completed (recorded on the server so it can't be faked or missed).
+    try {
+      await supabaseAdmin.from("analytics_events").insert({
+        event_name: "order_completed",
+        visitor_id: data.visitor_id ?? null,
+        session_id: data.session_id ?? null,
+        page: "/checkout",
+        device_type: "unknown",
+        source: "checkout",
+        metadata: {
+          order_id: orderId,
+          total: subtotal,
+          items_count: trustedItems.reduce((s, i) => s + i.qty, 0),
+          payment: data.wallet_name ?? null,
+        } as never,
+      });
+    } catch (e) {
+      console.error("[createOrder] analytics failed:", e);
+    }
+
+    return { id: orderId, duplicate: false };
   });
 
 export const listOrders = createServerFn({ method: "POST" })
