@@ -3,6 +3,8 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { supabasePublic } from "./public-backend.server";
 import { assertAdmin, verifyAdminPassword, signToken, base64ToBytes } from "./admin-auth.server";
+import { ORDER_STATUS_VALUES } from "./order-status";
+import { recordOrderStatus } from "./order-history.server";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
 
@@ -91,6 +93,8 @@ export const createOrder = createServerFn({ method: "POST" })
       throw new Error("تعذّر إنشاء الطلب، الرجاء المحاولة لاحقاً");
     }
 
+    await recordOrderStatus(orderId, null, "new", { changedBy: "customer", source: "checkout" });
+
     try {
       const { notifyAdmin } = await import("./push.server");
       const count = trustedItems.reduce((s, i) => s + i.qty, 0);
@@ -129,12 +133,17 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
       .object({
         password: z.string(),
         id: z.string().uuid(),
-        status: z.enum(["new", "confirmed", "shipped", "delivered", "cancelled"]),
+        status: z.enum(ORDER_STATUS_VALUES),
       })
       .parse(d),
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
+    const { data: prev } = await supabaseAdmin
+      .from("orders")
+      .select("status")
+      .eq("id", data.id)
+      .maybeSingle();
     const { error } = await supabaseAdmin
       .from("orders")
       .update({ status: data.status })
@@ -142,6 +151,12 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
     if (error) {
       console.error("[server] DB error:", error);
       throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    }
+    if (prev && prev.status !== data.status) {
+      await recordOrderStatus(data.id, prev.status, data.status, {
+        changedBy: "admin",
+        source: "admin",
+      });
     }
     return { ok: true };
   });
