@@ -1,5 +1,7 @@
 import { forwardRef, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { Download, Link2, Loader2, MessageCircle, Printer, X } from "lucide-react";
 import logoAsset from "@/assets/logo-tajalmoluk.png.asset.json";
 import { useSiteContentValue } from "@/lib/site-content";
@@ -132,7 +134,6 @@ export const BillingDocument = forwardRef<HTMLDivElement, { data: DocData }>(
             <img
               src={branding.logoUrl || logoAsset.url}
               alt="زين"
-              crossOrigin="anonymous"
               style={{
                 height: 64,
                 width: "auto",
@@ -346,34 +347,77 @@ function Row({ label, value }: { label: string; value: string }) {
 
 /* ------------------------------------------------------------------ */
 
+/**
+ * Renders the document off-screen (so a scrolled modal / fixed overlay can't
+ * crop or blank it), then builds an A4 PDF. If the logo can't be captured
+ * (cross-origin), retries without images rather than failing.
+ */
 export async function downloadElementPdf(el: HTMLElement, filename: string) {
-  const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-    import("html2canvas"),
-    import("jspdf"),
-  ]);
-  const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const margin = 10;
-  const w = pageW - margin * 2;
-  const pxPerMm = canvas.width / w;
-  const sliceH = Math.floor((pageH - margin * 2) * pxPerMm);
+  const holder = document.createElement("div");
+  holder.setAttribute("dir", "rtl");
+  holder.style.cssText =
+    "position:absolute;top:0;left:-10000px;width:800px;background:#ffffff;pointer-events:none;";
+  const clone = el.cloneNode(true) as HTMLElement;
+  clone.style.margin = "0";
+  clone.style.maxWidth = "800px";
+  clone.style.width = "800px";
+  holder.appendChild(clone);
+  document.body.appendChild(holder);
 
-  let y = 0;
-  let page = 0;
-  while (y < canvas.height) {
-    const h = Math.min(sliceH, canvas.height - y);
-    const slice = document.createElement("canvas");
-    slice.width = canvas.width;
-    slice.height = h;
-    slice.getContext("2d")!.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-    if (page > 0) pdf.addPage();
-    pdf.addImage(slice.toDataURL("image/png"), "PNG", margin, margin, w, h / pxPerMm);
-    y += h;
-    page++;
+  try {
+    const scale = clone.scrollHeight > 2500 ? 1.5 : 2;
+    const render = (withImages: boolean) =>
+      html2canvas(clone, {
+        scale,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
+        imageTimeout: 10000,
+        ignoreElements: withImages ? undefined : (node) => node.tagName === "IMG",
+      });
+
+    let canvas: HTMLCanvasElement;
+    try {
+      canvas = await render(true);
+    } catch {
+      canvas = await render(false);
+    }
+
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const w = pageW - margin * 2;
+    const pxPerMm = canvas.width / w;
+    const sliceH = Math.floor((pageH - margin * 2) * pxPerMm);
+
+    let y = 0;
+    let page = 0;
+    while (y < canvas.height) {
+      const h = Math.min(sliceH, canvas.height - y);
+      const slice = document.createElement("canvas");
+      slice.width = canvas.width;
+      slice.height = h;
+      const ctx = slice.getContext("2d");
+      if (!ctx) throw new Error("canvas unavailable");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, slice.width, slice.height);
+      ctx.drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+      if (page > 0) pdf.addPage();
+      pdf.addImage(slice.toDataURL("image/png"), "PNG", margin, margin, w, h / pxPerMm);
+      y += h;
+      page++;
+    }
+
+    try {
+      pdf.save(filename);
+    } catch {
+      // Some in-app browsers block the download; open the PDF instead.
+      window.open(pdf.output("bloburl").toString(), "_blank");
+    }
+  } finally {
+    document.body.removeChild(holder);
   }
-  pdf.save(filename);
 }
 
 export function docWhatsappMessage(d: DocData) {
@@ -409,8 +453,9 @@ export function DocActions({
     setBusy(true);
     try {
       await downloadElementPdf(docRef.current, `${data.number}.pdf`);
-    } catch {
-      alert("تعذّر إنشاء ملف PDF");
+    } catch (err) {
+      console.error("[pdf] failed:", err);
+      alert(`تعذّر إنشاء ملف PDF\n${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setBusy(false);
     }
