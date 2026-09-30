@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { trackClientEvent } from "./analytics-client";
 
 export type CartItem = {
   id: string;
@@ -42,6 +43,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const ex = prev.find((p) => p.id === item.id);
       if (ex) return prev.map((p) => (p.id === item.id ? { ...p, qty: p.qty + qty } : p));
       return [...prev, { ...item, qty }];
+    });
+    trackClientEvent("add_to_cart", {
+      product_id: item.id,
+      metadata: { name: item.name, price: item.price, qty },
     });
   }, []);
 
