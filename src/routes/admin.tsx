@@ -29,6 +29,8 @@ import { InstallationCentersPanel } from "@/components/admin/InstallationCenters
 import { HeroSlidesPanel } from "@/components/admin/HeroSlidesPanel";
 import { PushCampaignsPanel } from "@/components/admin/PushCampaignsPanel";
 import { AnalyticsDashboardPanel } from "@/components/admin/AnalyticsDashboardPanel";
+import { InvoicesPanel } from "@/components/admin/InvoicesPanel";
+import { QuotesPanel } from "@/components/admin/QuotesPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -40,6 +42,8 @@ export const Route = createFileRoute("/admin")({
 
 type Tab =
   | "orders"
+  | "invoices"
+  | "quotes"
   | "products"
   | "categories"
   | "services"
@@ -175,6 +179,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       ],
     },
     {
+      title: "الفواتير وعروض الأسعار",
+      tabs: [
+        { id: "invoices", label: "🧾 الفواتير" },
+        { id: "quotes", label: "📝 عروض الأسعار" },
+      ],
+    },
+    {
       title: "الضمانات",
       tabs: [
         { id: "w-overview", label: "نظرة عامة" },
@@ -251,6 +262,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
         <div className="mt-6">
           {tab === "orders" && <OrdersPanel />}
+          {tab === "invoices" && <InvoicesPanel />}
+          {tab === "quotes" && <QuotesPanel />}
           {tab === "products" && <ProductsPanel />}
           {tab === "categories" && <CategoriesPanel />}
           {tab === "services" && <ServicesPanel />}
