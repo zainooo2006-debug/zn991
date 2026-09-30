@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { enforceRateLimit } from "./rate-limit.server";
 import { z } from "zod";
 import { supabasePublic } from "./public-backend.server";
 
@@ -98,6 +99,13 @@ async function buildCatalogBlock(): Promise<string> {
 export const chatWithAssistant = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }) => {
+    await enforceRateLimit(
+      "assistant",
+      40,
+      600,
+      "أرسلت رسائل كثيرة خلال وقت قصير، حاول بعد قليل.",
+      { skipUnknownIp: true },
+    );
     const key = process.env.LOVABLE_API_KEY;
     if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
