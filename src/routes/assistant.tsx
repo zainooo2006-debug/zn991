@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Image as ImageIcon, Send, Sparkles, Trash2, X, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { chatWithAssistant } from "@/lib/assistant.functions";
+import { trackClientEvent } from "@/lib/analytics-client";
 
 type ContentPart =
   | { type: "text"; text: string }
@@ -101,6 +102,11 @@ function AssistantPage() {
     }
   }, [messages, hydrated]);
 
+  // Analytics: assistant page opened (once per visit)
+  useEffect(() => {
+    trackClientEvent("assistant_opened");
+  }, []);
+
   // Auto-scroll
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -129,6 +135,7 @@ function AssistantPage() {
     const next = [...messages, userMsg];
     setMessages(next);
     setLoading(true);
+    trackClientEvent("assistant_message");
     try {
       const payloadMessages = next.map((m) => ({ role: m.role, content: m.content }));
       const res = await chatWithAssistant({ data: { messages: payloadMessages } });
