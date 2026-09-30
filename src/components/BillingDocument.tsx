@@ -347,6 +347,65 @@ function Row({ label, value }: { label: string; value: string }) {
 
 /* ------------------------------------------------------------------ */
 
+/* html2canvas 1.4.1 cannot read modern CSS colours (oklch, color-mix, color()),
+ * which Tailwind v4 / shadcn put on almost every element (border-color,
+ * outline-color, ...). Before capturing, every such computed value inside the
+ * document is replaced by a plain rgba() value as an inline style. */
+const MODERN_COLOR = /(oklch|oklab|color-mix|lab|lch|color)\(/i;
+const PURE_MODERN_COLOR = /^(oklch|oklab|color-mix|lab|lch|color)\(/i;
+const NONE_WHEN_COMPLEX = new Set([
+  "box-shadow",
+  "text-shadow",
+  "background-image",
+  "filter",
+  "backdrop-filter",
+  "-webkit-mask-image",
+  "mask-image",
+]);
+
+let colorCtx: CanvasRenderingContext2D | null = null;
+
+function toRgba(value: string): string | null {
+  try {
+    if (!colorCtx) {
+      const c = document.createElement("canvas");
+      c.width = 1;
+      c.height = 1;
+      colorCtx = c.getContext("2d", { willReadFrequently: true });
+    }
+    const ctx = colorCtx;
+    if (!ctx) return null;
+    ctx.fillStyle = "#010203"; // sentinel: unchanged after assignment = unsupported value
+    ctx.fillStyle = value;
+    if (ctx.fillStyle === "#010203") return null;
+    ctx.clearRect(0, 0, 1, 1);
+    ctx.fillRect(0, 0, 1, 1);
+    const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+    return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+  } catch {
+    return null;
+  }
+}
+
+function sanitizeColors(root: HTMLElement) {
+  const nodes: HTMLElement[] = [root, ...Array.from(root.querySelectorAll<HTMLElement>("*"))];
+  for (const node of nodes) {
+    const cs = getComputedStyle(node);
+    for (let i = 0; i < cs.length; i++) {
+      const prop = cs.item(i);
+      if (prop.startsWith("--")) continue;
+      const v = cs.getPropertyValue(prop);
+      if (!v || !MODERN_COLOR.test(v)) continue;
+      if (PURE_MODERN_COLOR.test(v.trim())) {
+        const rgba = toRgba(v.trim());
+        node.style.setProperty(prop, rgba ?? (prop === "color" ? "#0f172a" : "transparent"));
+      } else if (NONE_WHEN_COMPLEX.has(prop)) {
+        node.style.setProperty(prop, "none");
+      }
+    }
+  }
+}
+
 /**
  * Renders the document off-screen (so a scrolled modal / fixed overlay can't
  * crop or blank it), then builds an A4 PDF. If the logo can't be captured
@@ -365,6 +424,7 @@ export async function downloadElementPdf(el: HTMLElement, filename: string) {
   document.body.appendChild(holder);
 
   try {
+    sanitizeColors(clone);
     const scale = clone.scrollHeight > 2500 ? 1.5 : 2;
     const render = (withImages: boolean) =>
       html2canvas(clone, {
@@ -373,6 +433,11 @@ export async function downloadElementPdf(el: HTMLElement, filename: string) {
         useCORS: true,
         logging: false,
         imageTimeout: 10000,
+        onclone: (doc) => {
+          // The page's own <html>/<body> backgrounds may use oklch too.
+          doc.documentElement.style.background = "#ffffff";
+          doc.body.style.background = "#ffffff";
+        },
         ignoreElements: withImages ? undefined : (node) => node.tagName === "IMG",
       });
 
