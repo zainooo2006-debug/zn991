@@ -111,6 +111,8 @@ export const createInvoice = createServerFn({ method: "POST" })
     let items: DocItem[] | undefined = data.items;
     let payment_method = data.payment_method ?? null;
     let notes = data.notes ?? null;
+    // Discount already given on the order (coupon / quote discount).
+    let orderDiscount = 0;
 
     if (data.order_id) {
       // One active invoice per order: return the existing one.
@@ -135,14 +137,15 @@ export const createInvoice = createServerFn({ method: "POST" })
       address = address ?? (order.address ? String(order.address) : null);
       items = items ?? cleanItems(order.items);
       payment_method = payment_method ?? (order.wallet_name ? String(order.wallet_name) : null);
-      notes = notes ?? null;
+      notes = notes ?? (order.coupon_code ? `كوبون خصم: ${String(order.coupon_code)}` : null);
+      orderDiscount = Math.max(Number(order.subtotal ?? 0) - Number(order.total ?? 0), 0);
     }
 
     if (!customer_name || !phone || !items || items.length === 0) {
       throw new Error("بيانات الفاتورة ناقصة (الاسم، الهاتف، البنود)");
     }
 
-    const t = calcTotals(items, data.discount ?? 0);
+    const t = calcTotals(items, data.discount ?? orderDiscount);
     const now = new Date().toISOString();
     const { data: row, error } = await client
       .from("invoices")
@@ -366,6 +369,7 @@ export const convertQuoteToOrder = createServerFn({ method: "POST" })
         qty: i.qty,
       })),
       subtotal: quote.subtotal,
+      discount: quote.discount,
       total: quote.total,
       notes: `من عرض السعر ${quote.quote_number}${quote.vehicle ? ` — ${quote.vehicle}` : ""}`,
       status: orderStatus,
