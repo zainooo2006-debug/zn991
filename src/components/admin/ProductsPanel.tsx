@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, X, Sparkles } from "lucide-react";
 import { getProducts, getCategories } from "@/lib/catalog.functions";
 import { saveProduct, adminDelete } from "@/lib/admin.functions";
 import { generateProductContent } from "@/lib/ai-content.functions";
+import { getProductStock } from "@/lib/inventory.functions";
 import { getPwd, ImageUploader, Modal, Input, Textarea, Select } from "@/components/admin/shared";
 
 /* ===================== Products ===================== */
@@ -18,14 +19,27 @@ type ProductRow = {
   is_bestseller: boolean;
   is_featured: boolean;
   category_id: string | null;
+  in_stock?: boolean | null;
+  // null = quantity not tracked (unlimited)
+  stock_qty?: number | null;
 };
+
+const LOW_STOCK = 3;
 
 export function ProductsPanel() {
   const fetchProducts = useServerFn(getProducts);
   const fetchCats = useServerFn(getCategories);
   const save = useServerFn(saveProduct);
   const del = useServerFn(adminDelete);
+  const fetchStock = useServerFn(getProductStock);
   const qc = useQueryClient();
+  // Quantities live in a separate admin-only query so the public catalog never exposes them.
+  const { data: stockRows = [] } = useQuery({
+    queryKey: ["admin-product-stock"],
+    queryFn: () => fetchStock({ data: { password: getPwd() } }),
+    retry: false,
+  });
+  const stockOf = (id: string) => stockRows.find((r) => r.id === id);
   const { data: products = [] } = useQuery({
     queryKey: ["admin-products"],
     queryFn: () => fetchProducts(),
@@ -35,6 +49,7 @@ export function ProductsPanel() {
 
   const refresh = useCallback(() => {
     qc.invalidateQueries({ queryKey: ["admin-products"] });
+    qc.invalidateQueries({ queryKey: ["admin-product-stock"] });
     qc.invalidateQueries({ queryKey: ["products"] });
     qc.invalidateQueries({ queryKey: ["featured-products"] });
   }, [qc]);
@@ -83,6 +98,29 @@ export function ProductsPanel() {
                     الأكثر مبيعاً
                   </span>
                 )}
+                {(() => {
+                  const st = stockOf(p.id);
+                  if (!st) return null;
+                  if (!st.in_stock || st.stock_qty === 0) {
+                    return (
+                      <span className="text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded">
+                        نفدت الكمية
+                      </span>
+                    );
+                  }
+                  if (st.stock_qty === null) return null;
+                  return (
+                    <span
+                      className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        st.stock_qty <= LOW_STOCK
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-green-100 text-green-700"
+                      }`}
+                    >
+                      {st.stock_qty <= LOW_STOCK ? "مخزون قليل" : "المخزون"}: {st.stock_qty}
+                    </span>
+                  );
+                })()}
                 {(p as ProductRow).is_featured && (
                   <span className="text-[10px] bg-[var(--color-gold)] text-[var(--color-ink)] px-1.5 py-0.5 rounded">
                     مميز
@@ -92,7 +130,13 @@ export function ProductsPanel() {
             </div>
             <div className="flex flex-col gap-1">
               <button
-                onClick={() => setEditing(p as ProductRow)}
+                onClick={() =>
+                  setEditing({
+                    ...(p as ProductRow),
+                    stock_qty: stockOf(p.id)?.stock_qty ?? null,
+                    in_stock: stockOf(p.id)?.in_stock ?? (p as ProductRow).in_stock ?? true,
+                  })
+                }
                 className="p-2 text-[var(--color-gold)]"
               >
                 <Pencil className="w-4 h-4" />
@@ -138,6 +182,8 @@ function ProductForm({
     category_id: string | null;
     is_bestseller: boolean;
     is_featured: boolean;
+    stock_qty: number | null;
+    in_stock: boolean;
   }) => Promise<void>;
 }) {
   const [name, setName] = useState(initial.name || "");
@@ -148,6 +194,10 @@ function ProductForm({
   const [catId, setCatId] = useState(initial.category_id || "");
   const [bestseller, setBestseller] = useState(initial.is_bestseller || false);
   const [featured, setFeatured] = useState(initial.is_featured || false);
+  const [stockQty, setStockQty] = useState(
+    initial.stock_qty === null || initial.stock_qty === undefined ? "" : String(initial.stock_qty),
+  );
+  const [inStock, setInStock] = useState(initial.in_stock !== false);
   const [busy, setBusy] = useState(false);
 
   const generate = useServerFn(generateProductContent);
@@ -209,6 +259,8 @@ function ProductForm({
             category_id: catId || null,
             is_bestseller: bestseller,
             is_featured: featured,
+            stock_qty: stockQty.trim() === "" ? null : Math.max(0, Math.floor(Number(stockQty))),
+            in_stock: inStock,
           });
         } catch (err) {
           alert((err as Error).message);
@@ -262,6 +314,34 @@ function ProductForm({
           />
           منتج مميز (يظهر في السلايدر)
         </label>
+      </div>
+      <div className="rounded-lg border border-[var(--color-hairline)] p-3 space-y-2">
+        <Input
+          label="الكمية المتوفرة في المخزون"
+          type="number"
+          value={stockQty}
+          onChange={setStockQty}
+        />
+        {stockQty.trim() === "" ? (
+          <>
+            <p className="text-xs text-[var(--color-ink-soft)]">
+              فارغة = كمية غير محدودة (لا يتم خصم شيء عند الطلب).
+            </p>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={inStock}
+                onChange={(e) => setInStock(e.target.checked)}
+                className="accent-[var(--color-gold)]"
+              />
+              متوفر للبيع
+            </label>
+          </>
+        ) : (
+          <p className="text-xs text-[var(--color-ink-soft)]">
+            تُخصم الكمية تلقائياً مع كل طلب، وعند الوصول إلى 0 يظهر المنتج «نفدت الكمية».
+          </p>
+        )}
       </div>
       <ImagesField images={images} onChange={setImages} />
       <div>
