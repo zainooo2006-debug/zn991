@@ -23,6 +23,7 @@ export const Route = createFileRoute("/product/$id")({
           images: string[];
           price?: number | null;
           rating?: number | null;
+          in_stock?: boolean | null;
         }
       | undefined;
     const url = `https://zn991.lovable.app/product/${params.id}`;
@@ -68,7 +69,10 @@ export const Route = createFileRoute("/product/$id")({
                           "@type": "Offer",
                           price: data.price,
                           priceCurrency: "YER",
-                          availability: "https://schema.org/InStock",
+                          availability:
+                            data.in_stock === false
+                              ? "https://schema.org/OutOfStock"
+                              : "https://schema.org/InStock",
                           url,
                         },
                       }
@@ -116,7 +120,10 @@ function ProductPage() {
 
   const waMsg = `مرحباً، أريد طلب المنتج: ${product.name} — السعر: ${product.price.toLocaleString()} ر.ي`;
 
+  const soldOut = product.in_stock === false;
+
   const addToCart = () => {
+    if (soldOut) return;
     cart.add({
       id: product.id,
       name: product.name,
@@ -186,9 +193,21 @@ function ProductPage() {
               {product.description}
             </p>
 
+            {soldOut && (
+              <p className="mt-4 inline-block rounded-lg bg-red-50 px-3 py-2 text-sm font-bold text-red-700">
+                نفدت الكمية حالياً — تواصل معنا عبر واتساب لمعرفة موعد التوفر
+              </p>
+            )}
+
             <div className="mt-6 flex flex-wrap gap-3">
-              <button onClick={addToCart} className="btn-gold">
-                {added ? (
+              <button
+                onClick={addToCart}
+                disabled={soldOut}
+                className="btn-gold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {soldOut ? (
+                  "نفدت الكمية"
+                ) : added ? (
                   <>
                     <Check className="w-4 h-4" /> تمت الإضافة
                   </>
@@ -203,7 +222,8 @@ function ProductPage() {
                   addToCart();
                   navigate({ to: "/checkout" });
                 }}
-                className="btn-outline"
+                disabled={soldOut}
+                className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 اشترِ الآن
               </button>
