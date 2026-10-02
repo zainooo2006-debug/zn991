@@ -104,6 +104,14 @@ export function OrdersPanel() {
                 <div className="text-[var(--color-gold)] font-black text-lg">
                   {Number(o.total).toLocaleString()} ر.ي
                 </div>
+                {Number((o as { discount?: number }).discount ?? 0) > 0 && (
+                  <div className="text-xs text-green-700">
+                    خصم {Number((o as { discount?: number }).discount).toLocaleString()} ر.ي
+                    {(o as { coupon_code?: string | null }).coupon_code
+                      ? ` (${(o as { coupon_code?: string | null }).coupon_code})`
+                      : ""}
+                  </div>
+                )}
                 <select
                   value={status}
                   onChange={(e) => setStatus(o.id, e.target.value)}
