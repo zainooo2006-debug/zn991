@@ -31,6 +31,7 @@ import { PushCampaignsPanel } from "@/components/admin/PushCampaignsPanel";
 import { AnalyticsDashboardPanel } from "@/components/admin/AnalyticsDashboardPanel";
 import { InvoicesPanel } from "@/components/admin/InvoicesPanel";
 import { QuotesPanel } from "@/components/admin/QuotesPanel";
+import { CouponsPanel } from "@/components/admin/CouponsPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -45,6 +46,7 @@ type Tab =
   | "invoices"
   | "quotes"
   | "products"
+  | "coupons"
   | "categories"
   | "services"
   | "packages"
@@ -163,7 +165,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       title: "المتجر",
       tabs: [
         { id: "orders", label: "الطلبات" },
-        { id: "products", label: "المنتجات" },
+        { id: "products", label: "المنتجات والمخزون" },
+        { id: "coupons", label: "🎟️ الكوبونات" },
         { id: "categories", label: "الأقسام" },
         { id: "services", label: "الخدمات" },
         { id: "packages", label: "البكجات" },
@@ -265,6 +268,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {tab === "invoices" && <InvoicesPanel />}
           {tab === "quotes" && <QuotesPanel />}
           {tab === "products" && <ProductsPanel />}
+          {tab === "coupons" && <CouponsPanel />}
           {tab === "categories" && <CategoriesPanel />}
           {tab === "services" && <ServicesPanel />}
           {tab === "packages" && <PackagesPanel />}
