@@ -184,6 +184,8 @@ function CheckoutPage() {
 
       const lines = [
         "🛒 *طلب جديد من زين*",
+        `🔖 رقم الطلب: ${saved.id.slice(0, 8).toUpperCase()}`,
+        `🔎 تتبع طلبك: ${window.location.origin}/track`,
         `👤 الاسم: ${name}`,
         `📱 الهاتف: ${phone}`,
         address ? `📍 العنوان: ${address}` : "",
