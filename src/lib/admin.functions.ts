@@ -6,6 +6,14 @@ import { assertAdmin, verifyAdminPassword, signToken, base64ToBytes } from "./ad
 import { ORDER_STATUS_VALUES } from "./order-status";
 import { recordOrderStatus } from "./order-history.server";
 import { enforceRateLimit } from "./rate-limit.server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  applyCoupon,
+  releaseCoupon,
+  releaseStock,
+  reserveStock,
+  toStockItems,
+} from "./shop-rules.server";
 
 const SESSION_TTL_MS = 1000 * 60 * 60 * 8; // 8 hours
 
@@ -30,6 +38,27 @@ export const adminLogin = createServerFn({ method: "POST" })
 
 /* ============ Orders (public create, admin list/update) ============ */
 
+// Orders table also has newer columns (discount, coupon_code, stock_state);
+// read them untyped so this compiles before the generated types are refreshed.
+const ordersDb = () => supabaseAdmin as unknown as SupabaseClient;
+
+/** Result for an order that already exists (double tap / retry of the same checkout). */
+async function existingOrderResult(id: string) {
+  const { data: o } = await ordersDb()
+    .from("orders")
+    .select("subtotal, discount, total, coupon_code")
+    .eq("id", id)
+    .maybeSingle();
+  return {
+    id,
+    duplicate: true as boolean,
+    subtotal: Number(o?.subtotal ?? 0),
+    discount: Number(o?.discount ?? 0),
+    total: Number(o?.total ?? 0),
+    coupon_code: ((o?.coupon_code as string | null) ?? null) as string | null,
+  };
+}
+
 const cartItemSchema = z.object({
   id: z.string(),
   name: z.string().max(200),
@@ -51,6 +80,7 @@ export const createOrder = createServerFn({ method: "POST" })
         payment_ref: z.string().trim().max(100).optional().nullable(),
         notes: z.string().trim().max(1000).optional().nullable(),
         idempotency_key: z.string().trim().min(8).max(100).optional().nullable(),
+        coupon_code: z.string().trim().max(40).optional().nullable(),
         visitor_id: z.string().max(100).optional().nullable(),
         session_id: z.string().max(100).optional().nullable(),
       })
@@ -64,7 +94,7 @@ export const createOrder = createServerFn({ method: "POST" })
         .select("id")
         .eq("idempotency_key", data.idempotency_key)
         .maybeSingle();
-      if (existing) return { id: existing.id as string, duplicate: true };
+      if (existing) return await existingOrderResult(existing.id as string);
     }
 
     // Spam protection: 10 orders per 10 minutes per IP.
@@ -101,6 +131,25 @@ export const createOrder = createServerFn({ method: "POST" })
     });
     const subtotal = trustedItems.reduce((s, i) => s + i.price * i.qty, 0);
 
+    // Stock: take the quantities now, all items or none (atomic in the database).
+    const stockItems = toStockItems(trustedItems);
+    await reserveStock(stockItems);
+
+    // Coupon: validated against the server-side subtotal; one use is counted.
+    let discount = 0;
+    let couponCode: string | null = null;
+    if (data.coupon_code && data.coupon_code.trim()) {
+      try {
+        const applied = await applyCoupon(data.coupon_code, subtotal, true);
+        discount = applied.discount;
+        couponCode = applied.code;
+      } catch (e) {
+        await releaseStock(stockItems);
+        throw e;
+      }
+    }
+    const total = subtotal - discount;
+
     const orderId = crypto.randomUUID();
     // Orders are inserted via the service-role client — public INSERT access
     // to orders was intentionally dropped (see migration 20260524021716),
@@ -112,7 +161,10 @@ export const createOrder = createServerFn({ method: "POST" })
       address: data.address ?? null,
       items: trustedItems,
       subtotal,
-      total: subtotal,
+      discount,
+      total,
+      coupon_code: couponCode,
+      stock_state: stockItems.length > 0 ? "reserved" : "none",
       wallet_id: data.wallet_id ?? null,
       wallet_name: data.wallet_name ?? null,
       payment_ref: data.payment_ref ?? null,
@@ -121,6 +173,9 @@ export const createOrder = createServerFn({ method: "POST" })
     };
     const { error } = await supabaseAdmin.from("orders").insert(orderRow);
     if (error) {
+      // The order was not saved: give back the stock and the coupon use.
+      await releaseStock(stockItems);
+      await releaseCoupon(couponCode);
       // Two identical requests raced: the other one won. Return its order.
       if ((error as { code?: string }).code === "23505" && data.idempotency_key) {
         const { data: winner } = await supabaseAdmin
@@ -128,7 +183,7 @@ export const createOrder = createServerFn({ method: "POST" })
           .select("id")
           .eq("idempotency_key", data.idempotency_key)
           .maybeSingle();
-        if (winner) return { id: winner.id as string, duplicate: true };
+        if (winner) return await existingOrderResult(winner.id as string);
       }
       console.error("[createOrder] DB error:", error);
       throw new Error("تعذّر إنشاء الطلب، الرجاء المحاولة لاحقاً");
@@ -142,7 +197,7 @@ export const createOrder = createServerFn({ method: "POST" })
       await notifyAdmin({
         type: "order",
         title: "طلب جديد",
-        body: `العميل: ${data.customer_name} — ${count} منتج — الإجمالي: ${subtotal.toLocaleString("ar-EG")}`,
+        body: `العميل: ${data.customer_name} — ${count} منتج — الإجمالي: ${total.toLocaleString("ar-EG")}`,
         ref_id: orderId,
       });
     } catch (e) {
@@ -160,7 +215,9 @@ export const createOrder = createServerFn({ method: "POST" })
         source: "checkout",
         metadata: {
           order_id: orderId,
-          total: subtotal,
+          total,
+          discount,
+          coupon: couponCode,
           items_count: trustedItems.reduce((s, i) => s + i.qty, 0),
           payment: data.wallet_name ?? null,
         } as never,
@@ -169,7 +226,14 @@ export const createOrder = createServerFn({ method: "POST" })
       console.error("[createOrder] analytics failed:", e);
     }
 
-    return { id: orderId, duplicate: false };
+    return {
+      id: orderId,
+      duplicate: false as boolean,
+      subtotal,
+      discount,
+      total,
+      coupon_code: couponCode,
+    };
   });
 
 export const listOrders = createServerFn({ method: "POST" })
@@ -200,21 +264,57 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
-    const { data: prev } = await supabaseAdmin
+    const client = ordersDb();
+    const { data: prev } = await client
       .from("orders")
-      .select("status")
+      .select("status, items, stock_state")
       .eq("id", data.id)
       .maybeSingle();
-    const { error } = await supabaseAdmin
-      .from("orders")
-      .update({ status: data.status })
-      .eq("id", data.id);
-    if (error) {
-      console.error("[server] DB error:", error);
-      throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+    if (!prev) throw new Error("الطلب غير موجود");
+
+    // Stock follows the order: cancelling gives the units back, re-opening a
+    // cancelled order takes them again (and fails if they are no longer there).
+    const stockItems = toStockItems(prev.items);
+    const prevState = String(prev.stock_state ?? "none");
+    const isCancelling = data.status === "cancelled" && prev.status !== "cancelled";
+    const isReopening = data.status !== "cancelled" && prev.status === "cancelled";
+    let nextState: string | null = null;
+    let undo: (() => Promise<unknown>) | null = null;
+
+    if (isCancelling && prevState === "reserved") {
+      await releaseStock(stockItems);
+      nextState = "released";
+      undo = () => reserveStock(stockItems);
+    } else if (isReopening && prevState === "released") {
+      await reserveStock(stockItems); // throws an Arabic message if stock is short
+      nextState = "reserved";
+      undo = () => releaseStock(stockItems);
     }
-    if (prev && prev.status !== data.status) {
-      await recordOrderStatus(data.id, prev.status, data.status, {
+
+    const patch: Record<string, unknown> = { status: data.status };
+    if (nextState) patch.stock_state = nextState;
+
+    // When stock moved, only apply the change if nobody else moved it first
+    // (stops a double click from giving the same units back twice).
+    let q = client.from("orders").update(patch).eq("id", data.id);
+    if (nextState) q = q.eq("stock_state", prevState);
+    const { data: updated, error } = await q.select("id");
+    if (error || (nextState && (!updated || updated.length === 0))) {
+      if (undo) {
+        try {
+          await undo();
+        } catch (e) {
+          console.error("[updateOrderStatus] stock undo failed:", e);
+        }
+      }
+      if (error) {
+        console.error("[server] DB error:", error);
+        throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
+      }
+      throw new Error("تغيّرت حالة الطلب من جهة أخرى، حدّث الصفحة وحاول من جديد");
+    }
+    if (prev.status !== data.status) {
+      await recordOrderStatus(data.id, prev.status as string, data.status, {
         changedBy: "admin",
         source: "admin",
       });
@@ -331,6 +431,8 @@ const productSchema = z.object({
   is_bestseller: z.boolean().optional(),
   is_featured: z.boolean().optional(),
   in_stock: z.boolean().optional(),
+  // null = quantity not tracked (unlimited); a number = units left in stock
+  stock_qty: z.number().int().min(0).max(1_000_000).nullable().optional(),
 });
 
 export const saveProduct = createServerFn({ method: "POST" })
@@ -345,14 +447,17 @@ export const saveProduct = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     assertAdmin(data.password);
+    // With a tracked quantity, availability follows it (0 = sold out).
+    const payload = { ...data.data };
+    if (typeof payload.stock_qty === "number") payload.in_stock = payload.stock_qty > 0;
     if (data.id) {
-      const { error } = await supabaseAdmin.from("products").update(data.data).eq("id", data.id);
+      const { error } = await supabaseAdmin.from("products").update(payload).eq("id", data.id);
       if (error) {
         console.error("[server] DB error:", error);
         throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
       }
     } else {
-      const { error } = await supabaseAdmin.from("products").insert(data.data);
+      const { error } = await supabaseAdmin.from("products").insert(payload);
       if (error) {
         console.error("[server] DB error:", error);
         throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
