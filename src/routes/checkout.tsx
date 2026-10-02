@@ -6,6 +6,7 @@ import { Shell } from "@/components/layout/Shell";
 import { useCart } from "@/lib/cart";
 import { getWallets } from "@/lib/catalog.functions";
 import { createOrder } from "@/lib/admin.functions";
+import { previewCoupon } from "@/lib/coupons.functions";
 import { whatsappLink } from "@/lib/whatsapp";
 import { getSessionId, getVisitorId, trackClientEvent } from "@/lib/analytics-client";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,9 @@ import {
   MessageCircle,
   Phone,
   ShoppingBag,
+  Tag,
   UserRound,
+  X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
@@ -44,6 +47,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const fetchWallets = useServerFn(getWallets);
   const submitOrder = useServerFn(createOrder);
+  const checkCoupon = useServerFn(previewCoupon);
 
   const {
     data: wallets = [],
@@ -64,6 +68,43 @@ function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const startedTracked = useRef(false);
+
+  // Discount code (checked on the server; the server re-checks it when the order is saved).
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [couponError, setCouponError] = useState("");
+  const discount = coupon?.discount ?? 0;
+  const finalTotal = Math.max(total - discount, 0);
+
+  // The cart total changed: the old discount is no longer valid.
+  useEffect(() => {
+    setCoupon(null);
+  }, [total]);
+
+  const applyCouponCode = async () => {
+    const code = couponInput.trim();
+    if (!code || couponBusy) return;
+    setCouponBusy(true);
+    setCouponError("");
+    try {
+      const r = await checkCoupon({
+        data: { code, items: items.map((i) => ({ id: i.id, qty: i.qty })) },
+      });
+      setCoupon({ code: r.code, discount: r.discount });
+    } catch (err) {
+      setCoupon(null);
+      setCouponError((err as Error).message || "تعذّر التحقق من الكود");
+    } finally {
+      setCouponBusy(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon(null);
+    setCouponInput("");
+    setCouponError("");
+  };
 
   // Analytics: customer reached checkout with items in the cart (once per visit to this page).
   useEffect(() => {
@@ -118,9 +159,10 @@ function CheckoutPage() {
     }
 
     try {
-      await submitOrder({
+      const saved = await submitOrder({
         data: {
           idempotency_key: idemKey,
+          coupon_code: coupon?.code ?? null,
           visitor_id: getVisitorId(),
           session_id: getSessionId(),
           customer_name: name.trim(),
@@ -152,7 +194,10 @@ function CheckoutPage() {
             `${idx + 1}. ${i.name} × ${i.qty} = ${(i.price * i.qty).toLocaleString()} ر.ي`,
         ),
         "",
-        `💰 *الإجمالي: ${total.toLocaleString()} ر.ي*`,
+        saved.discount > 0
+          ? `🎟️ كود الخصم: ${saved.coupon_code} (-${saved.discount.toLocaleString()} ر.ي)`
+          : "",
+        `💰 *الإجمالي: ${saved.total.toLocaleString()} ر.ي*`,
         `💳 وسيلة الدفع: ${wallet?.name} (${wallet?.account_number})`,
         paymentRef ? `🧾 مرجع التحويل: ${paymentRef}` : "",
         notes ? `📝 ملاحظات: ${notes}` : "",
@@ -390,10 +435,75 @@ function CheckoutPage() {
                 </li>
               ))}
             </ul>
+            <div className="mt-3 border-t border-[var(--color-hairline)] pt-4">
+              <span className="mb-1.5 flex items-center gap-2 text-sm font-semibold">
+                <Tag className="h-4 w-4 text-[var(--color-gold)]" />
+                كود الخصم
+              </span>
+              {coupon ? (
+                <div className="flex items-center justify-between gap-2 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm">
+                  <span className="font-bold text-green-700" dir="ltr">
+                    {coupon.code}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={removeCoupon}
+                    className="text-green-700 hover:text-red-600"
+                    aria-label="إزالة كود الخصم"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        applyCouponCode();
+                      }
+                    }}
+                    maxLength={40}
+                    dir="ltr"
+                    placeholder="أدخل الكود"
+                    className={`${inputClass} py-2`}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={applyCouponCode}
+                    disabled={couponBusy || !couponInput.trim()}
+                    className="shrink-0"
+                  >
+                    {couponBusy ? <LoaderCircle className="animate-spin" /> : "تطبيق"}
+                  </Button>
+                </div>
+              )}
+              {couponError && (
+                <p className="mt-2 text-xs font-semibold text-[var(--color-destructive)]">
+                  {couponError}
+                </p>
+              )}
+            </div>
+
+            {discount > 0 && (
+              <>
+                <div className="mt-3 flex items-center justify-between text-sm">
+                  <span className="text-[var(--color-ink-soft)]">المجموع</span>
+                  <span>{total.toLocaleString()} ر.ي</span>
+                </div>
+                <div className="mt-1 flex items-center justify-between text-sm text-green-700">
+                  <span>خصم الكود</span>
+                  <span>-{discount.toLocaleString()} ر.ي</span>
+                </div>
+              </>
+            )}
             <div className="mt-3 flex items-center justify-between border-t border-[var(--color-hairline)] pt-4">
               <span className="font-bold">الإجمالي</span>
               <strong className="text-xl text-[var(--color-gold)]">
-                {total.toLocaleString()} ر.ي
+                {finalTotal.toLocaleString()} ر.ي
               </strong>
             </div>
 
