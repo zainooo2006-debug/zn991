@@ -1,214 +1,321 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Trash2, Receipt, History } from "lucide-react";
-import { listOrders, updateOrderStatus, deleteOrder } from "@/lib/admin.functions";
-import { createInvoice, listInvoices, listOrderHistory } from "@/lib/billing.functions";
-import { getPwd, Loading, Empty } from "@/components/admin/shared";
-import { DocumentViewer, invoiceToDoc } from "@/components/BillingDocument";
-import { ORDER_STATUSES_LIST, normalizeOrderStatus, orderStatusLabel } from "@/lib/order-status";
-import type { InvoiceRow } from "@/lib/billing-utils";
+import { Plus, Eye, MessageCircle, Pencil, ShoppingBag } from "lucide-react";
+import {
+  convertQuoteToOrder,
+  deleteQuote,
+  listQuotes,
+  saveQuote,
+  setQuoteStatus,
+} from "@/lib/billing.functions";
+import { getPwd, Loading, Empty, Modal } from "@/components/admin/shared";
+import {
+  DocItemsEditor,
+  fieldClass,
+  emptyItem,
+  parseItems,
+  toEditable,
+  type EditableItem,
+} from "@/components/admin/DocItemsEditor";
+import { DocumentViewer, docWhatsappMessage, quoteToDoc } from "@/components/BillingDocument";
+import {
+  QUOTE_STATUS,
+  effectiveQuoteStatus,
+  fmtDate,
+  fmtMoney,
+  waLinkTo,
+  type QuoteRow,
+  type QuoteStatus,
+} from "@/lib/billing-utils";
 
-/* ===================== Orders ===================== */
-export function OrdersPanel() {
-  const fetchOrders = useServerFn(listOrders);
-  const updateStatus = useServerFn(updateOrderStatus);
-  const removeOrder = useServerFn(deleteOrder);
-  const fetchInvoices = useServerFn(listInvoices);
-  const makeInvoice = useServerFn(createInvoice);
+const FILTERS: { id: "all" | QuoteStatus | "expired"; label: string }[] = [
+  { id: "all", label: "الكل" },
+  { id: "draft", label: "مسودات" },
+  { id: "sent", label: "مُرسلة" },
+  { id: "accepted", label: "مقبولة" },
+  { id: "expired", label: "منتهية" },
+  { id: "converted", label: "تحوّلت لطلب" },
+];
+
+/* ===================== Quotes ===================== */
+export function QuotesPanel() {
+  const fetchQuotes = useServerFn(listQuotes);
+  const setStatus = useServerFn(setQuoteStatus);
+  const convert = useServerFn(convertQuoteToOrder);
+  const remove = useServerFn(deleteQuote);
   const qc = useQueryClient();
 
-  const { data: orders = [], isLoading } = useQuery({
-    queryKey: ["admin-orders"],
-    queryFn: () => fetchOrders({ data: { password: getPwd() } }),
+  const [editing, setEditing] = useState<QuoteRow | "new" | null>(null);
+  const [viewing, setViewing] = useState<QuoteRow | null>(null);
+  const [filter, setFilter] = useState<(typeof FILTERS)[number]["id"]>("all");
+  const [q, setQ] = useState("");
+
+  const { data: quotes = [], isLoading, error } = useQuery({
+    queryKey: ["admin-quotes"],
+    queryFn: () => fetchQuotes({ data: { password: getPwd() } }),
   });
-  // Invoices may fail before the SQL migration is run; orders must still work.
-  const { data: invoices = [] } = useQuery({
-    queryKey: ["admin-invoices"],
-    queryFn: () => fetchInvoices({ data: { password: getPwd() } }),
-    retry: false,
-  });
+  const refresh = () => {
+    qc.invalidateQueries({ queryKey: ["admin-quotes"] });
+    qc.invalidateQueries({ queryKey: ["admin-orders"] });
+  };
 
-  const [viewing, setViewing] = useState<InvoiceRow | null>(null);
-  const [historyOpen, setHistoryOpen] = useState<string | null>(null);
-  const [busyInvoice, setBusyInvoice] = useState<string | null>(null);
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    return quotes.filter((x) => {
+      const view = effectiveQuoteStatus(x.status, x.valid_until);
+      if (filter !== "all" && view !== filter) return false;
+      if (!s) return true;
+      return (
+        x.quote_number.toLowerCase().includes(s) ||
+        x.customer_name.toLowerCase().includes(s) ||
+        x.phone.includes(s)
+      );
+    });
+  }, [quotes, filter, q]);
 
-  const invoiceFor = (orderId: string) =>
-    invoices.find((i) => i.order_id === orderId && i.status !== "void");
-
-  const setStatus = async (id: string, status: string) => {
+  const run = async (fn: () => Promise<unknown>) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await updateStatus({ data: { password: getPwd(), id, status: status as any } });
-      qc.invalidateQueries({ queryKey: ["admin-orders"] });
-      qc.invalidateQueries({ queryKey: ["admin-order-history", id] });
+      await fn();
+      refresh();
     } catch (err) {
       alert((err as Error).message);
     }
   };
 
-  const onDeleteOrder = async (id: string) => {
-    if (!confirm("حذف هذا الطلب نهائياً؟")) return;
-    try {
-      await removeOrder({ data: { password: getPwd(), id } });
-      qc.invalidateQueries({ queryKey: ["admin-orders"] });
-    } catch (err) {
-      alert((err as Error).message);
-    }
-  };
+  const changeStatus = (id: string, status: "draft" | "sent" | "accepted" | "rejected" | "cancelled") =>
+    run(() => setStatus({ data: { password: getPwd(), id, status } }));
 
-  const onInvoice = async (orderId: string) => {
-    const existing = invoiceFor(orderId);
-    if (existing) {
-      setViewing(existing);
-      return;
-    }
-    setBusyInvoice(orderId);
-    try {
-      const res = await makeInvoice({ data: { password: getPwd(), order_id: orderId } });
-      qc.invalidateQueries({ queryKey: ["admin-invoices"] });
-      setViewing(res.invoice);
-    } catch (err) {
-      alert((err as Error).message);
-    } finally {
-      setBusyInvoice(null);
-    }
-  };
+  const onConvert = (x: QuoteRow) =>
+    run(async () => {
+      if (!confirm(`تحويل ${x.quote_number} إلى طلب مؤكد؟`)) return;
+      await convert({ data: { password: getPwd(), id: x.id } });
+      alert("تم إنشاء الطلب. تلقاه في تبويب الطلبات، ومنه تقدر تصدر الفاتورة.");
+    });
 
-  if (isLoading) return <Loading />;
-  if (orders.length === 0) return <Empty msg="لا توجد طلبات بعد" />;
+  const onDelete = (x: QuoteRow) =>
+    run(async () => {
+      if (!confirm("حذف هذه المسودة نهائياً؟")) return;
+      await remove({ data: { password: getPwd(), id: x.id } });
+    });
 
   return (
     <div className="space-y-3">
-      {orders.map((o) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const items = (o.items as any[]) || [];
-        const status = normalizeOrderStatus(o.status);
-        const inv = invoiceFor(o.id);
+      <div className="flex gap-2 flex-wrap items-center justify-between">
+        <input
+          className={`${fieldClass} sm:max-w-xs`}
+          placeholder="بحث: رقم العرض / الاسم / الهاتف"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <button onClick={() => setEditing("new")} className="btn-gold">
+          <Plus className="w-4 h-4" /> عرض سعر جديد
+        </button>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {FILTERS.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+              filter === f.id
+                ? "bg-[var(--color-gold)] text-[var(--color-ink)]"
+                : "bg-[var(--color-surface)] text-[var(--color-ink-soft)]"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {isLoading && <Loading />}
+      {error && (
+        <div className="rounded-xl bg-red-50 text-red-700 p-4 text-sm">
+          تعذّر تحميل عروض الأسعار. تأكد أنك شغّلت ملف SQL الخاص بالفواتير والعروض في قاعدة البيانات.
+        </div>
+      )}
+      {!isLoading && !error && filtered.length === 0 && <Empty msg="لا توجد عروض أسعار" />}
+
+      {filtered.map((x) => {
+        const view = effectiveQuoteStatus(x.status, x.valid_until);
+        const st = QUOTE_STATUS[view];
+        const locked = x.status === "converted";
         return (
-          <div key={o.id} className="card-clean p-4">
+          <div key={x.id} className="card-clean p-4">
             <div className="flex justify-between items-start gap-3 flex-wrap">
               <div>
-                <div className="font-bold">
-                  {o.customer_name} • <span dir="ltr">{o.phone}</span>
+                <div className="font-mono font-bold">{x.quote_number}</div>
+                <div className="font-bold mt-1">
+                  {x.customer_name} • <span dir="ltr">{x.phone}</span>
                 </div>
+                {x.vehicle && <div className="text-xs mt-0.5">🚗 {x.vehicle}</div>}
                 <div className="text-xs text-[var(--color-ink-soft)]">
-                  {new Date(o.created_at).toLocaleString("ar")}
+                  {fmtDate(x.created_at)}
+                  {x.valid_until ? ` • ساري حتى ${fmtDate(x.valid_until)}` : ""}
                 </div>
-                <div className="text-xs text-[var(--color-ink-soft)] font-mono">
-                  #{o.id.slice(0, 8)}
-                </div>
-                {o.address && <div className="text-xs mt-1">📍 {o.address}</div>}
               </div>
               <div className="text-left">
-                <div className="text-[var(--color-gold)] font-black text-lg">
-                  {Number(o.total).toLocaleString()} ر.ي
-                </div>
-                {Number((o as { discount?: number }).discount ?? 0) > 0 && (
-                  <div className="text-xs text-green-700">
-                    خصم {Number((o as { discount?: number }).discount).toLocaleString()} ر.ي
-                    {(o as { coupon_code?: string | null }).coupon_code
-                      ? ` (${(o as { coupon_code?: string | null }).coupon_code})`
-                      : ""}
-                  </div>
-                )}
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(o.id, e.target.value)}
-                  className="text-xs border border-[var(--color-hairline)] rounded px-2 py-1 mt-1"
+                <div className="text-[var(--color-gold)] font-black text-lg">{fmtMoney(x.total)}</div>
+                <span
+                  className="inline-block text-xs font-bold px-3 py-1 rounded-full mt-1"
+                  style={{ color: st.color, background: st.bg }}
                 >
-                  {ORDER_STATUSES_LIST.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
+                  {st.label}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mt-3 items-center">
+              <button onClick={() => setViewing(x)} className="btn-outline text-xs">
+                <Eye className="w-3 h-3" /> عرض / PDF
+              </button>
+              {!locked && (
+                <button onClick={() => setEditing(x)} className="btn-outline text-xs">
+                  <Pencil className="w-3 h-3" /> تعديل
+                </button>
+              )}
+              {x.status !== "draft" && (
+                <a
+                  className="btn-outline text-xs"
+                  target="_blank"
+                  rel="noreferrer"
+                  href={waLinkTo(x.phone, docWhatsappMessage(quoteToDoc(x)))}
+                >
+                  <MessageCircle className="w-3 h-3" /> واتساب
+                </a>
+              )}
+              {!locked && x.status !== "rejected" && x.status !== "cancelled" && (
+                <button onClick={() => onConvert(x)} className="btn-outline text-xs">
+                  <ShoppingBag className="w-3 h-3" /> تحويل إلى طلب
+                </button>
+              )}
+              {!locked && (
+                <select
+                  value={x.status}
+                  onChange={(e) => changeStatus(x.id, e.target.value as never)}
+                  className="text-xs border border-[var(--color-hairline)] rounded px-2 py-1"
+                >
+                  <option value="draft">مسودة</option>
+                  <option value="sent">مُرسل</option>
+                  <option value="accepted">مقبول</option>
+                  <option value="rejected">مرفوض</option>
+                  <option value="cancelled">ملغي</option>
                 </select>
-                {(status === "delivered" || status === "cancelled") && (
-                  <button
-                    onClick={() => onDeleteOrder(o.id)}
-                    className="mt-1 flex items-center gap-1 text-xs text-red-600 hover:underline"
-                  >
-                    <Trash2 className="w-3 h-3" /> حذف
-                  </button>
-                )}
-              </div>
+              )}
+              {x.status === "draft" && (
+                <button onClick={() => onDelete(x)} className="text-xs text-red-600 hover:underline px-2">
+                  حذف
+                </button>
+              )}
             </div>
-            <ul className="text-sm mt-3 space-y-1 border-t border-[var(--color-hairline)] pt-2">
-              {items.map((i, idx) => (
-                <li key={idx} className="flex justify-between">
-                  <span>
-                    {i.name} × {i.qty}
-                  </span>
-                  <span className="font-bold">{(i.price * i.qty).toLocaleString()} ر.ي</span>
-                </li>
-              ))}
-            </ul>
-            {o.wallet_name && (
-              <div className="text-xs mt-2 text-[var(--color-ink-soft)]">
-                💳 {o.wallet_name} {o.payment_ref && `— مرجع: ${o.payment_ref}`}
-              </div>
-            )}
-            {o.notes && (
-              <div className="text-xs mt-1 text-[var(--color-ink-soft)]">📝 {o.notes}</div>
-            )}
-
-            <div className="flex flex-wrap gap-2 mt-3">
-              <button
-                onClick={() => onInvoice(o.id)}
-                disabled={busyInvoice === o.id}
-                className="btn-outline text-xs"
-              >
-                <Receipt className="w-3 h-3" />
-                {inv ? `عرض الفاتورة ${inv.invoice_number}` : "إصدار فاتورة"}
-              </button>
-              <button
-                onClick={() => setHistoryOpen(historyOpen === o.id ? null : o.id)}
-                className="btn-outline text-xs"
-              >
-                <History className="w-3 h-3" /> سجل الحالات
-              </button>
-            </div>
-
-            {historyOpen === o.id && <OrderHistory orderId={o.id} />}
           </div>
         );
       })}
 
-      {viewing && <DocumentViewer data={invoiceToDoc(viewing)} onClose={() => setViewing(null)} />}
+      {editing && (
+        <QuoteForm
+          quote={editing === "new" ? null : editing}
+          onClose={() => setEditing(null)}
+          onSaved={(saved, andView) => {
+            setEditing(null);
+            refresh();
+            if (andView) setViewing(saved);
+          }}
+        />
+      )}
+      {viewing && (
+        <DocumentViewer
+          data={quoteToDoc(viewing)}
+          onClose={() => setViewing(null)}
+          onShared={() => {
+            if (viewing.status === "draft") changeStatus(viewing.id, "sent");
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function OrderHistory({ orderId }: { orderId: string }) {
-  const fetchHistory = useServerFn(listOrderHistory);
-  const { data = [], isLoading, error } = useQuery({
-    queryKey: ["admin-order-history", orderId],
-    queryFn: () => fetchHistory({ data: { password: getPwd(), order_id: orderId } }),
-  });
+function QuoteForm({
+  quote,
+  onClose,
+  onSaved,
+}: {
+  quote: QuoteRow | null;
+  onClose: () => void;
+  onSaved: (q: QuoteRow, andView: boolean) => void;
+}) {
+  const save = useServerFn(saveQuote);
+  const [name, setName] = useState(quote?.customer_name ?? "");
+  const [phone, setPhone] = useState(quote?.phone ?? "");
+  const [vehicle, setVehicle] = useState(quote?.vehicle ?? "");
+  const [validUntil, setValidUntil] = useState(quote?.valid_until ?? "");
+  const [notes, setNotes] = useState(quote?.notes ?? "");
+  const [rows, setRows] = useState<EditableItem[]>(quote ? toEditable(quote.items) : [emptyItem()]);
+  const [discount, setDiscount] = useState(quote && quote.discount ? String(quote.discount) : "");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
 
-  if (isLoading) return <div className="text-xs mt-3">جاري التحميل...</div>;
-  if (error) return <div className="text-xs mt-3 text-red-600">تعذّر تحميل السجل</div>;
-  if (data.length === 0)
-    return <div className="text-xs mt-3 text-[var(--color-ink-soft)]">لا يوجد سجل لهذا الطلب</div>;
+  const submit = async (andView: boolean) => {
+    setErr("");
+    const items = parseItems(rows);
+    if (name.trim().length < 2 || phone.trim().length < 6) {
+      setErr("اكتب اسم العميل ورقم هاتفه");
+      return;
+    }
+    if (!items) {
+      setErr("تأكد من البنود: الاسم والكمية والسعر لكل بند");
+      return;
+    }
+    setBusy(true);
+    try {
+      const saved = await save({
+        data: {
+          password: getPwd(),
+          id: quote?.id ?? null,
+          customer_name: name.trim(),
+          phone: phone.trim(),
+          vehicle: vehicle.trim() || null,
+          items,
+          discount: Number(discount) || 0,
+          valid_until: validUntil || null,
+          notes: notes.trim() || null,
+        },
+      });
+      onSaved(saved, andView);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <ol className="mt-3 border-t border-[var(--color-hairline)] pt-2 space-y-1 text-xs">
-      {data.map((h) => (
-        <li key={h.id} className="flex justify-between gap-2">
-          <span>
-            {h.from_status ? `${orderStatusLabel(h.from_status)} ← ` : ""}
-            <b>{orderStatusLabel(h.to_status)}</b>
-            <span className="text-[var(--color-ink-soft)]">
-              {" "}
-              ({h.changed_by === "customer" ? "العميل" : h.changed_by === "system" ? "النظام" : "الأدمن"}
-              {h.note ? ` — ${h.note}` : ""})
-            </span>
-          </span>
-          <span className="text-[var(--color-ink-soft)] whitespace-nowrap">
-            {new Date(h.created_at).toLocaleString("ar")}
-          </span>
-        </li>
-      ))}
-    </ol>
+    <Modal title={quote ? `تعديل ${quote.quote_number}` : "عرض سعر جديد"} onClose={onClose}>
+      <div className="space-y-3">
+        <input className={fieldClass} placeholder="اسم العميل" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className={fieldClass} placeholder="رقم الهاتف" dir="ltr" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input className={fieldClass} placeholder="السيارة (اختياري) مثال: لاندكروزر 2025" value={vehicle} onChange={(e) => setVehicle(e.target.value)} />
+        <div className="grid grid-cols-2 gap-2 items-center">
+          <label className="text-sm">ساري حتى (اختياري)</label>
+          <input type="date" className={fieldClass} dir="ltr" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
+        </div>
+        <DocItemsEditor rows={rows} onChange={setRows} discount={discount} onDiscountChange={setDiscount} />
+        <textarea className={fieldClass} rows={2} placeholder="ملاحظات / شروط (اختياري)" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        {err && <div className="text-sm text-red-600">{err}</div>}
+        <div className="flex gap-2">
+          <button onClick={() => submit(true)} disabled={busy} className="btn-gold flex-1">
+            {busy ? "جاري الحفظ..." : "حفظ ومعاينة"}
+          </button>
+          <button onClick={() => submit(false)} disabled={busy} className="btn-outline flex-1">
+            حفظ فقط
+          </button>
+        </div>
+        <p className="text-xs text-[var(--color-ink-soft)]">
+          العرض يبقى مسودة (لا يراه العميل) لين ترسله بواتساب أو تغيّر حالته إلى مُرسل.
+        </p>
+      </div>
+    </Modal>
   );
 }
