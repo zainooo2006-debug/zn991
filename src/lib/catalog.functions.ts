@@ -45,7 +45,7 @@ export const getProducts = createServerFn({ method: "GET" }).handler(async () =>
   const { data, error } = await supabasePublic
     .from("products")
     .select(
-      "id, name, description, price, old_price, images, rating, is_bestseller, is_featured, category_id",
+      "id, name, description, price, old_price, images, rating, is_bestseller, is_featured, category_id, in_stock",
     )
     .order("created_at", { ascending: false });
   if (error) {
@@ -58,7 +58,7 @@ export const getProducts = createServerFn({ method: "GET" }).handler(async () =>
 export const getFeaturedProducts = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabasePublic
     .from("products")
-    .select("id, name, price, old_price, images, rating")
+    .select("id, name, price, old_price, images, rating, in_stock")
     .eq("is_featured", true)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -74,7 +74,7 @@ export const getProductById = createServerFn({ method: "GET" })
   .handler(async ({ data }) => {
     const { data: row, error } = await supabasePublic
       .from("products")
-      .select("id, name, description, price, old_price, images, video_url, rating, category_id")
+      .select("id, name, description, price, old_price, images, video_url, rating, category_id, in_stock")
       .eq("id", data.id)
       .maybeSingle();
     if (error) {
