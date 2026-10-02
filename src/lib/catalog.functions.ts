@@ -171,19 +171,24 @@ export const getOrdersByPhone = createServerFn({ method: "POST" })
     // enumeration of other customers' orders via phone-only lookup.
     const normalized = data.phone.replace(/\D/g, "");
     if (normalized.length < 9) return [];
-    const orderIdPrefix = data.orderId.trim().toLowerCase();
-    // Match orders whose id starts with the provided prefix AND whose phone
-    // contains the normalized number. Return only non-PII fields.
+    // Accept "#A1B2C3D4", spaces, upper case: keep only hex digits and dashes.
+    const orderIdPrefix = data.orderId
+      .toLowerCase()
+      .replace(/[^0-9a-f-]/g, "");
+    if (orderIdPrefix.length < 4) return [];
+    // The id column is a uuid, which does not support ILIKE, so we look the
+    // orders up by phone first and match the order-number prefix here.
+    // Both must match, so phone-only lookups still return nothing.
+    // Return only non-PII fields.
     const { data: rows, error } = await supabaseAdmin
       .from("orders")
       .select("id, created_at, status, total, items")
-      .ilike("id", `${orderIdPrefix}%`)
       .ilike("phone", `%${normalized}%`)
       .order("created_at", { ascending: false })
-      .limit(80);
+      .limit(200);
     if (error) {
       console.error("[server] DB error:", error);
       throw new Error("حدث خطأ، الرجاء المحاولة لاحقاً");
     }
-    return rows ?? [];
+    return (rows ?? []).filter((o) => String(o.id).toLowerCase().startsWith(orderIdPrefix));
   });
